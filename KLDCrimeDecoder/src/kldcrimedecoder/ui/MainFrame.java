@@ -41,6 +41,17 @@ public MainFrame() {
 
     // Let GameManager know which window to control
     GameManager.init(this);
+    // ---- one DialogueBox floats over every screen ----
+final DialogueBox dialogueBox = new DialogueBox();
+dialogueBox.setVisible(false);
+getLayeredPane().add(dialogueBox, javax.swing.JLayeredPane.POPUP_LAYER);
+GameManager.setDialogue(dialogueBox);
+cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
+    @Override
+    public void componentResized(java.awt.event.ComponentEvent e) {
+        placeDialogue(dialogueBox);
+    }
+});
 
     // Add every screen to the CardLayout
     addScreen("menu",       new MenuPanel());
@@ -62,6 +73,14 @@ public MainFrame() {
     showCard("menu");
     GameManager.startNewGame();   // this line starts the clock
     LevelManager.jumpTo(3);
+}
+/** Puts the dialogue box at the bottom of the card area, centered. */
+private void placeDialogue(DialogueBox box) {
+    java.awt.Rectangle r = javax.swing.SwingUtilities.convertRectangle(
+            cardPanel.getParent(), cardPanel.getBounds(), getLayeredPane());
+    box.setBounds(r.x + (r.width - DialogueBox.BOX_WIDTH) / 2,
+                  r.y + r.height - DialogueBox.BOX_HEIGHT,
+                  DialogueBox.BOX_WIDTH, DialogueBox.BOX_HEIGHT);
 }
 
     /**

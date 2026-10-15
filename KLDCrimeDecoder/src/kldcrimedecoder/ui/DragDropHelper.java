@@ -81,10 +81,11 @@ public class DragDropHelper {
     };
 
     public static void makeDraggable(JLabel label) {
-        label.setTransferHandler(DRAG_SOURCE);
-        label.addMouseMotionListener(DRAG_STARTER);
-        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    }
+    label.setTransferHandler(DRAG_SOURCE);
+    label.setDropTarget(null);      // drops on this label go to the panel behind it
+    label.addMouseMotionListener(DRAG_STARTER);
+    label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+}
 
     public static void lock(JLabel label) {
         label.setTransferHandler(null);

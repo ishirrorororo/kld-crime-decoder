@@ -67,36 +67,44 @@ public class Story {
     public static final int DENIAL_SKIP = 15;    // skipping raises denial
 
     // ---- inventory items ----
-    public static final String ITEM_JOURNAL  = "Journal";
-    public static final String ITEM_BOOKMARK = "Bookmark (A.V.)";
+    public static final String ITEM_JOURNAL     = "Journal";
+    public static final String ITEM_EVIDENCE_AR = "Journal cover: scratched \"A.R.\"";
 
     // ---------- LEVEL 3: Shelf 005 ----------
-        public static final String[][] L3_SHELF_INTRO = {
-        {"Arnie", "Shelf 005. Hundreds of books, and the label on top is smudged. Maybe I can still read it."}
+        // ---------- LEVEL 3: Shelf 005 ----------
+    public static final String[][] L3_WALK = {
+        {"", "The library is quiet. The floor creaks under every step as you walk down the row of shelves to the number five."}
     };
     public static final String L3_WRONG_SHELF = "Wrong aisle. Amie's code pointed to shelf 005.";
-    public static final String L3_PAPER_PROMPT = "The label is smudged. \nUnscramble the letters:";
-    public static final String L3_SOLVED = "Unscrambled. Now find the matching book on the shelf.";
-    public static final String L3_BOOK_TOO_EARLY =
-        "Which book? There are hundreds. The smudged label on top must say something.";
-    public static final String[] L3_BOOKS = {
-        "Basic Algebra, Vol. 2",
-        "Philippine History: A Short Survey",
-        "The Double: A Novel",
-        "Lab Safety Handbook",
-        "Study Skills for Honors Students"
+
+    public static final String[][] L3_SHELF_INTRO = {
+        {"", "Programming books, dim and dusty. One spine sticks out a finger's width. Its label is peeling and the letters have slipped out of order."},
+        {"Arnie (thinking)", "The title is scrambled. Someone wanted me to work for it."}
     };
-    public static final String L3_WRONG = "That is not a word yet. Try rearranging the letters again.";
-    public static final String L3_WRONG_BOOK = "Nothing but pages. This is not the book the note meant.";
-    public static final String L3_JOURNAL_FOUND = "A journal is sandwiched between the pages.";
+
+    public static final String L3_TILES = "PMOCRELI";     // the loose tiles, in this order
+    public static final String L3_CATALOG =
+        "Catalog printout: \"Shelf 005. Alli's last search: the program that turns your code into machine language.\"";
+    public static final String[] L3_HINTS = {
+        "It starts with the same letters as computer.",
+        "C-O-M-P-I-L-E-R."
+    };
+    public static final String L3_TILES_WRONG = "That does not spell the title. Rearrange the tiles.";
+    public static final String L3_TILES_RIGHT = "The tiles click into place: COMPILER.";
+
+    /** {slow} at the start of a line makes the typewriter slower. */
     public static final String[][] L3_FOUND = {
-        {"Arnie", "A journal, pressed flat between two chapters. Someone hid it here on purpose."},
-        {"Arnie", "The handwriting on the cover looks familiar. Where have I seen it?"},
-        {"Arnie", "There is a bookmark with the initials \"A.V.\" scribbled on it. Lots of people have those initials. Right."},
-        {"Arnie", "I don't remember ever opening this shelf."}
+        {"", "The book slides out. Something heavier than paper drops into your hands: a journal."},
+        {"Arnie (thinking)", "Hidden on purpose. And meant to be found."},
+        {"Arnie (thinking)", "{slow} I know this slant. I've seen it on my own homework."},
+        {"Arnie (thinking)", "Alli's, probably. We write alike."},
+        {"Evidence", "Scratched into the cover, two tiny letters: A.R."},
+        {"Arnie (thinking)", "Probably nothing."}
     };
 
     // ---------- LEVEL 4: The Journal ----------
+    public static final String L4_CHOICE_PROMPT =
+    "The pages are packed with tiny handwriting. Do I read every word, or just look for the names?";
     public static final String[][] L4_INTRO = {
         {"", "The journal opens on a page of names. Six of them. Every name begins with \"Am\". Three are scratched out in pen."}
     };
@@ -169,7 +177,7 @@ public class Story {
     public static final int    CAESAR_SHIFT  = 14;
     public static final int    BINARY_VALUE  = 5;
     public static final int    BINARY_BITS   = 8;
-    public static final String SCRAMBLE_WORD = "DOUBLE";
+    public static final String SCRAMBLE_WORD = "COMPILER";
     public static final String MORSE_WORD    = "NOTES";
     public static final String LOCK_CODE     = "1405";
 
@@ -193,7 +201,7 @@ public class Story {
     public static final String HINT_BINARY =
         "Read the digits from the right: 1, 2, 4, 8... Add up the place values that have a 1.";
     public static final String HINT_SCRAMBLE =
-        "The book is about someone with a second self. Think of a word that means a twin.";
+        "It starts with the same letters as computer.";
     public static final String HINT_MORSE =
         "A dot is short and a dash is long. The first letter is N: dash, dot.";
     public static final String HINT_LOCK =

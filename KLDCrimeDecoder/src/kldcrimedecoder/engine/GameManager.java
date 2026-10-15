@@ -1,6 +1,7 @@
 package kldcrimedecoder.engine;
 
 import kldcrimedecoder.ui.MainFrame;
+import kldcrimedecoder.ui.DialogueBox;
 
 /**
  * The "boss" class. Starts and ends the game, switches screens,
@@ -15,13 +16,27 @@ public class GameManager {
     public static void init(MainFrame frame) {
         mainFrame = frame;
     }
+    private static DialogueBox dialogue;
+
+/** MainFrame gives us the dialogue box once. */
+public static void setDialogue(DialogueBox box) {
+    dialogue = box;
+}
+
+/** Levels call GameManager.getDialogue().play(...). Can be null in a test. */
+public static DialogueBox getDialogue() {
+    return dialogue;
+}
 
     /** Switches the CardLayout to the screen with this name. */
     public static void showCard(String name) {
-        if (mainFrame != null) {
-            mainFrame.showCard(name);
-        }
+    if (dialogue != null) {
+        dialogue.hideBox();      // a new screen starts with no dialogue open
     }
+    if (mainFrame != null) {
+        mainFrame.showCard(name);
+    }
+}
 
     /** Called by the Start button. Resets everything and begins level 0. */
     public static void startNewGame() {

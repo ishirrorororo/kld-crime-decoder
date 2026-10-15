@@ -3,22 +3,35 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import kldcrimedecoder.data.Story;
 import kldcrimedecoder.engine.GameManager;
 import kldcrimedecoder.engine.GameState;
 import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.puzzles.WordScramblePuzzle;
+import kldcrimedecoder.ui.DialogueBox;
+import kldcrimedecoder.ui.DragDropHelper;
 import kldcrimedecoder.ui.Theme;
 
 /**
@@ -26,76 +39,75 @@ import kldcrimedecoder.ui.Theme;
  * @author Von
  */
 public class Level3Shelf extends javax.swing.JPanel {
-    private static final Color BAD = new Color(0xFF6B6B);        // wrong answer (dark bars)
-    private static final Color PAPER_BAD = new Color(0xB00020);  // wrong answer (on the paper)
-    private static final Color INK = new Color(0x2B2B2B);        // dark text on the paper
-    private static final String KEY_SCRAMBLE = "level3.scrambleSolved";
+private static final Color BAD = new Color(0xFF6B6B);        // wrong answer (dark bars)
+private static final Color PAPER_BAD = new Color(0xB00020);  // wrong answer (on the paper)
+private static final Color INK = new Color(0x2B2B2B);        // dark text on the paper
+private static final String KEY_SOLVED = "level3.tilesSolved";
+private static final String KEY_INTRO  = "level3.introSeen";
 
-    private WordScramblePuzzle puzzle;
-    private boolean scrambleSolved;
-    private boolean journalFound;
+private WordScramblePuzzle puzzle;
+private boolean solved;
+private int hintsUsed;
+private JPanel[] slots;          // one slot for each letter
 
     /**
      * Creates new form Level3Shelf
      */
-    public Level3Shelf() {
+   public Level3Shelf() {
     initComponents();
 
     // ---- theme for the dark side bars ----
     Theme.background(this);
     Theme.label(lblFeedback);
-    Theme.textArea(txaIntro);
-    Theme.scroll(scrIntro);
-    Theme.button(btnBack, btnContinue, btnSubmit, btnHint, btnClosePaper);
-    txaIntro.setEditable(false);
+    Theme.button(btnBack, btnContinue, btnHint, btnClosePaper);
 
     // ---- the paper is light, so it uses dark ink ----
+    Font small = new Font("Consolas", Font.PLAIN, 13);
     pnlPaper.setOpaque(false);
-    lblPaperPrompt.setFont(Theme.MONO);
+    lblPaperPrompt.setFont(small);
     lblPaperPrompt.setForeground(INK);
-    lblScramble.setFont(new Font("Consolas", Font.BOLD, 34));
-    lblScramble.setForeground(INK);
-    lblScramble.setHorizontalAlignment(SwingConstants.CENTER);
-    lblPaperFeedback.setFont(Theme.MONO);
-    txtAnswer.setFont(Theme.MONO);
-    txtAnswer.setBackground(Color.WHITE);
-    txtAnswer.setForeground(INK);
-    txtAnswer.setCaretColor(INK);
-    txtAnswer.setBorder(BorderFactory.createLineBorder(INK, 1));
-    txtAnswer.addActionListener(e -> btnSubmit.doClick());   // Enter = Submit
+    lblPaperFeedback.setFont(small);
+    pnlSlots.setOpaque(false);
+    pnlTiles.setOpaque(false);
 
-    // ---- invisible hotspots with an amber outline on hover ----
-    JButton[] books = { btnBook1, btnBook2, btnBook3, btnBook4, btnBook5 };
-    JButton[] spots = { btnNote, btnBook1, btnBook2, btnBook3, btnBook4, btnBook5 };
+    // ---- slots (the two panels are empty in the Design tab) ----
+    int n = Story.L3_TILES.length();
+    pnlSlots.setLayout(new GridLayout(1, n, 3, 0));
+    pnlTiles.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));
+    slots = new JPanel[n];
+    for (int i = 0; i < n; i++) {
+        JPanel slot = new JPanel(new BorderLayout());
+        slot.setBackground(new Color(0xEDE7D6));
+        slot.setBorder(BorderFactory.createLineBorder(INK, 1));
+        slots[i] = slot;
+        pnlSlots.add(slot);
+        // a slot takes a tile only when it is empty
+        DragDropHelper.makeDropTarget(slot, (label, target) -> slotAccepts(target));
+    }
+    // the tray takes tiles back
+    DragDropHelper.makeDropTarget(pnlTiles, (label, target) -> true);
 
-    MouseAdapter hover = new MouseAdapter() {
+    // ---- the book that sticks out ----
+    btnSpine.setText("");
+    btnSpine.setIcon(makeSpineIcon(26, 70));
+    btnSpine.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    btnSpine.setOpaque(false);
+    btnSpine.setContentAreaFilled(false);
+    btnSpine.setBorderPainted(false);
+    btnSpine.setFocusPainted(false);
+    btnSpine.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    btnSpine.addMouseListener(new MouseAdapter() {
         @Override
         public void mouseEntered(MouseEvent e) {
-            JButton b = (JButton) e.getSource();
-            b.setBorder(BorderFactory.createLineBorder(Theme.AMBER, 2));
-            b.setBorderPainted(true);
+            btnSpine.setBorder(BorderFactory.createLineBorder(Theme.AMBER, 2));
+            btnSpine.setBorderPainted(true);
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            ((JButton) e.getSource()).setBorderPainted(false);
+            btnSpine.setBorderPainted(false);
         }
-    };
-    for (JButton b : spots) {
-        b.setText("");
-        b.setOpaque(false);
-        b.setContentAreaFilled(false);
-        b.setBorderPainted(false);
-        b.setFocusPainted(false);
-        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.addMouseListener(hover);
-    }
-
-    // Book i opens Story.L3_BOOKS[i]
-    for (int i = 0; i < books.length; i++) {
-        final int index = i;
-        books[i].addActionListener(e -> pickBook(index));
-    }
+    });
 
     // Every time this card is shown, rebuild it from the saved progress
     addComponentListener(new ComponentAdapter() {
@@ -105,7 +117,6 @@ public class Level3Shelf extends javax.swing.JPanel {
         }
     });
 }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -117,24 +128,16 @@ public class Level3Shelf extends javax.swing.JPanel {
 
         pnlPaper = new javax.swing.JPanel();
         lblPaperPrompt = new javax.swing.JLabel();
-        lblScramble = new javax.swing.JLabel();
-        txtAnswer = new javax.swing.JTextField();
-        btnSubmit = new javax.swing.JButton();
         btnHint = new javax.swing.JButton();
         lblPaperFeedback = new javax.swing.JLabel();
         btnClosePaper = new javax.swing.JButton();
+        pnlSlots = new javax.swing.JPanel();
+        pnlTiles = new javax.swing.JPanel();
         lblPaperBg = new javax.swing.JLabel();
-        btnNote = new javax.swing.JButton();
-        btnBook1 = new javax.swing.JButton();
-        btnBook2 = new javax.swing.JButton();
-        btnBook3 = new javax.swing.JButton();
-        btnBook4 = new javax.swing.JButton();
-        btnBook5 = new javax.swing.JButton();
-        scrIntro = new javax.swing.JScrollPane();
-        txaIntro = new javax.swing.JTextArea();
         lblFeedback = new javax.swing.JLabel();
         btnBack = new javax.swing.JButton();
         btnContinue = new javax.swing.JButton();
+        btnSpine = new javax.swing.JButton();
         lblShelfBg = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(1000, 580));
@@ -143,49 +146,36 @@ public class Level3Shelf extends javax.swing.JPanel {
         pnlPaper.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblPaperPrompt.setText("jLabel1");
-        pnlPaper.add(lblPaperPrompt, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 50, 270, 40));
-
-        lblScramble.setText("jLabel1");
-        pnlPaper.add(lblScramble, new org.netbeans.lib.awtextra.AbsoluteConstraints(45, 100, 280, 56));
-        pnlPaper.add(txtAnswer, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 170, 250, 34));
-
-        btnSubmit.setText("Submit");
-        btnSubmit.addActionListener(this::btnSubmitActionPerformed);
-        pnlPaper.add(btnSubmit, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 218, 115, 34));
+        pnlPaper.add(lblPaperPrompt, new org.netbeans.lib.awtextra.AbsoluteConstraints(45, 108, 285, 78));
 
         btnHint.setText("Hint");
         btnHint.addActionListener(this::btnHintActionPerformed);
-        pnlPaper.add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(195, 218, 115, 34));
-        pnlPaper.add(lblPaperFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 262, 270, 85));
+        pnlPaper.add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 374, 115, 30));
+        pnlPaper.add(lblPaperFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 328, 270, 40));
 
         btnClosePaper.setText("Close");
         btnClosePaper.addActionListener(this::btnClosePaperActionPerformed);
-        pnlPaper.add(btnClosePaper, new org.netbeans.lib.awtextra.AbsoluteConstraints(125, 357, 125, 32));
+        pnlPaper.add(btnClosePaper, new org.netbeans.lib.awtextra.AbsoluteConstraints(195, 374, 115, 30));
+
+        javax.swing.GroupLayout pnlSlotsLayout = new javax.swing.GroupLayout(pnlSlots);
+        pnlSlots.setLayout(pnlSlotsLayout);
+        pnlSlotsLayout.setHorizontalGroup(
+            pnlSlotsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        pnlSlotsLayout.setVerticalGroup(
+            pnlSlotsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        pnlPaper.add(pnlSlots, new org.netbeans.lib.awtextra.AbsoluteConstraints(57, 190, 261, 40));
+        pnlPaper.add(pnlTiles, new org.netbeans.lib.awtextra.AbsoluteConstraints(53, 240, 270, 82));
 
         lblPaperBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/paper.png"))); // NOI18N
         pnlPaper.add(lblPaperBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -1, 376, 440));
 
         add(pnlPaper, new org.netbeans.lib.awtextra.AbsoluteConstraints(312, 70, 376, 439));
-
-        btnNote.addActionListener(this::btnNoteActionPerformed);
-        add(btnNote, new org.netbeans.lib.awtextra.AbsoluteConstraints(432, 76, 140, 43));
-
-        btnBook1.addActionListener(this::btnBook1ActionPerformed);
-        add(btnBook1, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 150, 22, 62));
-
-        btnBook2.addActionListener(this::btnBook2ActionPerformed);
-        add(btnBook2, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 230, 22, 62));
-        add(btnBook3, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 320, 22, 62));
-        add(btnBook4, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 320, 22, 62));
-        add(btnBook5, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 410, 22, 62));
-
-        txaIntro.setEditable(false);
-        txaIntro.setColumns(20);
-        txaIntro.setRows(5);
-        scrIntro.setViewportView(txaIntro);
-
-        add(scrIntro, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 216, 130));
-        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 360, 216, 130));
+        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 216, 160));
 
         btnBack.setText("Back to the aisle");
         btnBack.addActionListener(this::btnBackActionPerformed);
@@ -195,42 +185,21 @@ public class Level3Shelf extends javax.swing.JPanel {
         btnContinue.addActionListener(this::btnContinueActionPerformed);
         add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(784, 520, 196, 40));
 
+        btnSpine.addActionListener(this::btnSpineActionPerformed);
+        add(btnSpine, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 230, 26, 70));
+
         lblShelfBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/shelf_005.png"))); // NOI18N
         add(lblShelfBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(236, 0, 527, 580));
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNoteActionPerformed
-        pnlPaper.setVisible(true);                 // open the paper
-    if (!scrambleSolved) {
-        txtAnswer.requestFocusInWindow();
-    }
-    }//GEN-LAST:event_btnNoteActionPerformed
-
-    private void btnBook1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBook1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnBook1ActionPerformed
-
-    private void btnBook2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBook2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnBook2ActionPerformed
-
-    private void btnSubmitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitActionPerformed
-        if (puzzle.check(txtAnswer.getText())) {
-        ScoreManager.onCorrect();
-        scrambleSolved = true;
-        GameState.getInstance().putChoice(KEY_SCRAMBLE, "yes");   // saved for this game
-        showPaperSolved();
-        setFeedback(Story.L3_SOLVED, true);
-    } else {
-        ScoreManager.onWrong();
-        setPaperFeedback(Story.L3_WRONG, false);
-        txtAnswer.selectAll();
-    }
-    }//GEN-LAST:event_btnSubmitActionPerformed
-
     private void btnHintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHintActionPerformed
-        ScoreManager.onHint();
-    setPaperFeedback("Hint: " + puzzle.getHint(), true);
+        if (solved) {
+        return;
+    }
+    ScoreManager.onHint();
+    int i = Math.min(hintsUsed, Story.L3_HINTS.length - 1);   // hint 1, then hint 2
+    hintsUsed++;
+    setPaperFeedback("Hint " + (i + 1) + ": " + Story.L3_HINTS[i], true);
     }//GEN-LAST:event_btnHintActionPerformed
 
     private void btnClosePaperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClosePaperActionPerformed
@@ -244,76 +213,157 @@ public class Level3Shelf extends javax.swing.JPanel {
     private void btnContinueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnContinueActionPerformed
          LevelManager.nextLevel();
     }//GEN-LAST:event_btnContinueActionPerformed
-/** Rebuilds the screen. Progress comes from GameState, so "Back" does not lose it. */
+
+    private void btnSpineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSpineActionPerformed
+        hideDialogue();                            // so the box does not cover the paper
+    pnlPaper.setVisible(true);
+    }//GEN-LAST:event_btnSpineActionPerformed
+   /** Plays lines in the dialogue box at the bottom of the screen. */
+   /** Rebuilds the screen from the saved progress. Called every time the card is shown. */
 private void startLevel() {
     GameState gs = GameState.getInstance();
-    scrambleSolved = gs.getChoice(KEY_SCRAMBLE, "no").equals("yes");
-    journalFound = gs.hasItem(Story.ITEM_JOURNAL);
-    puzzle = new WordScramblePuzzle(Story.SCRAMBLE_WORD);   // same scramble every time
+    solved = gs.getChoice(KEY_SOLVED, "no").equals("yes");
+    puzzle = new WordScramblePuzzle(Story.SCRAMBLE_WORD);
+    hintsUsed = 0;
 
-    // narration
-    StringBuilder text = new StringBuilder(Story.format(Story.L3_SHELF_INTRO));
-    if (journalFound) {
-        text.append("\n\n").append(Story.format(Story.L3_FOUND));
-    }
-    txaIntro.setText(text.toString());
-    txaIntro.setCaretPosition(txaIntro.getDocument().getLength());
     setFeedback("", true);
-    btnContinue.setEnabled(journalFound);
-
-    // paper
     pnlPaper.setVisible(false);
-    lblPaperPrompt.setText("<html>" + Story.L3_PAPER_PROMPT + "</html>");
+    lblPaperPrompt.setText("<html>" + Story.L3_CATALOG + "</html>");
     setPaperFeedback("", true);
-    if (scrambleSolved) {
-        showPaperSolved();
-    } else {
-        lblScramble.setText(spaced(puzzle.getScrambled()));
-        txtAnswer.setText("");
-        txtAnswer.setEnabled(true);
-        btnSubmit.setEnabled(true);
-        btnHint.setEnabled(true);
+    btnHint.setEnabled(!solved);
+    btnSpine.setVisible(!solved);              // after the puzzle the book is gone
+    btnContinue.setEnabled(solved);
+    buildTiles();
+
+    // intro: only the first time the player enters this screen
+    if (!solved && gs.getChoice(KEY_INTRO, "no").equals("no")) {
+        gs.putChoice(KEY_INTRO, "yes");
+        speak(Story.L3_SHELF_INTRO, null);
     }
 }
 
-/** The player clicked book number "index" (0 to 4). */
-private void pickBook(int index) {
-    // The paper does not block clicks on the hotspots behind it, so check here
-    if (journalFound || pnlPaper.isVisible()) {
+/** Fresh tiles in the tray. If the puzzle is already solved, the word sits locked in the slots. */
+private void buildTiles() {
+    for (JPanel slot : slots) {
+        slot.removeAll();
+    }
+    pnlTiles.removeAll();
+
+    if (solved) {
+        for (int i = 0; i < slots.length; i++) {
+            JLabel tile = makeTile(Story.SCRAMBLE_WORD.charAt(i));
+            DragDropHelper.lock(tile);
+            slots[i].add(tile, BorderLayout.CENTER);
+        }
+    } else {
+        for (char c : Story.L3_TILES.toCharArray()) {
+            pnlTiles.add(makeTile(c));
+        }
+    }
+    pnlSlots.revalidate();
+    pnlSlots.repaint();
+    pnlTiles.revalidate();
+    pnlTiles.repaint();
+}
+
+private JLabel makeTile(char letter) {
+    JLabel tile = new JLabel(String.valueOf(letter), SwingConstants.CENTER);
+    tile.setFont(new Font("Consolas", Font.BOLD, 20));
+    tile.setForeground(INK);
+    tile.setOpaque(true);
+    tile.setBackground(new Color(0xD8C79B));
+    tile.setBorder(BorderFactory.createLineBorder(INK, 1));
+    tile.setPreferredSize(new Dimension(30, 36));
+    DragDropHelper.makeDraggable(tile);
+    return tile;
+}
+
+/** Called by a slot when a tile is dropped on it. */
+private boolean slotAccepts(JPanel slot) {
+    if (solved || slot.getComponentCount() > 0) {
+        return false;                          // already has a tile
+    }
+    SwingUtilities.invokeLater(this::checkWord);   // check AFTER the tile has moved in
+    return true;
+}
+
+/** When every slot has a tile, check the word. */
+private void checkWord() {
+    if (solved) {
         return;
     }
-    if (!scrambleSolved) {                      // no penalty, just a nudge
-        setFeedback(Story.L3_BOOK_TOO_EARLY, true);
-        return;
+    StringBuilder word = new StringBuilder();
+    for (JPanel slot : slots) {
+        if (slot.getComponentCount() == 0) {
+            return;                            // not full yet
+        }
+        word.append(((JLabel) slot.getComponent(0)).getText());
     }
-    String title = Story.L3_BOOKS[index];
-    if (title.toUpperCase().contains(puzzle.getWord())) {
-        journalFound = true;
-        GameState.getInstance().addItem(Story.ITEM_JOURNAL);
-        GameState.getInstance().addItem(Story.ITEM_BOOKMARK);
-        txaIntro.append("\n\n" + Story.format(Story.L3_FOUND));
-        txaIntro.setCaretPosition(txaIntro.getDocument().getLength());
-        setFeedback(Story.L3_JOURNAL_FOUND, true);
-        btnContinue.setEnabled(true);
+    if (puzzle.check(word.toString())) {
+        onSolved();
     } else {
         ScoreManager.onWrong();
-        setFeedback("\"" + title + "\". " + Story.L3_WRONG_BOOK, false);
+        setPaperFeedback(Story.L3_TILES_WRONG, false);
     }
 }
 
-/** Shows the answer on the paper and locks the input. */
-private void showPaperSolved() {
-    lblScramble.setText(spaced(puzzle.getWord()));
-    txtAnswer.setText(puzzle.getWord());
-    txtAnswer.setEnabled(false);
-    btnSubmit.setEnabled(false);
+private void onSolved() {
+    solved = true;
+    ScoreManager.onCorrect();
+    GameState gs = GameState.getInstance();
+    gs.putChoice(KEY_SOLVED, "yes");
+    gs.addItem(Story.ITEM_JOURNAL);
+    gs.addItem(Story.ITEM_EVIDENCE_AR);
+
+    for (JPanel slot : slots) {                // the tiles can no longer be moved
+        DragDropHelper.lock((JLabel) slot.getComponent(0));
+    }
     btnHint.setEnabled(false);
-    setPaperFeedback("The note reads " + puzzle.getWord() + ".", true);
+    setPaperFeedback(Story.L3_TILES_RIGHT, true);
+
+    // short pause so the player sees the word, then close the paper and play the scene
+    Timer pause = new Timer(1200, e -> {
+        pnlPaper.setVisible(false);
+        btnSpine.setVisible(false);            // the book slid out
+        speak(Story.L3_FOUND, () -> btnContinue.setEnabled(true));
+    });
+    pause.setRepeats(false);
+    pause.start();
 }
 
-/** "DOUBLE" becomes "D O U B L E". */
-private String spaced(String s) {
-    return String.join(" ", s.split(""));
+/** Plays lines in the dialogue box. "after" runs when the last line ends. */
+private void speak(String[][] lines, Runnable after) {
+    DialogueBox box = GameManager.getDialogue();
+    if (box == null) {                         // no box (testing a form alone)
+        if (after != null) {
+            after.run();
+        }
+        return;
+    }
+    box.play(lines, after);
+}
+
+private void hideDialogue() {
+    if (GameManager.getDialogue() != null) {
+        GameManager.getDialogue().hideBox();
+    }
+}
+
+/** A book spine drawn in code, so you need no image for it. */
+private static ImageIcon makeSpineIcon(int w, int h) {
+    BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = img.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g.setColor(new Color(0, 0, 0, 90));        // shadow
+    g.fillRect(4, 4, w - 4, h - 4);
+    g.setColor(new Color(0x7A2E2E));           // the spine
+    g.fillRect(0, 0, w - 4, h - 4);
+    g.setColor(new Color(0xE8DCC0));           // the peeling label
+    g.fillRect(3, 8, w - 10, h / 3);
+    g.setColor(new Color(0x5A1F1F));
+    g.drawRect(0, 0, w - 5, h - 5);
+    g.dispose();
+    return new ImageIcon(img);
 }
 
 private void setFeedback(String text, boolean good) {
@@ -328,25 +378,17 @@ private void setPaperFeedback(String text, boolean good) {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
-    private javax.swing.JButton btnBook1;
-    private javax.swing.JButton btnBook2;
-    private javax.swing.JButton btnBook3;
-    private javax.swing.JButton btnBook4;
-    private javax.swing.JButton btnBook5;
     private javax.swing.JButton btnClosePaper;
     private javax.swing.JButton btnContinue;
     private javax.swing.JButton btnHint;
-    private javax.swing.JButton btnNote;
-    private javax.swing.JButton btnSubmit;
+    private javax.swing.JButton btnSpine;
     private javax.swing.JLabel lblFeedback;
     private javax.swing.JLabel lblPaperBg;
     private javax.swing.JLabel lblPaperFeedback;
     private javax.swing.JLabel lblPaperPrompt;
-    private javax.swing.JLabel lblScramble;
     private javax.swing.JLabel lblShelfBg;
     private javax.swing.JPanel pnlPaper;
-    private javax.swing.JScrollPane scrIntro;
-    private javax.swing.JTextArea txaIntro;
-    private javax.swing.JTextField txtAnswer;
+    private javax.swing.JPanel pnlSlots;
+    private javax.swing.JPanel pnlTiles;
     // End of variables declaration//GEN-END:variables
 }

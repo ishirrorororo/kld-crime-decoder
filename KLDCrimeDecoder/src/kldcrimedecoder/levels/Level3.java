@@ -16,6 +16,11 @@ import kldcrimedecoder.puzzles.WordScramblePuzzle;
 import kldcrimedecoder.ui.Theme;
 import javax.swing.JOptionPane;
 import kldcrimedecoder.engine.GameManager;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.GameManager;
+import kldcrimedecoder.engine.GameState;
 /**
  *
  * @author Joel
@@ -27,9 +32,29 @@ public class Level3 extends javax.swing.JPanel {
     /**
      * Creates new form Level3
      */
-    public Level3() {
+    private static final String KEY_WALK = "level3.walkSeen";
+
+public Level3() {
     initComponents();
 
+    // When the aisle appears, play the walk-in once
+    addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentShown(ComponentEvent e) {
+            onShown();
+        }
+    });
+}
+
+private void onShown() {
+    GameState gs = GameState.getInstance();
+    if (gs.getChoice(KEY_WALK, "no").equals("no")) {
+        gs.putChoice(KEY_WALK, "yes");
+        // Sfx.play("creak");        // creaking floor, see the optional step at the end
+        if (GameManager.getDialogue() != null) {
+            GameManager.getDialogue().play(Story.L3_WALK, null);
+        }
+    }
 }
     private static class GlowBorder implements javax.swing.border.Border {
     private final Color color;
@@ -174,9 +199,10 @@ public class Level3 extends javax.swing.JPanel {
     private void libShelf_006ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libShelf_006ActionPerformed
         libShelf_006.setBackground(new java.awt.Color(0, 255, 255)); 
         libShelf_006.setForeground(java.awt.Color.BLACK);
-        ScoreManager.onWrong();                // the binary code said 005
-        JOptionPane.showMessageDialog(this, Story.L3_WRONG_SHELF,
-            "Shelf 006", JOptionPane.INFORMATION_MESSAGE);// TODO add your handling code here:
+        ScoreManager.onWrong();                  // the binary code said 005
+    if (GameManager.getDialogue() != null) {
+        GameManager.getDialogue().say("Arnie", Story.L3_WRONG_SHELF);
+    }
     }//GEN-LAST:event_libShelf_006ActionPerformed
     /** Resets the whole level. Called every time the card is shown. */
 
