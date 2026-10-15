@@ -82,7 +82,7 @@ public class Level3 extends javax.swing.JPanel {
 
         jButton2.setBackground(new java.awt.Color(0, 0, 0));
         jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (6).png"))); // NOI18N
+        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_006.png"))); // NOI18N
         jButton2.setToolTipText("");
         jButton2.setBorderPainted(false);
         jButton2.setContentAreaFilled(false);
@@ -102,7 +102,7 @@ public class Level3 extends javax.swing.JPanel {
 
         jButton1.setBackground(new java.awt.Color(0, 0, 0));
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (5)_1.png"))); // NOI18N
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_005.png"))); // NOI18N
         jButton1.setToolTipText("");
         jButton1.setBorderPainted(false);
         jButton1.setContentAreaFilled(false);
