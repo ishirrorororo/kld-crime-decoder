@@ -3,20 +3,66 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
-
+import java.awt.Color;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import javax.swing.DefaultListModel;
+import javax.swing.ListSelectionModel;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.GameState;
+import kldcrimedecoder.engine.LevelManager;
+import kldcrimedecoder.engine.ScoreManager;
+import kldcrimedecoder.puzzles.WordScramblePuzzle;
+import kldcrimedecoder.ui.Theme;
 /**
  *
  * @author Joel
  */
 public class Level3 extends javax.swing.JPanel {
 
+    private static final Color BAD = new Color(0xFF6B6B);   // wrong-answer color
+    private WordScramblePuzzle puzzle;
     /**
      * Creates new form Level3
      */
     public Level3() {
-        initComponents();
+    initComponents();
+
+}
+    private static class GlowBorder implements javax.swing.border.Border {
+    private final Color color;
+    private final int size;
+
+    GlowBorder(Color color, int size) {
+        this.color = color;
+        this.size = size;
     }
 
+    @Override
+    public void paintBorder(java.awt.Component c, java.awt.Graphics g, int x, int y, int w, int h) {
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+        g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                            java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setStroke(new java.awt.BasicStroke(1.5f));
+        for (int i = 0; i < size; i++) {
+            int alpha = 220 * (size - i) / size;   // bright at the edge, fading inward
+            g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha));
+            g2.drawRoundRect(x + i, y + i, w - 1 - 2 * i, h - 1 - 2 * i, 14, 14);
+        }
+        g2.dispose();
+    }
+
+    @Override
+    public java.awt.Insets getBorderInsets(java.awt.Component c) {
+        return new java.awt.Insets(0, 0, 0, 0);   // no insets, so the icon doesn't shift
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return false;
+    }
+}
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,19 +72,60 @@ public class Level3 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        jButton1 = new javax.swing.JButton();
+        ShelfBackground = new javax.swing.JLabel();
+
+        setMaximumSize(new java.awt.Dimension(1000, 580));
+        setPreferredSize(new java.awt.Dimension(1000, 580));
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jButton1.setBackground(new java.awt.Color(0, 0, 0));
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (7).png"))); // NOI18N
+        jButton1.setToolTipText("");
+        jButton1.setBorderPainted(false);
+        jButton1.setContentAreaFilled(false);
+        jButton1.setFocusPainted(false);
+        jButton1.setOpaque(true);
+        jButton1.setPreferredSize(new java.awt.Dimension(370, 480));
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jButton1MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jButton1MouseExited(evt);
+            }
+        });
+        jButton1.addActionListener(this::jButton1ActionPerformed);
+        add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 60, -1, 480));
+
+        ShelfBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (5).png"))); // NOI18N
+        add(ShelfBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+       jButton1.setBackground(new java.awt.Color(0, 255, 255)); 
+    jButton1.setForeground(java.awt.Color.BLACK); // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseExited
+          jButton1.setBorderPainted(false);
+    jButton1.repaint();
+
+ // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1MouseExited
+
+    private void jButton1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseEntered
+       jButton1.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
+    jButton1.setBorderPainted(true);
+    jButton1.repaint();
+
+    }//GEN-LAST:event_jButton1MouseEntered
+    /** Resets the whole level. Called every time the card is shown. */
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel ShelfBackground;
+    private javax.swing.JButton jButton1;
     // End of variables declaration//GEN-END:variables
 }

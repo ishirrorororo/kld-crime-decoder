@@ -10,6 +10,8 @@ import java.awt.Font;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import kldcrimedecoder.levels.*;
+import kldcrimedecoder.engine.LevelManager;
+import kldcrimedecoder.engine.GameManager;
 
 public class MainFrame extends javax.swing.JFrame {
     
@@ -25,21 +27,22 @@ public MainFrame() {
     // Window setup: fixed 1000x650, centered
     setSize(1000, 650);
     setLocationRelativeTo(null);
-    getContentPane().setBackground(BG);
 
-    // Top bar styling (temporary: Phase 2 moves this into Theme)
-    Font barFont = new Font("Consolas", Font.PLAIN, 14);
-    pnlTopBar.setBackground(BG);
-    pnlTopBar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 2, 0, AMBER),
-            BorderFactory.createEmptyBorder(0, 12, 0, 12)));
-    lblTimer.setFont(barFont);
-    lblTimer.setForeground(AMBER);
-    lblScore.setFont(barFont);
-    lblScore.setForeground(TEXT);
-    cardPanel.setBackground(BG);
+    // Theme for the frame and top bar
+    getContentPane().setBackground(Theme.BG);
+    Theme.background(pnlTopBar, cardPanel);
+    pnlTopBar.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, Theme.AMBER),
+            javax.swing.BorderFactory.createEmptyBorder(0, 12, 0, 12)));
+    lblTimer.setFont(Theme.MONO);
+    lblTimer.setForeground(Theme.AMBER);
+    lblScore.setFont(Theme.MONO);
+    lblScore.setForeground(Theme.TEXT);
 
-    // Add every screen to the CardLayout. Names are used by showCard(...)
+    // Let GameManager know which window to control
+    GameManager.init(this);
+
+    // Add every screen to the CardLayout
     addScreen("menu",       new MenuPanel());
     addScreen("level0",     new Level0Prologue());
     addScreen("level1",     new Level1());
@@ -55,7 +58,7 @@ public MainFrame() {
     addScreen("goodEnding", new GoodEnding());
     addScreen("badEnding",  new BadEnding());
 
-    showCard("menu");
+    showCard("level3");
 }
 
     /**
@@ -118,13 +121,10 @@ public MainFrame() {
         java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
     }
 
-// ---- fields (put above the constructor, outside the blue code) ----
-private static final Color BG    = new Color(0x0B1220);
-private static final Color AMBER = new Color(0xFFB000);
-private static final Color TEXT  = new Color(0xE8E8E8);
+
 /** Adds one screen to cardPanel under a name. */
 private void addScreen(String name, JPanel panel) {
-    panel.setBackground(BG);
+    panel.setBackground(Theme.BG);
     cardPanel.add(panel, name);
 }
 
