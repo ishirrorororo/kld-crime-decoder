@@ -72,6 +72,7 @@ public class Level3 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButton2 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         ShelfBackground = new javax.swing.JLabel();
 
@@ -79,9 +80,29 @@ public class Level3 extends javax.swing.JPanel {
         setPreferredSize(new java.awt.Dimension(1000, 580));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jButton2.setBackground(new java.awt.Color(0, 0, 0));
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
+        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (6).png"))); // NOI18N
+        jButton2.setToolTipText("");
+        jButton2.setBorderPainted(false);
+        jButton2.setContentAreaFilled(false);
+        jButton2.setFocusPainted(false);
+        jButton2.setOpaque(true);
+        jButton2.setPreferredSize(new java.awt.Dimension(370, 480));
+        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jButton2MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jButton2MouseExited(evt);
+            }
+        });
+        jButton2.addActionListener(this::jButton2ActionPerformed);
+        add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 50, 380, 500));
+
         jButton1.setBackground(new java.awt.Color(0, 0, 0));
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (7).png"))); // NOI18N
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (5)_1.png"))); // NOI18N
         jButton1.setToolTipText("");
         jButton1.setBorderPainted(false);
         jButton1.setContentAreaFilled(false);
@@ -97,9 +118,9 @@ public class Level3 extends javax.swing.JPanel {
             }
         });
         jButton1.addActionListener(this::jButton1ActionPerformed);
-        add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 60, -1, 480));
+        add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 50, 380, 500));
 
-        ShelfBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/Untitled design (5).png"))); // NOI18N
+        ShelfBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/library_shelf.png"))); // NOI18N
         add(ShelfBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
     }// </editor-fold>//GEN-END:initComponents
 
@@ -121,11 +142,28 @@ public class Level3 extends javax.swing.JPanel {
     jButton1.repaint();
 
     }//GEN-LAST:event_jButton1MouseEntered
+
+    private void jButton2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseEntered
+        jButton2.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
+    jButton2.setBorderPainted(true);
+    jButton2.repaint();   // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2MouseEntered
+
+    private void jButton2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseExited
+        jButton2.setBorderPainted(false);
+    jButton1.repaint();// TODO add your handling code here:
+    }//GEN-LAST:event_jButton2MouseExited
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+           jButton2.setBackground(new java.awt.Color(0, 255, 255)); 
+    jButton2.setForeground(java.awt.Color.BLACK);// TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
     /** Resets the whole level. Called every time the card is shown. */
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ShelfBackground;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     // End of variables declaration//GEN-END:variables
 }
