@@ -48,6 +48,7 @@ public MainFrame() {
     addScreen("level1",     new Level1());
     addScreen("level2",     new Level2());
     addScreen("level3",     new Level3());
+    addScreen("level3shelf", new Level3Shelf());
     addScreen("level4",     new Level4());
     addScreen("level5",     new Level5());
     addScreen("level6",     new Level6());
@@ -58,7 +59,9 @@ public MainFrame() {
     addScreen("goodEnding", new GoodEnding());
     addScreen("badEnding",  new BadEnding());
 
-    showCard("level3");
+    showCard("menu");
+    GameManager.startNewGame();   // this line starts the clock
+    LevelManager.jumpTo(3);
 }
 
     /**

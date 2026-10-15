@@ -9,7 +9,7 @@ import javax.swing.Timer;
 public class TimerManager {
 
     private static final Timer timer = new Timer(1000, e -> drain(1));
-
+    
     /** Starts the clock (GameManager resets the time first). */
     public static void start() {
         timer.restart();
@@ -31,6 +31,7 @@ public class TimerManager {
 
     /** Removes seconds from the clock. Also used for penalties. */
     public static void drain(int seconds) {
+       
         GameState gs = GameState.getInstance();
         if (gs.isGameOver()) {
             return;

@@ -71,10 +71,14 @@ public class Story {
     public static final String ITEM_BOOKMARK = "Bookmark (A.V.)";
 
     // ---------- LEVEL 3: Shelf 005 ----------
-    public static final String[][] L3_INTRO = {
-        {"", "Shelf 005. The binary code pointed here. Dust, old textbooks, and a smudged note taped to the end of the shelf."},
-        {"Arnie", "The letters on the note are all mixed up. Unscramble them to find the right book."}
+        public static final String[][] L3_SHELF_INTRO = {
+        {"Arnie", "Shelf 005. Hundreds of books, and the label on top is smudged. Maybe I can still read it."}
     };
+    public static final String L3_WRONG_SHELF = "Wrong aisle. Amie's code pointed to shelf 005.";
+    public static final String L3_PAPER_PROMPT = "The label is smudged. \nUnscramble the letters:";
+    public static final String L3_SOLVED = "Unscrambled. Now find the matching book on the shelf.";
+    public static final String L3_BOOK_TOO_EARLY =
+        "Which book? There are hundreds. The smudged label on top must say something.";
     public static final String[] L3_BOOKS = {
         "Basic Algebra, Vol. 2",
         "Philippine History: A Short Survey",
@@ -82,7 +86,6 @@ public class Story {
         "Lab Safety Handbook",
         "Study Skills for Honors Students"
     };
-    public static final String L3_SOLVED = "Unscrambled. Now pick the matching book from the list.";
     public static final String L3_WRONG = "That is not a word yet. Try rearranging the letters again.";
     public static final String L3_WRONG_BOOK = "Nothing but pages. This is not the book the note meant.";
     public static final String L3_JOURNAL_FOUND = "A journal is sandwiched between the pages.";

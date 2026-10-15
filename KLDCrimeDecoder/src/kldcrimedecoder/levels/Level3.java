@@ -14,6 +14,8 @@ import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.puzzles.WordScramblePuzzle;
 import kldcrimedecoder.ui.Theme;
+import javax.swing.JOptionPane;
+import kldcrimedecoder.engine.GameManager;
 /**
  *
  * @author Joel
@@ -72,98 +74,118 @@ public class Level3 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton2 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        Shelf006 = new javax.swing.JLabel();
+        libShelf_006 = new javax.swing.JButton();
+        Shelf005 = new javax.swing.JLabel();
+        libShelf_005 = new javax.swing.JButton();
         ShelfBackground = new javax.swing.JLabel();
 
         setMaximumSize(new java.awt.Dimension(1000, 580));
         setPreferredSize(new java.awt.Dimension(1000, 580));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jButton2.setBackground(new java.awt.Color(0, 0, 0));
-        jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_006.png"))); // NOI18N
-        jButton2.setToolTipText("");
-        jButton2.setBorderPainted(false);
-        jButton2.setContentAreaFilled(false);
-        jButton2.setFocusPainted(false);
-        jButton2.setOpaque(true);
-        jButton2.setPreferredSize(new java.awt.Dimension(370, 480));
-        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                jButton2MouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                jButton2MouseExited(evt);
-            }
-        });
-        jButton2.addActionListener(this::jButton2ActionPerformed);
-        add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 50, 380, 500));
+        Shelf006.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Shelf006.setText("Shelf 006");
+        Shelf006.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        add(Shelf006, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 80, 110, 40));
 
-        jButton1.setBackground(new java.awt.Color(0, 0, 0));
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_005.png"))); // NOI18N
-        jButton1.setToolTipText("");
-        jButton1.setBorderPainted(false);
-        jButton1.setContentAreaFilled(false);
-        jButton1.setFocusPainted(false);
-        jButton1.setOpaque(true);
-        jButton1.setPreferredSize(new java.awt.Dimension(370, 480));
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+        libShelf_006.setBackground(new java.awt.Color(0, 0, 0));
+        libShelf_006.setForeground(new java.awt.Color(255, 255, 255));
+        libShelf_006.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_006.png"))); // NOI18N
+        libShelf_006.setToolTipText("");
+        libShelf_006.setBorderPainted(false);
+        libShelf_006.setContentAreaFilled(false);
+        libShelf_006.setFocusPainted(false);
+        libShelf_006.setOpaque(true);
+        libShelf_006.setPreferredSize(new java.awt.Dimension(370, 480));
+        libShelf_006.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                jButton1MouseEntered(evt);
+                libShelf_006MouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                jButton1MouseExited(evt);
+                libShelf_006MouseExited(evt);
             }
         });
-        jButton1.addActionListener(this::jButton1ActionPerformed);
-        add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 50, 380, 500));
+        libShelf_006.addActionListener(this::libShelf_006ActionPerformed);
+        add(libShelf_006, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 50, 380, 500));
+
+        Shelf005.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Shelf005.setText("Shelf 005");
+        Shelf005.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        add(Shelf005, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 80, 110, 40));
+
+        libShelf_005.setBackground(new java.awt.Color(0, 0, 0));
+        libShelf_005.setForeground(new java.awt.Color(255, 255, 255));
+        libShelf_005.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_005.png"))); // NOI18N
+        libShelf_005.setToolTipText("");
+        libShelf_005.setBorderPainted(false);
+        libShelf_005.setContentAreaFilled(false);
+        libShelf_005.setFocusPainted(false);
+        libShelf_005.setOpaque(true);
+        libShelf_005.setPreferredSize(new java.awt.Dimension(370, 480));
+        libShelf_005.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                libShelf_005MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                libShelf_005MouseExited(evt);
+            }
+        });
+        libShelf_005.addActionListener(this::libShelf_005ActionPerformed);
+        add(libShelf_005, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 50, 380, 500));
 
         ShelfBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/library_shelf.png"))); // NOI18N
         add(ShelfBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-       jButton1.setBackground(new java.awt.Color(0, 255, 255)); 
-    jButton1.setForeground(java.awt.Color.BLACK); // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void libShelf_005ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libShelf_005ActionPerformed
+       libShelf_005.setBackground(new java.awt.Color(0, 255, 255)); 
+       libShelf_005.setForeground(java.awt.Color.BLACK); 
+       GameManager.showCard("level3shelf");
+// TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_005ActionPerformed
 
-    private void jButton1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseExited
-          jButton1.setBorderPainted(false);
-    jButton1.repaint();
+    private void libShelf_005MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseExited
+          libShelf_005.setBorderPainted(false);
+    libShelf_005.repaint();
 
  // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1MouseExited
+    }//GEN-LAST:event_libShelf_005MouseExited
 
-    private void jButton1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseEntered
-       jButton1.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
-    jButton1.setBorderPainted(true);
-    jButton1.repaint();
+    private void libShelf_005MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseEntered
+       libShelf_005.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
+    libShelf_005.setBorderPainted(true);
+    libShelf_005.repaint();
 
-    }//GEN-LAST:event_jButton1MouseEntered
+    }//GEN-LAST:event_libShelf_005MouseEntered
 
-    private void jButton2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseEntered
-        jButton2.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
-    jButton2.setBorderPainted(true);
-    jButton2.repaint();   // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2MouseEntered
+    private void libShelf_006MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_006MouseEntered
+        libShelf_006.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
+        libShelf_006.setBorderPainted(true);
+        libShelf_006.repaint(); 
+        // TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_006MouseEntered
 
-    private void jButton2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseExited
-        jButton2.setBorderPainted(false);
-    jButton1.repaint();// TODO add your handling code here:
-    }//GEN-LAST:event_jButton2MouseExited
+    private void libShelf_006MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_006MouseExited
+        libShelf_006.setBorderPainted(false);
+    libShelf_006.repaint();// TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_006MouseExited
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-           jButton2.setBackground(new java.awt.Color(0, 255, 255)); 
-    jButton2.setForeground(java.awt.Color.BLACK);// TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void libShelf_006ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libShelf_006ActionPerformed
+        libShelf_006.setBackground(new java.awt.Color(0, 255, 255)); 
+        libShelf_006.setForeground(java.awt.Color.BLACK);
+        ScoreManager.onWrong();                // the binary code said 005
+        JOptionPane.showMessageDialog(this, Story.L3_WRONG_SHELF,
+            "Shelf 006", JOptionPane.INFORMATION_MESSAGE);// TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_006ActionPerformed
     /** Resets the whole level. Called every time the card is shown. */
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Shelf005;
+    private javax.swing.JLabel Shelf006;
     private javax.swing.JLabel ShelfBackground;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton libShelf_005;
+    private javax.swing.JButton libShelf_006;
     // End of variables declaration//GEN-END:variables
 }
