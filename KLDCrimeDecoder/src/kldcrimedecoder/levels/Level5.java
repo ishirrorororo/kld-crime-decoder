@@ -191,7 +191,7 @@ private void startLevel() {
 /** The talking is over: show the evidence cards. */
 private void beginPuzzle() {
     lblAmy.setVisible(false);
-    lblAmyMini.setIcon(loadImage("amy_neutral.png", 90, 100, "Amy"));
+    lblAmyMini.setIcon(amyPicture("neutral", 90, 100));
     pnlPuzzle.setVisible(true);
     puzzleActive = true;
     btnHint.setEnabled(true);
@@ -234,9 +234,22 @@ private void playFrom(final String[][] lines, final int i, final Runnable after)
 }
 
 /** Shows Amy with this mood: angry, neutral, sad or suspicious. */
+/** Shows Amy with this mood: angry, neutral, sad or suspicious. */
 private void setMood(String mood) {
-    lblAmy.setIcon(loadImage("amy_" + mood + ".png", 240, 300, "Amy [" + mood + "]"));
+    lblAmy.setIcon(amyPicture(mood, 240, 300));
     lblAmy.setVisible(true);
+}
+
+/** amy_<mood>.png if you have drawn it, otherwise the one Amy picture you have. */
+private Icon amyPicture(String mood, int w, int h) {
+    Icon pic = Theme.image("amy_" + mood + ".png", w, h);
+    if (pic == null) {
+        pic = Theme.portrait("Amy Mercado", w, h);
+    }
+    if (pic == null) {
+        pic = loadImage("amy_" + mood + ".png", w, h, "Amy [" + mood + "]");   // placeholder box
+    }
+    return pic;
 }
 
 /** A short screen shake: the background and Amy jump left and right. */

@@ -33,6 +33,11 @@ import kldcrimedecoder.puzzles.WordScramblePuzzle;
 import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.ui.DragDropHelper;
 import kldcrimedecoder.ui.Theme;
+import java.awt.Graphics;
+import java.awt.RadialGradientPaint;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import javax.swing.JComponent;
 
 /**
  *
@@ -44,6 +49,13 @@ private static final Color PAPER_BAD = new Color(0xB00020);  // wrong answer (on
 private static final Color INK = new Color(0x2B2B2B);        // dark text on the paper
 private static final String KEY_SOLVED = "level3.tilesSolved";
 private static final String KEY_INTRO  = "level3.introSeen";
+private static final int POP_MS = 900;       // how long the pop-out takes
+private static final double POP_X = 500;     // where the journal ends up (its center)
+private static final double POP_Y = 175;     // above the dialogue band, which starts at y 340
+
+private JournalPop journalPop;               // the see-through layer that draws the journal
+private Timer popTimer;
+private long popStart;
 
 private WordScramblePuzzle puzzle;
 private boolean solved;
@@ -114,11 +126,22 @@ private JPanel[] slots;          // one slot for each letter
 
     // Every time this card is shown, rebuild it from the saved progress
     addComponentListener(new ComponentAdapter() {
-        @Override
-        public void componentShown(ComponentEvent e) {
-            startLevel();
-        }
-    });
+    @Override
+    public void componentShown(ComponentEvent e) {
+        startLevel();
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent e) {
+        stopJournalPop();
+    }
+});
+    // ---- the journal that pops out: a see-through layer on top of everything ----
+BufferedImage raw = Theme.trimmedImage("journal.png");
+journalPop = new JournalPop(raw == null ? null : scaleSharp(raw, 243));
+add(journalPop, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580), 0);
+journalPop.setVisible(false);
+    
 }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -224,6 +247,7 @@ private JPanel[] slots;          // one slot for each letter
    /** Plays lines in the dialogue box at the bottom of the screen. */
    /** Rebuilds the screen from the saved progress. Called every time the card is shown. */
 private void startLevel() {
+    stopJournalPop();
     GameState gs = GameState.getInstance();
     solved = gs.getChoice(KEY_SOLVED, "no").equals("yes");
     puzzle = new WordScramblePuzzle(Story.SCRAMBLE_WORD);
@@ -243,6 +267,9 @@ private void startLevel() {
         gs.putChoice(KEY_INTRO, "yes");
         speak(Story.L3_SHELF_INTRO, null);
     }
+    if (solved) {
+    playJournalPop(false);          // already solved: the journal just rests there
+}
 }
 
 /** Fresh tiles in the tray. If the puzzle is already solved, the word sits locked in the slots. */
@@ -358,14 +385,19 @@ private void onSolved() {
     btnHint.setEnabled(false);
     setPaperFeedback(Story.L3_TILES_RIGHT, true);
 
-    // short pause so the player sees the word, then close the paper and play the scene
-    Timer pause = new Timer(1200, e -> {
-        pnlPaper.setVisible(false);
-        btnSpine.setVisible(false);            // the book slid out
-        speak(Story.L3_FOUND, () -> btnContinue.setEnabled(true));
-    });
-    pause.setRepeats(false);
-    pause.start();
+    // a short pause so the player sees the word, then the journal pops out
+Timer pause = new Timer(1200, e -> {
+    pnlPaper.setVisible(false);
+    playJournalPop(true);                     // the journal pops out of the spine
+    btnSpine.setVisible(false);               // the spine is empty now
+
+    // the lines start when the journal has landed
+    Timer talk = new Timer(POP_MS, e2 -> speak(Story.L3_FOUND, () -> btnContinue.setEnabled(true)));
+    talk.setRepeats(false);
+    talk.start();
+});
+pause.setRepeats(false);
+pause.start();
 }
 
 /** Plays lines in the dialogue box. "after" runs when the last line ends. */
@@ -412,6 +444,72 @@ private void setPaperFeedback(String text, boolean good) {
     lblPaperFeedback.setForeground(good ? INK : PAPER_BAD);
     lblPaperFeedback.setText("<html>" + text.replace("\n", "<br>") + "</html>");
 }
+/** Swing normally assumes children never overlap. Ours do, so repaint them in the right order. */
+@Override
+public boolean isOptimizedDrawingEnabled() {
+    return false;
+}
+
+/** The journal flies out of the spine to the middle of the screen and floats there. */
+private void playJournalPop(boolean animate) {
+    stopJournalPop();
+    Rectangle spine = btnSpine.getBounds();
+    final double x0 = spine.getCenterX();               // start at the spine
+    final double y0 = spine.getCenterY();
+    journalPop.setVisible(true);
+    popStart = System.currentTimeMillis() - (animate ? 0 : POP_MS);   // no animation = already landed
+    // Sfx.play("thud");                                 // optional sound, see the Sfx step from Level 3
+
+    popTimer = new Timer(16, e -> {
+        long ms = System.currentTimeMillis() - popStart;
+        double t = ms / (double) POP_MS;                 // 0 at the start, 1 when landed
+        if (t < 1) {
+            double move = easeOutCubic(t);               // flies to the middle
+            double size = 0.12 + 0.88 * easeOutBack(t);  // grows, a little too big, then settles
+            journalPop.place(x0 + (POP_X - x0) * move, y0 + (POP_Y - y0) * move,
+                    size, Math.min(1, t * 2) * 0.8);
+        } else {
+            double bob = Math.sin(ms / 350.0) * 3;       // gentle floating up and down
+            journalPop.place(POP_X, POP_Y + bob, 1.0, 0.8);
+        }
+    });
+    popTimer.start();
+}
+
+private void stopJournalPop() {
+    if (popTimer != null) {
+        popTimer.stop();
+    }
+    if (journalPop != null) {
+        journalPop.setVisible(false);
+    }
+}
+
+/** Fast at the start, slow at the end. */
+private static double easeOutCubic(double t) {
+    double u = 1 - t;
+    return 1 - u * u * u;
+}
+
+/** Goes a little past 1 and comes back: the "pop". */
+private static double easeOutBack(double t) {
+    double c1 = 1.70158;
+    double c3 = c1 + 1;
+    double u = t - 1;
+    return 1 + c3 * u * u * u + c1 * u * u;
+}
+
+/** Scales a picture to this width with sharp pixels (no blur). */
+private static BufferedImage scaleSharp(BufferedImage src, int width) {
+    int height = src.getHeight() * width / src.getWidth();
+    BufferedImage out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = out.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    g.drawImage(src, 0, 0, width, height, null);
+    g.dispose();
+    return out;
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
@@ -428,4 +526,67 @@ private void setPaperFeedback(String text, boolean good) {
     private javax.swing.JPanel pnlSlots;
     private javax.swing.JPanel pnlTiles;
     // End of variables declaration//GEN-END:variables
+/** A see-through layer over the whole screen. It only draws the journal. */
+private static class JournalPop extends JComponent {
+
+    private final BufferedImage img;     // the journal, already at its final size (null = missing file)
+    private double cx;                   // center of the book
+    private double cy;
+    private double scale;                // 1.0 = final size
+    private double glow;                 // 0 to 1: how strong the amber glow is
+
+    JournalPop(BufferedImage img) {
+        this.img = img;
+        setOpaque(false);                // see-through, clicks go to what is behind
+        setFocusable(false);
+    }
+
+    private int finalWidth() {
+        return img != null ? img.getWidth() : 243;
+    }
+
+    private int finalHeight() {
+        return img != null ? img.getHeight() : 213;
+    }
+
+    void place(double cx, double cy, double scale, double glow) {
+        this.cx = cx;
+        this.cy = cy;
+        this.scale = scale;
+        this.glow = glow;
+        repaint();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        int w = (int) Math.round(finalWidth() * scale);
+        int h = (int) Math.round(finalHeight() * scale);
+        if (w < 2 || h < 2) {
+            return;
+        }
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        // amber glow behind the book
+        float radius = (float) (finalWidth() * 0.75 * Math.max(scale, 0.2));
+        g2.setPaint(new RadialGradientPaint(new Point2D.Double(cx, cy), radius,
+                new float[] { 0f, 1f },
+                new Color[] { new Color(255, 176, 0, (int) (140 * glow)), new Color(255, 176, 0, 0) }));
+        g2.fillOval((int) (cx - radius), (int) (cy - radius), (int) (radius * 2), (int) (radius * 2));
+
+        // the book itself, with sharp pixels
+        int x = (int) Math.round(cx - w / 2.0);
+        int y = (int) Math.round(cy - h / 2.0);
+        if (img != null) {
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            g2.drawImage(img, x, y, w, h, null);
+        } else {                         // no picture: a purple box, so the game never crashes
+            g2.setColor(new Color(0x7E64A2));
+            g2.fillRect(x, y, w, h);
+            g2.setColor(Theme.AMBER);
+            g2.drawRect(x, y, w - 1, h - 1);
+        }
+        g2.dispose();
+    }
+}
 }
