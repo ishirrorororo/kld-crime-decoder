@@ -21,6 +21,10 @@ import java.awt.event.ComponentEvent;
 import kldcrimedecoder.data.Story;
 import kldcrimedecoder.engine.GameManager;
 import kldcrimedecoder.engine.GameState;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 /**
  *
  * @author Joel
@@ -44,6 +48,13 @@ public Level3() {
             onShown();
         }
     });
+    styleShelfLabel(Shelf005, "005");
+styleShelfLabel(Shelf006, "006");
+}
+/** The signs sit on top of the shelf buttons (overlapping children), so tell Swing to repaint them in order. */
+@Override
+public boolean isOptimizedDrawingEnabled() {
+    return false;
 }
 
 private void onShown() {
@@ -89,6 +100,15 @@ private void onShown() {
         return false;
     }
 }
+    /** Sign text: a small SHELF on top, a big bold number below. */
+private void styleShelfLabel(JLabel lbl, String number) {
+    lbl.setText("<html><div align='center'><font size='2'>SHELF</font><br>"
+            + "<font size='5'><b>" + number + "</b></font></div></html>");
+    lbl.setFont(new Font("Consolas", Font.BOLD, 14));
+    lbl.setForeground(new Color(0x1B2A47));       // dark navy ink on the light sign
+    lbl.setHorizontalAlignment(SwingConstants.CENTER);
+    lbl.setVerticalAlignment(SwingConstants.CENTER);
+}
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -112,7 +132,7 @@ private void onShown() {
         Shelf006.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Shelf006.setText("Shelf 006");
         Shelf006.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        add(Shelf006, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 80, 110, 40));
+        add(Shelf006, new org.netbeans.lib.awtextra.AbsoluteConstraints(738, 76, 112, 46));
 
         libShelf_006.setBackground(new java.awt.Color(0, 0, 0));
         libShelf_006.setForeground(new java.awt.Color(255, 255, 255));
@@ -137,7 +157,7 @@ private void onShown() {
         Shelf005.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         Shelf005.setText("Shelf 005");
         Shelf005.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        add(Shelf005, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 80, 110, 40));
+        add(Shelf005, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 76, 112, 46));
 
         libShelf_005.setBackground(new java.awt.Color(0, 0, 0));
         libShelf_005.setForeground(new java.awt.Color(255, 255, 255));
@@ -171,8 +191,8 @@ private void onShown() {
     }//GEN-LAST:event_libShelf_005ActionPerformed
 
     private void libShelf_005MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseExited
-          libShelf_005.setBorderPainted(false);
-    libShelf_005.repaint();
+        libShelf_005.setBorderPainted(false);
+        libShelf_005.repaint();
 
  // TODO add your handling code here:
     }//GEN-LAST:event_libShelf_005MouseExited

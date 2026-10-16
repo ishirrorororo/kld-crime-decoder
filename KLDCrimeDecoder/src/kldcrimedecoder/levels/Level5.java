@@ -3,19 +3,109 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.GameManager;
+import kldcrimedecoder.engine.GameState;
+import kldcrimedecoder.engine.LevelManager;
+import kldcrimedecoder.engine.ScoreManager;
+import kldcrimedecoder.ui.DialogueBox;
+import kldcrimedecoder.ui.DragDropHelper;
+import kldcrimedecoder.ui.Theme;
 
 /**
  *
  * @author Joel
  */
 public class Level5 extends javax.swing.JPanel {
+    private static final Color BAD   = new Color(0xFF6B6B);
+    private static final Color DARK  = new Color(0x0B1220);
+    private static final Color PAPER = new Color(0xF3EBD6);   // evidence cards
+    private static final Color INK   = new Color(0x1F3A93);
+    private static final Color BROWN = new Color(0x5A4632);
+    /** Splits "Amy [angry]" into the name and the mood. */
+    private static final Pattern MOOD = Pattern.compile("^(.*?)\\s*\\[(\\w+)\\]$");
+    private static final int SLOT_SIZE = 2;                   // the slot takes two cards
+
+    private boolean puzzleActive;
+    private boolean solved;
+    private int hintsUsed;
 
     /**
      * Creates new form Level5
      */
     public Level5() {
-        initComponents();
-    }
+    initComponents();
+
+    // ---- theme ----
+    Theme.background(this);
+    Theme.heading(lblTitle);
+    Theme.label(lblFeedback, lblSlotTitle);
+    Theme.button(btnHint, btnContinue);
+
+    // dark boxes, so the text is readable on top of the picture
+    lblTitle.setOpaque(true);
+    lblTitle.setBackground(DARK);
+    lblTitle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
+    lblFeedback.setOpaque(true);
+    lblFeedback.setBackground(DARK);
+    lblFeedback.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Theme.AMBER, 1),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)));
+    lblSlotTitle.setForeground(Theme.AMBER);
+
+    // ---- background (a colored placeholder if the file is missing) ----
+    lblBg.setIcon(loadImage("room_classroom.png", 1000, 580, "room_classroom.png (missing)"));
+
+    // ---- the puzzle panel ----
+    pnlPuzzle.setBackground(new Color(0x10151F));
+    pnlPuzzle.setBorder(BorderFactory.createLineBorder(Theme.AMBER, 2));
+    pnlSlot.setBackground(new Color(0x182033));
+    pnlSlot.setLayout(new GridLayout(1, SLOT_SIZE, 8, 0));
+    pnlSlot.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createDashedBorder(Theme.AMBER, 2, 6, 4, true),
+            BorderFactory.createEmptyBorder(6, 6, 6, 6)));
+    pnlCards.setOpaque(false);
+    pnlCards.setLayout(new GridLayout(1, 4, 10, 0));
+
+    // ---- drag and drop: the slot takes up to two cards, the tray takes them back ----
+    DragDropHelper.makeDropTarget(pnlSlot, (label, target) -> slotAccepts());
+    DragDropHelper.makeDropTarget(pnlCards, (label, target) -> {
+        if (puzzleActive) {
+            setFeedback(Story.L5_PROMPT, true);   // clear an old "wrong" message
+        }
+        return puzzleActive;
+    });
+
+    // Start fresh every time this card is shown
+    addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentShown(ComponentEvent e) {
+            startLevel();
+        }
+    });
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,19 +116,314 @@ public class Level5 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        lblTitle = new javax.swing.JLabel();
+        pnlPuzzle = new javax.swing.JPanel();
+        lblSlotTitle = new javax.swing.JLabel();
+        lblAmyMini = new javax.swing.JLabel();
+        pnlSlot = new javax.swing.JPanel();
+        pnlCards = new javax.swing.JPanel();
+        lblAmy = new javax.swing.JLabel();
+        btnHint = new javax.swing.JButton();
+        btnContinue = new javax.swing.JButton();
+        lblFeedback = new javax.swing.JLabel();
+        lblBg = new javax.swing.JLabel();
+
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblTitle.setText("Amy Mercado");
+        add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 190, 28));
+
+        pnlPuzzle.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblSlotTitle.setText("Proof Amy was in the council room at 9:00 PM.");
+        pnlPuzzle.add(lblSlotTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 8, 880, 26));
+        pnlPuzzle.add(lblAmyMini, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 44, 110, 100));
+        pnlPuzzle.add(pnlSlot, new org.netbeans.lib.awtextra.AbsoluteConstraints(235, 40, 450, 108));
+        pnlPuzzle.add(pnlCards, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 158, 880, 124));
+
+        add(pnlPuzzle, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 30, 920, 292));
+        add(lblAmy, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 24, 240, 300));
+
+        btnHint.setText("Hint");
+        btnHint.addActionListener(this::btnHintActionPerformed);
+        add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 340, 100, 34));
+
+        btnContinue.setText("Continue");
+        btnContinue.addActionListener(this::btnContinueActionPerformed);
+        add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 340, 100, 34));
+        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 334, 690, 54));
+        add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnHintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHintActionPerformed
+            if (!puzzleActive) {
+        return;
+    }
+    ScoreManager.onHint();
+    int i = Math.min(hintsUsed, Story.L5_HINTS.length - 1);   // hint 1, then hint 2
+    hintsUsed++;
+    setFeedback("Hint " + (i + 1) + ": " + Story.L5_HINTS[i], true);
 
+    }//GEN-LAST:event_btnHintActionPerformed
+
+    private void btnContinueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnContinueActionPerformed
+        LevelManager.nextLevel();
+    }//GEN-LAST:event_btnContinueActionPerformed
+
+/** Resets the level and plays the scene with Amy. */
+private void startLevel() {
+    solved = false;
+    puzzleActive = false;
+    hintsUsed = 0;
+
+    lblTitle.setText(Story.L5_TITLE);
+    setFeedback("");
+    lblAmy.setVisible(false);              // Amy appears at her first line
+    pnlPuzzle.setVisible(false);
+    btnHint.setEnabled(false);
+    btnContinue.setEnabled(false);
+    buildCards();
+
+    // Sfx.play("chair");                  // a chair scrapes, see the optional Sfx step from Level 3
+    scene(Story.L5_INTRO, this::beginPuzzle);
+}
+
+/** The talking is over: show the evidence cards. */
+private void beginPuzzle() {
+    lblAmy.setVisible(false);
+    lblAmyMini.setIcon(loadImage("amy_neutral.png", 90, 100, "Amy"));
+    pnlPuzzle.setVisible(true);
+    puzzleActive = true;
+    btnHint.setEnabled(true);
+    setFeedback(Story.L5_PROMPT, true);
+}
+
+// ------------------------------------------------------------ the scene
+
+/** Plays lines one by one. "Amy [angry]" changes her picture, "{shake}" shakes the screen. */
+private void scene(String[][] lines, Runnable after) {
+    playFrom(lines, 0, after);
+}
+
+private void playFrom(final String[][] lines, final int i, final Runnable after) {
+    if (i >= lines.length) {
+        if (after != null) {
+            after.run();
+        }
+        return;
+    }
+    String speaker = lines[i][0];
+    String text = lines[i][1];
+
+    Matcher m = MOOD.matcher(speaker);       // "Amy [angry]" -> "Amy" + "angry"
+    if (m.matches()) {
+        speaker = m.group(1);
+        setMood(m.group(2));
+    }
+    if (text.startsWith("{shake}")) {
+        text = text.substring(7).trim();
+        shake();
+    }
+
+    DialogueBox box = GameManager.getDialogue();
+    if (box == null) {                       // no dialogue box (testing the form alone)
+        playFrom(lines, i + 1, after);
+        return;
+    }
+    box.play(new String[][] { { speaker, text } }, () -> playFrom(lines, i + 1, after));
+}
+
+/** Shows Amy with this mood: angry, neutral, sad or suspicious. */
+private void setMood(String mood) {
+    lblAmy.setIcon(loadImage("amy_" + mood + ".png", 240, 300, "Amy [" + mood + "]"));
+    lblAmy.setVisible(true);
+}
+
+/** A short screen shake: the background and Amy jump left and right. */
+private void shake() {
+    final Point bg0 = lblBg.getLocation();
+    final Point amy0 = lblAmy.getLocation();
+    final int[] step = { 0 };
+    final Timer t = new Timer(25, null);
+    t.addActionListener(e -> {
+        int dx = (step[0] % 2 == 0 ? 1 : -1) * (8 - step[0] / 2);   // gets smaller
+        lblBg.setLocation(bg0.x + dx, bg0.y);
+        lblAmy.setLocation(amy0.x + dx, amy0.y);
+        if (++step[0] >= 16) {
+            lblBg.setLocation(bg0);          // back to the exact place
+            lblAmy.setLocation(amy0);
+            t.stop();
+        }
+    });
+    t.start();
+}
+
+// ------------------------------------------------------------ the cards
+
+/** Puts the four evidence cards in the tray and empties the slot. */
+private void buildCards() {
+    pnlSlot.removeAll();
+    pnlCards.removeAll();
+    int[] order = { 2, 0, 3, 1 };            // mixes the real and the fake cards
+    for (int i : order) {
+        pnlCards.add(makeCard(Story.L5_CARDS[i]));
+    }
+    pnlSlot.revalidate();
+    pnlSlot.repaint();
+    pnlCards.revalidate();
+    pnlCards.repaint();
+}
+
+private JLabel makeCard(String[] row) {
+    final JLabel card = new JLabel("<html><body style='width:170px'><div align='center'><b>"
+            + row[0] + "</b><br><small>" + row[1] + "</small></div></body></html>",
+            SwingConstants.CENTER);
+    card.setOpaque(true);
+    card.setBackground(PAPER);
+    card.setForeground(INK);
+    card.setFont(new Font("Georgia", Font.PLAIN, 13));
+    card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BROWN, 2),
+            BorderFactory.createEmptyBorder(6, 8, 6, 8)));
+    card.putClientProperty("row", row);      // {title, text, "real"/"fake", why}
+
+    DragDropHelper.makeDraggable(card);
+    card.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            moveByClick(card);
+        }
+    });
+    return card;
+}
+
+/** Called when a card is dropped on the slot. */
+private boolean slotAccepts() {
+    if (!puzzleActive || pnlSlot.getComponentCount() >= SLOT_SIZE) {
+        return false;                        // the slot is full
+    }
+    SwingUtilities.invokeLater(this::checkProof);   // check AFTER the card has moved in
+    return true;
+}
+
+/** A click moves a card: tray to slot, or slot back to the tray. */
+private void moveByClick(JLabel card) {
+    if (!puzzleActive) {
+        return;
+    }
+    if (card.getParent() == pnlCards) {
+        if (pnlSlot.getComponentCount() < SLOT_SIZE) {
+            pnlSlot.add(card);
+            refreshPanels();
+            SwingUtilities.invokeLater(this::checkProof);
+        }
+    } else {
+        pnlCards.add(card);
+        setFeedback(Story.L5_PROMPT, true);
+        refreshPanels();
+    }
+}
+
+private void refreshPanels() {
+    pnlSlot.revalidate();
+    pnlSlot.repaint();
+    pnlCards.revalidate();
+    pnlCards.repaint();
+}
+
+/** When the slot holds two cards, check them. */
+private void checkProof() {
+    if (!puzzleActive || pnlSlot.getComponentCount() < SLOT_SIZE) {
+        return;
+    }
+    JLabel a = (JLabel) pnlSlot.getComponent(0);
+    JLabel b = (JLabel) pnlSlot.getComponent(1);
+    String[] ra = (String[]) a.getClientProperty("row");
+    String[] rb = (String[]) b.getClientProperty("row");
+
+    if (ra[2].equals("real") && rb[2].equals("real")) {
+        onSolved(a, b);
+        return;
+    }
+    // a wrong pair: explain the first fake card, then send both cards back
+    ScoreManager.onWrong();
+    String why = ra[2].equals("fake") ? ra[3] : rb[3];
+    setFeedback(why + " " + Story.L5_TRY_AGAIN, false);
+    pnlCards.add(a);
+    pnlCards.add(b);
+    refreshPanels();
+}
+
+private void onSolved(JLabel a, JLabel b) {
+    puzzleActive = false;
+    solved = true;
+    ScoreManager.onCorrect();
+    DragDropHelper.lock(a);                  // the two cards stay in the slot
+    DragDropHelper.lock(b);
+    btnHint.setEnabled(false);
+
+    GameState gs = GameState.getInstance();
+    gs.putChoice("level5", "amyCleared");
+    gs.addItem(Story.ITEM_AMY_CLEARED);
+    setFeedback(Story.L5_RIGHT, true);
+
+    // a short pause so the player sees the right pair, then Amy reacts
+    Timer pause = new Timer(2200, e -> {
+        pnlPuzzle.setVisible(false);
+        setMood("sad");
+        scene(Story.L5_AFTER, () -> {
+            setFeedback(Story.L5_CLEARED, true);   // no time deducted
+            btnContinue.setEnabled(true);
+        });
+    });
+    pause.setRepeats(false);
+    pause.start();
+}
+
+// ------------------------------------------------------------ pictures and text
+
+/** Loads /kldcrimedecoder/images/<file>. If missing, draws a colored placeholder with a label. */
+private static Icon loadImage(String file, int w, int h, String label) {
+    java.net.URL url = Level5.class.getResource("/kldcrimedecoder/images/" + file);
+    if (url != null) {
+        Image img = new ImageIcon(url).getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        return new ImageIcon(img);
+    }
+    BufferedImage ph = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = ph.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g.setColor(new Color(0x6A4A4A));
+    g.fillRect(0, 0, w, h);
+    g.setColor(Theme.AMBER);
+    g.drawRect(0, 0, w - 1, h - 1);
+    g.setFont(new Font("Consolas", Font.PLAIN, 12));
+    FontMetrics fm = g.getFontMetrics();
+    g.drawString(label, Math.max(2, (w - fm.stringWidth(label)) / 2), h / 2);
+    g.dispose();
+    return new ImageIcon(ph);
+}
+
+private void setFeedback(String text) {
+    lblFeedback.setText(text);
+    lblFeedback.setVisible(!text.isEmpty());
+}
+
+private void setFeedback(String text, boolean good) {
+    lblFeedback.setForeground(good ? Theme.AMBER : BAD);
+    lblFeedback.setText("<html>" + text.replace("\n", "<br>") + "</html>");
+    lblFeedback.setVisible(!text.isEmpty());
+}
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnContinue;
+    private javax.swing.JButton btnHint;
+    private javax.swing.JLabel lblAmy;
+    private javax.swing.JLabel lblAmyMini;
+    private javax.swing.JLabel lblBg;
+    private javax.swing.JLabel lblFeedback;
+    private javax.swing.JLabel lblSlotTitle;
+    private javax.swing.JLabel lblTitle;
+    private javax.swing.JPanel pnlCards;
+    private javax.swing.JPanel pnlPuzzle;
+    private javax.swing.JPanel pnlSlot;
     // End of variables declaration//GEN-END:variables
 }

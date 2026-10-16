@@ -36,7 +36,7 @@ import kldcrimedecoder.ui.Theme;
 
 /**
  *
- * @author Von
+ * @author Joel
  */
 public class Level3Shelf extends javax.swing.JPanel {
 private static final Color BAD = new Color(0xFF6B6B);        // wrong answer (dark bars)
@@ -84,8 +84,11 @@ private JPanel[] slots;          // one slot for each letter
         // a slot takes a tile only when it is empty
         DragDropHelper.makeDropTarget(slot, (label, target) -> slotAccepts(target));
     }
-    // the tray takes tiles back
-    DragDropHelper.makeDropTarget(pnlTiles, (label, target) -> true);
+    // the tray takes tiles back, and clears the old message
+    DragDropHelper.makeDropTarget(pnlTiles, (label, target) -> {
+    setPaperFeedback("", true);
+    return true;
+    });
 
     // ---- the book that sticks out ----
     btnSpine.setText("");
@@ -267,7 +270,7 @@ private void buildTiles() {
 }
 
 private JLabel makeTile(char letter) {
-    JLabel tile = new JLabel(String.valueOf(letter), SwingConstants.CENTER);
+    final JLabel tile = new JLabel(String.valueOf(letter), SwingConstants.CENTER);
     tile.setFont(new Font("Consolas", Font.BOLD, 20));
     tile.setForeground(INK);
     tile.setOpaque(true);
@@ -275,6 +278,14 @@ private JLabel makeTile(char letter) {
     tile.setBorder(BorderFactory.createLineBorder(INK, 1));
     tile.setPreferredSize(new Dimension(30, 36));
     DragDropHelper.makeDraggable(tile);
+
+    // a plain click (no dragging) moves the tile
+    tile.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            moveTileByClick(tile);
+        }
+    });
     return tile;
 }
 
@@ -285,6 +296,32 @@ private boolean slotAccepts(JPanel slot) {
     }
     SwingUtilities.invokeLater(this::checkWord);   // check AFTER the tile has moved in
     return true;
+}
+/** Tray tile: jumps to the first empty slot. Slot tile: goes back to the tray. */
+private void moveTileByClick(JLabel tile) {
+    if (solved) {
+        return;                                  // solved tiles stay locked
+    }
+    if (tile.getParent() == pnlTiles) {          // tray -> first empty slot
+        for (JPanel slot : slots) {
+            if (slot.getComponentCount() == 0) {
+                slot.add(tile, BorderLayout.CENTER);
+                pnlSlots.revalidate();
+                pnlSlots.repaint();
+                pnlTiles.revalidate();
+                pnlTiles.repaint();
+                SwingUtilities.invokeLater(this::checkWord);
+                return;
+            }
+        }
+    } else {                                     // slot -> tray
+        pnlTiles.add(tile);
+        setPaperFeedback("", true);              // clear the old "wrong" message
+        pnlSlots.revalidate();
+        pnlSlots.repaint();
+        pnlTiles.revalidate();
+        pnlTiles.repaint();
+    }
 }
 
 /** When every slot has a tile, check the word. */

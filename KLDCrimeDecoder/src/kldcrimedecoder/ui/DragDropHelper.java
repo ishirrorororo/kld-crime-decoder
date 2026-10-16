@@ -27,8 +27,17 @@ public class DragDropHelper {
         boolean onDrop(JLabel label, JPanel target);
     }
 
-    private static final DataFlavor LABEL_FLAVOR = new DataFlavor(JLabel.class, "JLabel");
+    private static final DataFlavor LABEL_FLAVOR = makeFlavor();
 
+/** A "same object, same program" flavor: the drop receives the real label, not a copy. */
+private static DataFlavor makeFlavor() {
+    try {
+        return new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType
+                + ";class=javax.swing.JLabel");
+    } catch (ClassNotFoundException e) {
+        throw new IllegalStateException(e);
+    }
+}
     /** Carries the label itself while it is being dragged. */
     private static class LabelTransferable implements Transferable {
         private final JLabel label;
@@ -68,29 +77,34 @@ public class DragDropHelper {
         }
     };
 
-    /** Starts the drag when the mouse moves with the button held down. */
-    private static final MouseAdapter DRAG_STARTER = new MouseAdapter() {
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            JComponent c = (JComponent) e.getSource();
-            TransferHandler th = c.getTransferHandler();
-            if (th != null) {                       // null = locked label
-                th.exportAsDrag(c, e, TransferHandler.MOVE);
-            }
+/** Starts the drag when the mouse moves with the button held down. */
+private static final MouseAdapter DRAG_STARTER = new MouseAdapter() {
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        JComponent c = (JComponent) e.getSource();
+        if (Boolean.TRUE.equals(c.getClientProperty("dd.locked"))) {
+            return;                                 // locked label: no drag
         }
-    };
+        TransferHandler th = c.getTransferHandler();
+        if (th != null) {
+            th.exportAsDrag(c, e, TransferHandler.MOVE);
+        }
+    }
+};
 
-    public static void makeDraggable(JLabel label) {
+public static void makeDraggable(JLabel label) {
+    label.putClientProperty("dd.locked", Boolean.FALSE);
     label.setTransferHandler(DRAG_SOURCE);
     label.setDropTarget(null);      // drops on this label go to the panel behind it
     label.addMouseMotionListener(DRAG_STARTER);
     label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 }
 
-    public static void lock(JLabel label) {
-        label.setTransferHandler(null);
-        label.setCursor(Cursor.getDefaultCursor());
-    }
+/** The label stays where it is and can no longer be dragged. */
+public static void lock(JLabel label) {
+    label.putClientProperty("dd.locked", Boolean.TRUE);
+    label.setCursor(Cursor.getDefaultCursor());
+}
 
     public static void makeDropTarget(final JPanel panel, final DropListener listener) {
         panel.setTransferHandler(new TransferHandler() {

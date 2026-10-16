@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package kldcrimedecoder.ui;
-// ---- imports (add under the package line) ----
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -17,10 +16,7 @@ public class MainFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
 
-    /**
-     * Creates new form MainFrame
-     */
-// ---- constructor (replace the generated one's body, keep initComponents first) ----
+    
 public MainFrame() {
     initComponents();
 
@@ -42,10 +38,10 @@ public MainFrame() {
     // Let GameManager know which window to control
     GameManager.init(this);
     // ---- one DialogueBox floats over every screen ----
-final DialogueBox dialogueBox = new DialogueBox();
-dialogueBox.setVisible(false);
-getLayeredPane().add(dialogueBox, javax.swing.JLayeredPane.POPUP_LAYER);
-GameManager.setDialogue(dialogueBox);
+    final DialogueBox dialogueBox = new DialogueBox();
+    dialogueBox.setVisible(false);
+    getLayeredPane().add(dialogueBox, javax.swing.JLayeredPane.POPUP_LAYER);
+    GameManager.setDialogue(dialogueBox);
 cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
     @Override
     public void componentResized(java.awt.event.ComponentEvent e) {
@@ -61,6 +57,7 @@ cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
     addScreen("level3",     new Level3());
     addScreen("level3shelf", new Level3Shelf());
     addScreen("level4",     new Level4());
+    addScreen("suspectBoard", new SuspectBoard());
     addScreen("level5",     new Level5());
     addScreen("level6",     new Level6());
     addScreen("level7",     new Level7());
@@ -72,9 +69,9 @@ cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
 
     showCard("menu");
     GameManager.startNewGame();   // this line starts the clock
-    LevelManager.jumpTo(3);
+//    LevelManager.jumpTo(3); // remove in comment if you want to jump to level
 }
-/** Puts the dialogue box at the bottom of the card area, centered. */
+
 private void placeDialogue(DialogueBox box) {
     java.awt.Rectangle r = javax.swing.SwingUtilities.convertRectangle(
             cardPanel.getParent(), cardPanel.getBounds(), getLayeredPane());
@@ -144,7 +141,7 @@ private void placeDialogue(DialogueBox box) {
     }
 
 
-/** Adds one screen to cardPanel under a name. */
+
 private void addScreen(String name, JPanel panel) {
     panel.setBackground(Theme.BG);
     cardPanel.add(panel, name);

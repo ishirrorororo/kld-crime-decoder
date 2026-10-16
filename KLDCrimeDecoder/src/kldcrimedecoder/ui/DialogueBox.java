@@ -32,6 +32,7 @@ private static final Color EDGE_OUT = new Color(0x6E737C);   // outer thin line
 private static final Color EDGE_IN  = new Color(0xB9BDC4);   // inner thin line
 private static final Color TEXT     = new Color(0xF2F2F2);   // white text
 private static final Color HILITE   = new Color(0x4E7F80);   // teal highlight
+private static final Color DIM = new Color(0x8E959E);    // {dim} text
 private static final Font  SERIF    = new Font("Georgia", Font.PLAIN, 18);
 
 private final Timer typeTimer = new Timer(20, e -> typeNext());  // typewriter
@@ -199,17 +200,31 @@ private static Border frame() {
 
 /** Starts typing one line. */
 /** Starts typing one line. */
+/** Starts typing one line. */
 private void showLine(String speaker, String text) {
     boolean hasName = speaker != null && !speaker.isEmpty();
     pnlName.setVisible(hasName);                 // narration has no name plate
     lblSpeaker.setText(hasName ? speaker : "");
+
     fullText = text == null ? "" : text;
-    if (fullText.startsWith("{slow}")) {         // {slow} = type slowly
-        fullText = fullText.substring(6).trim();
-        typeTimer.setDelay(55);
-    } else {
-        typeTimer.setDelay(20);
+    boolean slow = false;
+    boolean dim = false;
+    boolean again = true;
+    while (again) {                              // read the tags at the start
+        again = false;
+        if (fullText.startsWith("{slow}")) {
+            slow = true;
+            again = true;
+            fullText = fullText.substring(6).trim();
+        } else if (fullText.startsWith("{dim}")) {
+            dim = true;
+            again = true;
+            fullText = fullText.substring(5).trim();
+        }
     }
+    typeTimer.setDelay(slow ? 55 : 20);
+    txaLine.setForeground(dim ? DIM : TEXT);
+
     shown = 0;
     txaLine.setText("");
     btnNext.setVisible(false);
