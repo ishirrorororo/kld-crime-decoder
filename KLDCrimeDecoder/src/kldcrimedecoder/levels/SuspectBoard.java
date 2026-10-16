@@ -78,18 +78,37 @@ public class SuspectBoard extends javax.swing.JPanel {
             BorderFactory.createLineBorder(new Color(0x6B4A2B), 6),
             BorderFactory.createEmptyBorder(14, 14, 14, 14)));
 
-    // ---- Alli's phone ----
-    pnlPhone.setBackground(new Color(0x10151F));
-    pnlPhone.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(0x2B3140), 6),
-            BorderFactory.createLineBorder(Theme.AMBER, 1)));
+        // ---- Alli's phone: the clue is written on its screen ----
+    pnlPhone.setOpaque(false);
+    pnlPhone.setBorder(null);
+    Icon phone = Theme.withoutWhiteBackground("phone.jpg", 520);
+    Color ink = new Color(0x1B2A47);              // dark text on the light phone screen
+    Color gray = new Color(0x5B6577);
+    if (phone != null) {
+        lblPhoneBg.setIcon(phone);
+    } else {                                      // no picture: the old dark phone panel
+        pnlPhone.setOpaque(true);
+        pnlPhone.setBackground(new Color(0x10151F));
+        ink = Theme.TEXT;
+        gray = new Color(0x8E959E);
+    }
     lblPhoneApp.setFont(new Font("Consolas", Font.BOLD, 16));
-    lblPhoneApp.setForeground(Theme.AMBER);
+    lblPhoneApp.setForeground(ink);
     lblPhoneMeta.setFont(new Font("Consolas", Font.PLAIN, 12));
-    lblPhoneMeta.setForeground(new Color(0x8E959E));
-    lblPhoneBody.setFont(new Font("Consolas", Font.PLAIN, 15));
-    lblPhoneBody.setForeground(Theme.TEXT);
+    lblPhoneMeta.setForeground(gray);
+    lblPhoneBody.setFont(new Font("Consolas", Font.PLAIN, 14));
+    lblPhoneBody.setForeground(ink);
     lblPhoneBody.setVerticalAlignment(SwingConstants.TOP);
+
+    // the "<" arrow in the phone's top bar closes the phone, like a back button
+    pnlPhone.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (new java.awt.Rectangle(16, 31, 28, 36).contains(e.getPoint())) {
+                btnPhoneClose.doClick();
+            }
+        }
+    });
 
     // Start fresh every time this card is shown
     addComponentListener(new ComponentAdapter() {
@@ -117,6 +136,7 @@ public class SuspectBoard extends javax.swing.JPanel {
         lblPhoneMeta = new javax.swing.JLabel();
         lblPhoneBody = new javax.swing.JLabel();
         btnPhoneClose = new javax.swing.JButton();
+        lblPhoneBg = new javax.swing.JLabel();
         lblBg = new javax.swing.JLabel();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -141,17 +161,21 @@ public class SuspectBoard extends javax.swing.JPanel {
         pnlPhone.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblPhoneApp.setText("Voicemail");
-        pnlPhone.add(lblPhoneApp, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 14, 308, 28));
+        pnlPhone.add(lblPhoneApp, new org.netbeans.lib.awtextra.AbsoluteConstraints(44, 39, 196, 26));
 
         lblPhoneMeta.setText("jLabel1");
-        pnlPhone.add(lblPhoneMeta, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 46, 308, 22));
-        pnlPhone.add(lblPhoneBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 76, 308, 140));
+        pnlPhone.add(lblPhoneMeta, new org.netbeans.lib.awtextra.AbsoluteConstraints(18, 90, 258, 22));
+        pnlPhone.add(lblPhoneBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(18, 118, 258, 326));
 
         btnPhoneClose.setText("Close");
         btnPhoneClose.addActionListener(this::btnPhoneCloseActionPerformed);
-        pnlPhone.add(btnPhoneClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(115, 228, 110, 30));
+        pnlPhone.add(btnPhoneClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 452, 92, 30));
 
-        add(pnlPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 50, 340, 274));
+        lblPhoneBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/phone.jpg"))); // NOI18N
+        lblPhoneBg.setText("jLabel1");
+        pnlPhone.add(lblPhoneBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 294, 520));
+
+        add(pnlPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(656, 46, 294, 520));
         add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
     }// </editor-fold>//GEN-END:initComponents
 
@@ -376,12 +400,17 @@ private static String wrap(String text, int maxChars) {
     }
     return out.toString();
 }
+@Override
+public boolean isOptimizedDrawingEnabled() {
+    return false;
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnPhoneClose;
     private javax.swing.JLabel lblBg;
     private javax.swing.JLabel lblFeedback;
     private javax.swing.JLabel lblPhoneApp;
+    private javax.swing.JLabel lblPhoneBg;
     private javax.swing.JLabel lblPhoneBody;
     private javax.swing.JLabel lblPhoneMeta;
     private javax.swing.JLabel lblTitle;

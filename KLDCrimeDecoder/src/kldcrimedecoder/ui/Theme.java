@@ -19,6 +19,121 @@ import javax.swing.ImageIcon;
  * constructors, after initComponents(), so we never touch the blue code.
  */
 public class Theme {
+      /**
+ * Loads a square picture that sits on a plain white background (like a JPG).
+ * The white that touches the edges, and any pale purple glow, becomes see-through.
+ * The picture is scaled to size x size. Returns null if the file is missing.
+ */
+/**
+ * Loads a picture that sits on a plain white background (like a JPG).
+ * The white that touches the edges, and any pale purple or pink glow, becomes see-through.
+ * The empty edges are cut off and the picture is scaled to this height.
+ * Returns null if the file is missing.
+ */
+public static Icon withoutWhiteBackground(String file, int height) {
+    java.net.URL url = Theme.class.getResource("/kldcrimedecoder/images/" + file);
+    if (url == null) {
+        return null;
+    }
+    try {
+        BufferedImage src = javax.imageio.ImageIO.read(url);
+
+        // 1. a half-size working copy: fast, and "nearest" does not blend colors
+        int w = src.getWidth() / 2;
+        int h = src.getHeight() / 2;
+        BufferedImage work = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        java.awt.Graphics2D g = work.createGraphics();
+        g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.drawImage(src, 0, 0, w, h, null);
+        g.dispose();
+        int[] px = work.getRGB(0, 0, w, h, null, 0, w);
+
+        // 2. white that is connected to the edges becomes see-through (flood fill)
+        boolean[] seen = new boolean[w * h];
+        int[] queue = new int[w * h];
+        int head = 0;
+        int tail = 0;
+        for (int x = 0; x < w; x++) {
+            tail = seed(px, seen, queue, tail, x);                    // top row
+            tail = seed(px, seen, queue, tail, (h - 1) * w + x);      // bottom row
+        }
+        for (int y = 0; y < h; y++) {
+            tail = seed(px, seen, queue, tail, y * w);                // left column
+            tail = seed(px, seen, queue, tail, y * w + w - 1);        // right column
+        }
+        while (head < tail) {
+            int p = queue[head++];
+            int x = p % w;
+            if (x > 0) {
+                tail = seed(px, seen, queue, tail, p - 1);
+            }
+            if (x < w - 1) {
+                tail = seed(px, seen, queue, tail, p + 1);
+            }
+            if (p >= w) {
+                tail = seed(px, seen, queue, tail, p - w);
+            }
+            if (p < w * (h - 1)) {
+                tail = seed(px, seen, queue, tail, p + w);
+            }
+        }
+
+                // 3. the background and the glow become transparent, and we count what is left
+        int[] colCount = new int[w];
+        int[] rowCount = new int[h];
+        for (int i = 0; i < px.length; i++) {
+            int r = (px[i] >> 16) & 0xFF;
+            int gr = (px[i] >> 8) & 0xFF;
+            int b = px[i] & 0xFF;
+            boolean glow = (b - gr) > 20 && (b - r) > -12;     // pale purple or pink
+            if (seen[i] || glow) {
+                px[i] = 0;                                     // fully transparent
+            } else {
+                colCount[i % w]++;
+                rowCount[i / w]++;
+            }
+        }
+
+        // the picture starts at the first column and row that hold many pixels,
+        // so a few stray specks on the edge cannot move it
+        int minX = firstBig(colCount, false);
+        int maxX = firstBig(colCount, true);
+        int minY = firstBig(rowCount, false);
+        int maxY = firstBig(rowCount, true);
+        if (minX < 0 || minY < 0) {
+            return null;                                       // nothing left
+        }
+
+        // 4. cut off the empty edges and scale to the wanted height ("nearest" = sharp)
+        int cw = maxX - minX + 1;
+        int ch = maxY - minY + 1;
+        int outW = Math.max(1, (int) Math.round(cw * (double) height / ch));
+        BufferedImage out = new BufferedImage(outW, height, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < height; y++) {
+            int sy = minY + y * ch / height;
+            for (int x = 0; x < outW; x++) {
+                int sx = minX + x * cw / outW;
+                out.setRGB(x, y, px[sy * w + sx]);
+            }
+        }
+        return new ImageIcon(out);
+    } catch (java.io.IOException e) {
+        return null;
+    }
+}
+/** Adds a white pixel to the flood-fill queue if it has not been seen yet. */
+private static int seed(int[] px, boolean[] seen, int[] queue, int tail, int index) {
+    int c = px[index];
+    boolean white = ((c >> 16) & 0xFF) >= 228 && ((c >> 8) & 0xFF) >= 228 && (c & 0xFF) >= 228;
+    if (!seen[index] && white) {
+        seen[index] = true;
+        queue[tail] = index;
+        return tail + 1;
+    }
+    return tail;
+}  
+        
     /** The picture used for any character that has no portrait file. */
 public static final String SILHOUETTE_FILE = "cleared_characters.png";
 
@@ -162,4 +277,21 @@ public static BufferedImage trimmedImage(String file) {
             p.getViewport().setBackground(PANEL);
         }
     }
+    /** Index of the first (or last) entry that holds at least 20 pixels, or -1 if none. */
+private static int firstBig(int[] counts, boolean fromEnd) {
+    if (fromEnd) {
+        for (int i = counts.length - 1; i >= 0; i--) {
+            if (counts[i] >= 20) {
+                return i;
+            }
+        }
+    } else {
+        for (int i = 0; i < counts.length; i++) {
+            if (counts[i] >= 20) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
 }
