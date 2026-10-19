@@ -3,10 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.ui;
-import java.awt.Color;
-import java.awt.Font;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.GameManager;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+
 /**
  *
  * @author Joel
@@ -16,22 +16,19 @@ public class MenuPanel extends javax.swing.JPanel {
     /**
      * Creates new form MenuPanel
      */
-    public MenuPanel() {
+public MenuPanel() {
     initComponents();
 
-    // Theme (temporary: Phase 2 moves this into Theme)
-    setBackground(new Color(0x0B1220));
+    Theme.background(this);
 
-    lblTitle.setFont(new Font("Consolas", Font.BOLD, 44));
-    lblTitle.setForeground(new Color(0xFFB000));
+    lblTitle.setText(Story.GAME_TITLE);
+    lblTitle.setFont(Theme.TITLE);
+    lblTitle.setForeground(Theme.AMBER);
 
-    lblSubtitle.setFont(new Font("Consolas", Font.PLAIN, 14));
-    lblSubtitle.setForeground(new Color(0xE8E8E8));
+    lblSubtitle.setText(Story.SUBTITLE);
+    Theme.label(lblSubtitle);
 
-    Font btnFont = new Font("Consolas", Font.PLAIN, 14);
-    btnStart.setFont(btnFont);
-    btnHowToPlay.setFont(btnFont);
-    btnExit.setFont(btnFont);
+    Theme.button(btnStart, btnHowToPlay, btnExit);
 }
 
     /**
@@ -104,28 +101,19 @@ public class MenuPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        // TODO add your handling code here:
-        getMainFrame().showCard("level0");
+        GameManager.startNewGame();   // resets state, starts the timer, opens level 0
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnHowToPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHowToPlayActionPerformed
-         JOptionPane.showMessageDialog(this,
-        "You are Arnie. Alli is missing.\n\n"
-      + "- Solve each puzzle to move to the next level.\n"
-      + "- Wrong answers and hints cost you time.\n"
-      + "- Beat the bell before the timer hits 00:00.\n"
-      + "- Read the clues carefully. Some of them are about you.",
+          JOptionPane.showMessageDialog(this, Story.HOW_TO_PLAY,
         "How to Play", JOptionPane.INFORMATION_MESSAGE);
-// TODO add your handling code here:
     }//GEN-LAST:event_btnHowToPlayActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         System.exit(0);
 // TODO add your handling code here:
     }//GEN-LAST:event_btnExitActionPerformed
-private MainFrame getMainFrame() {
-    return (MainFrame) SwingUtilities.getWindowAncestor(this);
-}
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExit;

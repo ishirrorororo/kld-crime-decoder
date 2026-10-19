@@ -6,7 +6,7 @@ package kldcrimedecoder.data;
 
 /**
  *
- * @author Von
+ * @author Joel
  */
 public class removeit extends javax.swing.JFrame {
     

@@ -3,20 +3,113 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
-
+import java.awt.Color;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import javax.swing.DefaultListModel;
+import javax.swing.ListSelectionModel;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.GameState;
+import kldcrimedecoder.engine.LevelManager;
+import kldcrimedecoder.engine.ScoreManager;
+import kldcrimedecoder.puzzles.WordScramblePuzzle;
+import kldcrimedecoder.ui.Theme;
+import javax.swing.JOptionPane;
+import kldcrimedecoder.engine.GameManager;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.GameManager;
+import kldcrimedecoder.engine.GameState;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 /**
  *
  * @author Joel
  */
 public class Level3 extends javax.swing.JPanel {
 
+    private static final Color BAD = new Color(0xFF6B6B);   // wrong-answer color
+    private WordScramblePuzzle puzzle;
     /**
      * Creates new form Level3
      */
-    public Level3() {
-        initComponents();
+    private static final String KEY_WALK = "level3.walkSeen";
+
+public Level3() {
+    initComponents();
+
+    // When the aisle appears, play the walk-in once
+    addComponentListener(new ComponentAdapter() {
+        @Override
+        public void componentShown(ComponentEvent e) {
+            onShown();
+        }
+    });
+    styleShelfLabel(Shelf005, "005");
+styleShelfLabel(Shelf006, "006");
+}
+/** The signs sit on top of the shelf buttons (overlapping children), so tell Swing to repaint them in order. */
+@Override
+public boolean isOptimizedDrawingEnabled() {
+    return false;
+}
+
+private void onShown() {
+    GameState gs = GameState.getInstance();
+    if (gs.getChoice(KEY_WALK, "no").equals("no")) {
+        gs.putChoice(KEY_WALK, "yes");
+        // Sfx.play("creak");        // creaking floor, see the optional step at the end
+        if (GameManager.getDialogue() != null) {
+            GameManager.getDialogue().play(Story.L3_WALK, null);
+        }
+    }
+}
+    private static class GlowBorder implements javax.swing.border.Border {
+    private final Color color;
+    private final int size;
+
+    GlowBorder(Color color, int size) {
+        this.color = color;
+        this.size = size;
     }
 
+    @Override
+    public void paintBorder(java.awt.Component c, java.awt.Graphics g, int x, int y, int w, int h) {
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+        g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                            java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setStroke(new java.awt.BasicStroke(1.5f));
+        for (int i = 0; i < size; i++) {
+            int alpha = 220 * (size - i) / size;   // bright at the edge, fading inward
+            g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha));
+            g2.drawRoundRect(x + i, y + i, w - 1 - 2 * i, h - 1 - 2 * i, 14, 14);
+        }
+        g2.dispose();
+    }
+
+    @Override
+    public java.awt.Insets getBorderInsets(java.awt.Component c) {
+        return new java.awt.Insets(0, 0, 0, 0);   // no insets, so the icon doesn't shift
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+        return false;
+    }
+}
+    /** Sign text: a small SHELF on top, a big bold number below. */
+private void styleShelfLabel(JLabel lbl, String number) {
+    lbl.setText("<html><div align='center'><font size='2'>SHELF</font><br>"
+            + "<font size='5'><b>" + number + "</b></font></div></html>");
+    lbl.setFont(new Font("Consolas", Font.BOLD, 14));
+    lbl.setForeground(new Color(0x1B2A47));       // dark navy ink on the light sign
+    lbl.setHorizontalAlignment(SwingConstants.CENTER);
+    lbl.setVerticalAlignment(SwingConstants.CENTER);
+}
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,19 +119,119 @@ public class Level3 extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        Shelf006 = new javax.swing.JLabel();
+        libShelf_006 = new javax.swing.JButton();
+        Shelf005 = new javax.swing.JLabel();
+        libShelf_005 = new javax.swing.JButton();
+        ShelfBackground = new javax.swing.JLabel();
+
+        setMaximumSize(new java.awt.Dimension(1000, 580));
+        setPreferredSize(new java.awt.Dimension(1000, 580));
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        Shelf006.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Shelf006.setText("Shelf 006");
+        Shelf006.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        add(Shelf006, new org.netbeans.lib.awtextra.AbsoluteConstraints(738, 76, 112, 46));
+
+        libShelf_006.setBackground(new java.awt.Color(0, 0, 0));
+        libShelf_006.setForeground(new java.awt.Color(255, 255, 255));
+        libShelf_006.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_006.png"))); // NOI18N
+        libShelf_006.setToolTipText("");
+        libShelf_006.setBorderPainted(false);
+        libShelf_006.setContentAreaFilled(false);
+        libShelf_006.setFocusPainted(false);
+        libShelf_006.setOpaque(true);
+        libShelf_006.setPreferredSize(new java.awt.Dimension(370, 480));
+        libShelf_006.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                libShelf_006MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                libShelf_006MouseExited(evt);
+            }
+        });
+        libShelf_006.addActionListener(this::libShelf_006ActionPerformed);
+        add(libShelf_006, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 50, 380, 500));
+
+        Shelf005.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        Shelf005.setText("Shelf 005");
+        Shelf005.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        add(Shelf005, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 76, 112, 46));
+
+        libShelf_005.setBackground(new java.awt.Color(0, 0, 0));
+        libShelf_005.setForeground(new java.awt.Color(255, 255, 255));
+        libShelf_005.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/libShelf_005.png"))); // NOI18N
+        libShelf_005.setToolTipText("");
+        libShelf_005.setBorderPainted(false);
+        libShelf_005.setContentAreaFilled(false);
+        libShelf_005.setFocusPainted(false);
+        libShelf_005.setOpaque(true);
+        libShelf_005.setPreferredSize(new java.awt.Dimension(370, 480));
+        libShelf_005.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                libShelf_005MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                libShelf_005MouseExited(evt);
+            }
+        });
+        libShelf_005.addActionListener(this::libShelf_005ActionPerformed);
+        add(libShelf_005, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 50, 380, 500));
+
+        ShelfBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/library_shelf.png"))); // NOI18N
+        add(ShelfBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void libShelf_005ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libShelf_005ActionPerformed
+       libShelf_005.setBackground(new java.awt.Color(0, 255, 255)); 
+       libShelf_005.setForeground(java.awt.Color.BLACK); 
+       GameManager.showCard("level3shelf");
+// TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_005ActionPerformed
+
+    private void libShelf_005MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseExited
+        libShelf_005.setBorderPainted(false);
+        libShelf_005.repaint();
+
+ // TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_005MouseExited
+
+    private void libShelf_005MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseEntered
+       libShelf_005.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
+    libShelf_005.setBorderPainted(true);
+    libShelf_005.repaint();
+
+    }//GEN-LAST:event_libShelf_005MouseEntered
+
+    private void libShelf_006MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_006MouseEntered
+        libShelf_006.setBorder(new GlowBorder(new Color(255, 215, 1), 10));  // neon cyan glow
+        libShelf_006.setBorderPainted(true);
+        libShelf_006.repaint(); 
+        // TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_006MouseEntered
+
+    private void libShelf_006MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_006MouseExited
+        libShelf_006.setBorderPainted(false);
+    libShelf_006.repaint();// TODO add your handling code here:
+    }//GEN-LAST:event_libShelf_006MouseExited
+
+    private void libShelf_006ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libShelf_006ActionPerformed
+        libShelf_006.setBackground(new java.awt.Color(0, 255, 255)); 
+        libShelf_006.setForeground(java.awt.Color.BLACK);
+        ScoreManager.onWrong();                  // the binary code said 005
+    if (GameManager.getDialogue() != null) {
+        GameManager.getDialogue().say("Arnie", Story.L3_WRONG_SHELF);
+    }
+    }//GEN-LAST:event_libShelf_006ActionPerformed
+    /** Resets the whole level. Called every time the card is shown. */
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Shelf005;
+    private javax.swing.JLabel Shelf006;
+    private javax.swing.JLabel ShelfBackground;
+    private javax.swing.JButton libShelf_005;
+    private javax.swing.JButton libShelf_006;
     // End of variables declaration//GEN-END:variables
 }

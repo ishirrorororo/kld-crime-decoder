@@ -3,49 +3,61 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package kldcrimedecoder.ui;
-// ---- imports (add under the package line) ----
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import kldcrimedecoder.levels.*;
+import kldcrimedecoder.engine.LevelManager;
+import kldcrimedecoder.engine.GameManager;
 
 public class MainFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
 
-    /**
-     * Creates new form MainFrame
-     */
-// ---- constructor (replace the generated one's body, keep initComponents first) ----
+    
 public MainFrame() {
     initComponents();
 
     // Window setup: fixed 1000x650, centered
     setSize(1000, 650);
     setLocationRelativeTo(null);
-    getContentPane().setBackground(BG);
 
-    // Top bar styling (temporary: Phase 2 moves this into Theme)
-    Font barFont = new Font("Consolas", Font.PLAIN, 14);
-    pnlTopBar.setBackground(BG);
-    pnlTopBar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 2, 0, AMBER),
-            BorderFactory.createEmptyBorder(0, 12, 0, 12)));
-    lblTimer.setFont(barFont);
-    lblTimer.setForeground(AMBER);
-    lblScore.setFont(barFont);
-    lblScore.setForeground(TEXT);
-    cardPanel.setBackground(BG);
+    // Theme for the frame and top bar
+    getContentPane().setBackground(Theme.BG);
+    Theme.background(pnlTopBar, cardPanel);
+    pnlTopBar.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createMatteBorder(0, 0, 2, 0, Theme.AMBER),
+            javax.swing.BorderFactory.createEmptyBorder(0, 12, 0, 12)));
+    lblTimer.setFont(Theme.MONO);
+    lblTimer.setForeground(Theme.AMBER);
+    lblScore.setFont(Theme.MONO);
+    lblScore.setForeground(Theme.TEXT);
 
-    // Add every screen to the CardLayout. Names are used by showCard(...)
+    // Let GameManager know which window to control
+    GameManager.init(this);
+    // ---- one DialogueBox floats over every screen ----
+    final DialogueBox dialogueBox = new DialogueBox();
+    dialogueBox.setVisible(false);
+    getLayeredPane().add(dialogueBox, javax.swing.JLayeredPane.POPUP_LAYER);
+    GameManager.setDialogue(dialogueBox);
+cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
+    @Override
+    public void componentResized(java.awt.event.ComponentEvent e) {
+        placeDialogue(dialogueBox);
+    }
+});
+
+    // Add every screen to the CardLayout
     addScreen("menu",       new MenuPanel());
     addScreen("level0",     new Level0Prologue());
     addScreen("level1",     new Level1());
     addScreen("level2",     new Level2());
     addScreen("level3",     new Level3());
+    addScreen("level3shelf", new Level3Shelf());
     addScreen("level4",     new Level4());
+    addScreen("suspectBoard", new SuspectBoard());
     addScreen("level5",     new Level5());
     addScreen("level6",     new Level6());
     addScreen("level7",     new Level7());
@@ -56,6 +68,16 @@ public MainFrame() {
     addScreen("badEnding",  new BadEnding());
 
     showCard("menu");
+//    GameManager.startNewGame();   // this line starts the clock
+//    LevelManager.jumpTo(0); // remove in comment if you want to jump to level
+}
+
+private void placeDialogue(DialogueBox box) {
+    java.awt.Rectangle r = javax.swing.SwingUtilities.convertRectangle(
+            cardPanel.getParent(), cardPanel.getBounds(), getLayeredPane());
+    box.setBounds(r.x + (r.width - DialogueBox.BOX_WIDTH) / 2,
+                  r.y + r.height - DialogueBox.BOX_HEIGHT,
+                  DialogueBox.BOX_WIDTH, DialogueBox.BOX_HEIGHT);
 }
 
     /**
@@ -118,13 +140,10 @@ public MainFrame() {
         java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
     }
 
-// ---- fields (put above the constructor, outside the blue code) ----
-private static final Color BG    = new Color(0x0B1220);
-private static final Color AMBER = new Color(0xFFB000);
-private static final Color TEXT  = new Color(0xE8E8E8);
-/** Adds one screen to cardPanel under a name. */
+
+
 private void addScreen(String name, JPanel panel) {
-    panel.setBackground(BG);
+    panel.setBackground(Theme.BG);
     cardPanel.add(panel, name);
 }
 

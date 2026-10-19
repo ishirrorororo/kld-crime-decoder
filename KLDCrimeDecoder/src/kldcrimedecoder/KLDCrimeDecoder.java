@@ -12,14 +12,16 @@ import kldcrimedecoder.ui.MainFrame;
 public class KLDCrimeDecoder {
 
     public static void main(String[] args) {
-        // Nimbus theme colors. These must be set BEFORE setLookAndFeel.
+        
         UIManager.put("control", new Color(0x0B1220));              // panel background
         UIManager.put("nimbusBase", new Color(0x1B2A47));           // button base color
         UIManager.put("nimbusLightBackground", new Color(0x111A2E)); // text fields, lists
         UIManager.put("text", new Color(0xE8E8E8));                 // text color
         UIManager.put("nimbusFocus", new Color(0xFFB000));          // amber focus ring
         UIManager.put("nimbusSelectionBackground", new Color(0xFFB000));
-        UIManager.put("info", new Color(0x1B2A47));                 // tooltips
+        UIManager.put("info", new Color(0x1B2A47)); 
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");// tooltips
 
         // Use Nimbus if it exists, otherwise keep the default look.
         try {
