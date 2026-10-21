@@ -56,6 +56,8 @@ public class Level0Prologue extends javax.swing.JPanel {
         buildNamePrompt();
         buildTestBar();
 
+        setScene("room_bedroom", new Color(0x2A2438));   // show the bedroom right away
+        showNamePrompt(false); 
         // Restart the prologue every time this screen is shown
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -111,7 +113,8 @@ public class Level0Prologue extends javax.swing.JPanel {
     // =====================================================
     private void startScene0B() {
         lblTutorial.setVisible(false);
-        setScene("room_classroom", new Color(0x2E3B2E));
+        setScene("room_classroom", new Color(0x2A2438));
+        showNamePrompt(false);
         showCharacter("neutral", "hair_guy", 330, 90);
         play(Story.PROLOGUE_0B_A, () -> {
             showCharacter("confused", "hair_guy", 330, 90);
