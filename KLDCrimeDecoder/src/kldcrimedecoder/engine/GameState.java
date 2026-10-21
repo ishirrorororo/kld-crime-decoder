@@ -18,17 +18,18 @@ public class GameState {
     /** Key used to store the word the player types for the final cipher. */
     public static final String KEY_FINAL_WORD = "finalKeyWord";
 
+    /** Nickname rules (prologue Scene 0C). */
+    public static final int MAX_NICKNAME = 8;
+    public static final String DEFAULT_NICKNAME = "ARNIE";
+
     private static GameState instance;
 
     private int score;
     private int timeLeftSeconds;
     private int denialMeter;          // hidden until the final screen
     private boolean gameOver;
-    private String nickname = "ARNIE";
+    private String nickname = DEFAULT_NICKNAME;
 
-    public String getNickname() { return nickname; }
-    public void setNickname(String name) { nickname = name; }
-    
     private final List<String> inventory = new ArrayList<>();
     private final Map<String, String> playerChoices = new HashMap<>();
 
@@ -49,9 +50,21 @@ public class GameState {
         timeLeftSeconds = START_SECONDS;
         denialMeter = 0;
         gameOver = false;
-        nickname = "ARNIE";
+        nickname = DEFAULT_NICKNAME;
         inventory.clear();
         playerChoices.clear();
+    }
+
+    // ---- nickname ----
+    public String getNickname() { return nickname; }
+
+    /** Letters only, max 8 letters, upper-cased. Blank or null -> default ARNIE. */
+    public void setNickname(String name) {
+        String cleaned = (name == null) ? "" : name.replaceAll("[^A-Za-z]", "").toUpperCase();
+        if (cleaned.length() > MAX_NICKNAME) {
+            cleaned = cleaned.substring(0, MAX_NICKNAME);
+        }
+        nickname = cleaned.isEmpty() ? DEFAULT_NICKNAME : cleaned;
     }
 
     // ---- score ----
@@ -86,6 +99,16 @@ public class GameState {
             inventory.add(item);
         }
     }
+
+    /** Overload: add several items at once, e.g. addItem(PHONE, KEY). */
+    public void addItem(String... items) {
+        for (String item : items) {
+            addItem(item);
+        }
+    }
+
+    /** Removes an item (e.g. a key after it is used). Returns true if it was there. */
+    public boolean removeItem(String item) { return inventory.remove(item); }
 
     public boolean hasItem(String item) { return inventory.contains(item); }
 

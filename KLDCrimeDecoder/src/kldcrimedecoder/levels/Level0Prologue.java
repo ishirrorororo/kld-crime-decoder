@@ -2,18 +2,13 @@ package kldcrimedecoder.levels;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import javax.swing.ImageIcon;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -24,87 +19,133 @@ import kldcrimedecoder.engine.*;
 
 /**
  * Prologue: 0A bedroom (click to collect), 0B classroom, 0C name prompt.
- * Follows the group script, version 3.
+ * The components are made in the Design tab (see Level0Prologue.form).
  */
-public class Level0Prologue extends javax.swing.JPanel {
+public class Level0Prologue extends ScenePanel {
 
-    private static final String IMG_PATH = "/kldcrimedecoder/images/";
+    private static final Color BEDROOM_BG = new Color(0x2A2438);
+    private static final Color CLASSROOM_BG = new Color(0x2E3B2E);
+    private static final Color PHONE_BG = new Color(0x10151F);
+    private static final int DANEL_X = 275, DANEL_Y = 130;     // center, bottom of screen
+    private static final int MAX_NAME = GameState.MAX_NICKNAME;
+    private static final int TOTAL_ITEMS = 3;                  // phone, photo, bag
 
-    private Image background;
-    private Color fallbackColor = Color.BLACK;
+    private final JButton[] hotspots;           // phone, photo, bag (made in the Design tab)
     private int collectedCount;
-    private boolean busy;                       // true while a collect dialogue plays
-
-    // character: emotion picture on the bottom, hair on top
-    private Image charBody, charHair;
-    private int charX, charY;
-
-    // Scene 0A
-    private JLabel lblTutorial;
-    private JButton btnPhone, btnPhoto, btnBag;
-
-    // Scene 0C
-    private JLabel lblNamePrompt;
-    private JTextField txtNickname;
-    private JButton btnUnlock;
+    private boolean busy;                       // true while any dialogue plays
 
     public Level0Prologue() {
-        setLayout(null);                                   // exact positions
-        setPreferredSize(new Dimension(1000, 580));
+        initComponents();
+        hotspots = new JButton[]{btnPhone, btnPhoto, btnBag};
+        styleComponents();
 
-        buildHotspots();
-        buildNamePrompt();
-        buildTestBar();
+        btnPhone.addActionListener(e -> collectPhone());
+        btnPhoto.addActionListener(e -> collect(btnPhoto, Story.PROLOGUE_PHOTO, Story.ITEM_TORN_PHOTO, null));
+        btnBag.addActionListener(e -> collect(btnBag, null, null, null));   // collected silently
 
-        setScene("room_bedroom", new Color(0x2A2438));   // show the bedroom right away
-        showNamePrompt(false); 
+        limitNickname();
+        txtNickname.addActionListener(e -> unlockPhone());   // Enter also unlocks
+        btnUnlock.addActionListener(e -> unlockPhone());
+
+        showNamePrompt(false);
+        setScene("room_bedroom", BEDROOM_BG);               // visible even before the first show event
+
         // Restart the prologue every time this screen is shown
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
-                startScene0A();
+                startScene();
             }
         });
+    }
+
+    /** Fonts and colors (positions and texts come from the Design tab). */
+    private void styleComponents() {
+        lblTutorial.setText(Story.PROLOGUE_TUTORIAL);
+        lblTutorial.setFont(new Font("Consolas", Font.BOLD, 16));
+        lblTutorial.setForeground(new Color(255, 230, 120));
+        lblTutorial.setHorizontalAlignment(SwingConstants.CENTER);
+
+        lblNamePrompt.setText("");
+        lblNamePrompt.setFont(new Font("Consolas", Font.BOLD, 18));
+        lblNamePrompt.setForeground(Color.WHITE);
+        lblNamePrompt.setBackground(PHONE_BG);
+        lblNamePrompt.setOpaque(true);
+        lblNamePrompt.setHorizontalAlignment(SwingConstants.CENTER);
+
+        txtNickname.setText("");
+        txtNickname.setFont(new Font("Consolas", Font.BOLD, 20));
+        txtNickname.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (JButton b : hotspots) {
+            makeInvisibleHotspot(b);
+        }
     }
 
     // =====================================================
     // SCENE 0A: Arnie's bedroom (click to collect)
     // =====================================================
-    private void startScene0A() {
+    @Override
+    public void startScene() {                      // overrides ScenePanel.startScene()
         collectedCount = 0;
-        busy = false;
         hideCharacter();
-        setScene("room_bedroom", new Color(0x2A2438));
-        for (JButton b : new JButton[]{btnPhone, btnPhoto, btnBag}) {
+        hideOverlay();
+        setScene("room_bedroom", BEDROOM_BG);
+        for (JButton b : hotspots) {
             b.setVisible(true);
         }
         lblTutorial.setVisible(true);
         showNamePrompt(false);
-        play(Story.PROLOGUE_0A_INTRO, null);
+        busy = true;                                // block clicks while the intro plays
+        play(Story.PROLOGUE_0A_INTRO, () -> busy = false);
     }
 
-    /** Collects one item. lines can be null (collected silently). */
-    private void collect(JButton button, String[][] lines, String item) {
+    /** Collects one item. lines can be null (silent). overlayName can be null. */
+    private void collect(JButton button, String[][] lines, String item, String overlayName) {
         if (busy) {
-            return;                              // wait for the dialogue to finish
+            return;                                 // wait for the dialogue to finish
         }
         busy = true;
-        button.setVisible(false);                // collected, so it disappears
+        button.setVisible(false);                   // collected, so it disappears
         if (item != null) {
             GameState.getInstance().addItem(item);
         }
         collectedCount++;
+        if (overlayName != null) {
+            showOverlay(overlayName);               // e.g. the text from Alli's mom
+        }
 
-        Runnable afterLines = () -> {
-            busy = false;
-            if (collectedCount == 3) {
-                play(Story.PROLOGUE_0A_END, this::startScene0B);
-            }
-        };
+        Runnable afterLines = this::afterCollect;
         if (lines == null) {
             afterLines.run();
         } else {
             play(lines, afterLines);
+        }
+    }
+
+    /** Phone: lock screen shows Alli's mom's text, then the opened thread shows Arnie's thought. */
+    private void collectPhone() {
+        if (busy) {
+            return;
+        }
+        busy = true;
+        btnPhone.setVisible(false);
+        GameState.getInstance().addItem(Story.ITEM_ARNIE_PHONE);
+        collectedCount++;
+        showOverlay("arnie_phone");                                   // lock screen: text from Alli's mom
+        play(new String[][]{Story.PROLOGUE_PHONE[0]}, () -> {
+            showOverlay("arnie_msgs");                                // thread opened: Arnie thinks
+            play(new String[][]{Story.PROLOGUE_PHONE[1]}, this::afterCollect);
+        });
+    }
+
+    /** Runs after any item's dialogue; starts Scene 0B when all three are collected. */
+    private void afterCollect() {
+        hideOverlay();
+        busy = false;
+        if (collectedCount == TOTAL_ITEMS) {
+            busy = true;                            // no clicks during the ending lines
+            play(Story.PROLOGUE_0A_END, this::startScene0B);
         }
     }
 
@@ -113,29 +154,37 @@ public class Level0Prologue extends javax.swing.JPanel {
     // =====================================================
     private void startScene0B() {
         lblTutorial.setVisible(false);
-        setScene("room_classroom", new Color(0x2A2438));
-        showNamePrompt(false);
-        showCharacter("neutral", "hair_guy", 330, 90);
+        setScene("room_classroom", CLASSROOM_BG);
+        showDanel("neutral");
         play(Story.PROLOGUE_0B_A, () -> {
-            showCharacter("confused", "hair_guy", 330, 90);
+            showDanel("confused");
             play(Story.PROLOGUE_0B_B, () -> {
-                showCharacter("neutral", "hair_guy", 330, 90);
+                showDanel("neutral");
                 play(Story.PROLOGUE_0B_C, () -> {
                     hideCharacter();
-                    GameState.getInstance().addItem(Story.ITEM_ALLI_PHONE);
-                    GameState.getInstance().addItem(Story.ITEM_BRASS_KEY);
+                    GameState.getInstance().addItem(Story.ITEM_ALLI_PHONE, Story.ITEM_BRASS_KEY);
                     startScene0C();
                 });
             });
         });
     }
 
+    /** Uses sir_danel_<emotion>.png if it exists, otherwise the single sir_danel.png. */
+    private void showDanel(String emotion) {
+        String file = "sir_danel_" + emotion;
+        if (getClass().getResource("/kldcrimedecoder/images/" + file + ".png") == null) {
+            file = "sir_danel";
+        }
+        showCharacter(file, DANEL_X, DANEL_Y);
+    }
+
     // =====================================================
     // SCENE 0C: Name prompt (lock screen)
     // =====================================================
     private void startScene0C() {
+        busy = false;
         hideCharacter();
-        setScene("ui_phone", new Color(0x10151F));
+        setScene("alli_lockscreen", PHONE_BG, true);
         lblNamePrompt.setText(Story.PROLOGUE_0C_PROMPT);
         txtNickname.setText("");
         showNamePrompt(true);
@@ -143,143 +192,48 @@ public class Level0Prologue extends javax.swing.JPanel {
     }
 
     private void unlockPhone() {
-        String name = txtNickname.getText().trim().toUpperCase();
-        if (name.isEmpty()) {
-            name = "ARNIE";                                  // default
+        if (busy) {
+            return;                                          // ignore double Enter / double click
         }
-        GameState.getInstance().setNickname(name);           // stored for Level 10
+        busy = true;
+        GameState.getInstance().setNickname(txtNickname.getText().trim()); // GameState cleans it; blank -> ARNIE
         showNamePrompt(false);
+        setScene("alli_phone", PHONE_BG, true);              // the phone opens
         play(Story.PROLOGUE_0C_OPEN, LevelManager::nextLevel);   // go to Level 1
     }
 
     // =====================================================
     // Helpers
     // =====================================================
-    /** Plays dialogue. If there is no DialogueBox (test), just continues. */
-    private void play(String[][] lines, Runnable after) {
-        if (GameManager.getDialogue() != null) {
-            GameManager.getDialogue().play(lines, after);
-        } else if (after != null) {
-            after.run();
-        }
-    }
-
-    private Image loadImage(String name) {
-        java.net.URL url = getClass().getResource(IMG_PATH + name + ".png");
-        return (url == null) ? null : new ImageIcon(url).getImage();
-    }
-
-    private void setScene(String imageName, Color fallback) {
-        background = loadImage(imageName);
-        fallbackColor = fallback;
-        repaint();
-    }
-
-    private void showCharacter(String emotion, String hair, int x, int y) {
-        charBody = loadImage(emotion);
-        charHair = loadImage(hair);
-        charX = x;
-        charY = y;
-        repaint();
-    }
-
-    private void hideCharacter() {
-        charBody = null;
-        charHair = null;
-        repaint();
-    }
-
-    /** Draws a character image scaled to a fixed height. */
-    private void drawChar(Graphics g, Image img) {
-        if (img == null || img.getHeight(this) <= 0) {
-            return;
-        }
-        int h = 450;                                         // change to resize
-        int w = img.getWidth(this) * h / img.getHeight(this);
-        g.drawImage(img, charX, charY, w, h, this);
-    }
-
     private void showNamePrompt(boolean show) {
         lblNamePrompt.setVisible(show);
         txtNickname.setVisible(show);
         btnUnlock.setVisible(show);
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (background != null) {
-            g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
-        } else {
-            g.setColor(fallbackColor);          // shown until the real image exists
-            g.fillRect(0, 0, getWidth(), getHeight());
-        }
-        drawChar(g, charBody);                   // emotion first (bottom)
-        drawChar(g, charHair);                   // hair on top
-    }
-
-    // =====================================================
-    // Buttons and widgets
-    // =====================================================
-    private void buildHotspots() {
-        lblTutorial = new JLabel(Story.PROLOGUE_TUTORIAL, SwingConstants.CENTER);
-        lblTutorial.setFont(new Font("Consolas", Font.BOLD, 16));
-        lblTutorial.setForeground(new Color(255, 230, 120));
-        lblTutorial.setBounds(150, 50, 700, 30);
-        add(lblTutorial);
-
-        btnPhone = makeHotspot("Phone", 120, 160);
-        btnPhoto = makeHotspot("Torn photo", 430, 160);
-        btnBag   = makeHotspot("Bag", 760, 160);
-
-        // phone: Alli's mom's text. photo: the torn photo. bag: collected silently.
-        btnPhone.addActionListener(e -> collect(btnPhone, Story.PROLOGUE_PHONE, Story.ITEM_ARNIE_PHONE));
-        btnPhoto.addActionListener(e -> collect(btnPhoto, Story.PROLOGUE_PHOTO, Story.ITEM_TORN_PHOTO));
-        btnBag.addActionListener(e -> collect(btnBag, null, null));
-
-        // Use pictures if the files exist (change the names to match yours)
-        setImageButton(btnPhone, "item_phone", 120, 120);
-        setImageButton(btnPhoto, "item_photo", 120, 120);
-        setImageButton(btnBag,   "item_bag",   160, 160);
-    }
-
-    private JButton makeHotspot(String text, int x, int y) {
-        JButton b = new JButton(text);
-        b.setBounds(x, y, 150, 70);
+    /** Makes a button see-through, with a yellow outline when the mouse is over it. */
+    private void makeInvisibleHotspot(JButton b) {
+        b.setText("");
+        b.setContentAreaFilled(false);
+        b.setBorderPainted(false);
         b.setFocusPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        add(b);
-        return b;
+        b.setBorder(BorderFactory.createLineBorder(new Color(255, 230, 120), 2));
+        b.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                b.setBorderPainted(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                b.setBorderPainted(false);
+            }
+        });
     }
 
-    /** Swaps the plain button for a picture, if the image file exists. */
-    private void setImageButton(JButton b, String imageName, int w, int h) {
-        Image img = loadImage(imageName);
-        if (img == null) {
-            return;                              // keeps the text if the image is missing
-        }
-        b.setIcon(new ImageIcon(img.getScaledInstance(w, h, Image.SCALE_SMOOTH)));
-        b.setText("");
-        b.setBorderPainted(false);
-        b.setContentAreaFilled(false);
-        b.setFocusPainted(false);
-        b.setSize(w, h);
-    }
-
-    private void buildNamePrompt() {
-        lblNamePrompt = new JLabel("", SwingConstants.CENTER);
-        lblNamePrompt.setFont(new Font("Consolas", Font.BOLD, 20));
-        lblNamePrompt.setForeground(Color.WHITE);
-        lblNamePrompt.setBounds(250, 140, 500, 36);
-        add(lblNamePrompt);
-
-        txtNickname = new JTextField();                      // empty: the player types
-        txtNickname.setFont(new Font("Consolas", Font.BOLD, 22));
-        txtNickname.setHorizontalAlignment(SwingConstants.CENTER);
-        txtNickname.setBounds(350, 190, 300, 42);
-        txtNickname.addActionListener(e -> unlockPhone());   // Enter key also unlocks
-
-        // up to 8 characters
+    /** Nickname: letters only, up to 8 (script). */
+    private void limitNickname() {
         ((AbstractDocument) txtNickname.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
@@ -290,47 +244,70 @@ public class Level0Prologue extends javax.swing.JPanel {
             @Override
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                     throws BadLocationException {
-                int newLength = fb.getDocument().getLength() - length + (text == null ? 0 : text.length());
-                if (newLength <= 8) {
-                    super.replace(fb, offset, length, text, attrs);
+                String t = (text == null) ? "" : text;
+                int newLength = fb.getDocument().getLength() - length + t.length();
+                if (t.matches("[A-Za-z]*") && newLength <= MAX_NAME) {
+                    super.replace(fb, offset, length, t, attrs);
                 }
             }
         });
-        add(txtNickname);
-
-        btnUnlock = new JButton("Unlock");
-        btnUnlock.setBounds(420, 245, 160, 40);
-        btnUnlock.addActionListener(e -> unlockPhone());
-        add(btnUnlock);
     }
 
     // ===== TEMPORARY TEST CODE (Joel's): DELETE IN PHASE 5 =====
-    private void buildTestBar() {
-        JPanel bar = new JPanel(new FlowLayout());
-        bar.setOpaque(false);
-        bar.setBounds(0, 0, 1000, 40);
-        JButton bOk    = new JButton("Correct");
-        JButton bWrong = new JButton("Wrong");
-        JButton bHint  = new JButton("Hint");
-        JButton bDeny  = new JButton("Denial +60");
-        JButton bNext  = new JButton("Next level");
-        JButton bEnd   = new JButton("Finish game");
-        JButton bDrain = new JButton("Drain 880s");
-        bOk.addActionListener(e -> ScoreManager.onCorrect());
-        bWrong.addActionListener(e -> ScoreManager.onWrong());
-        bHint.addActionListener(e -> ScoreManager.onHint());
-        bDeny.addActionListener(e -> GameState.getInstance().addDenial(60));
-        bNext.addActionListener(e -> LevelManager.nextLevel());
-        bEnd.addActionListener(e -> GameManager.finishGame());
-        bDrain.addActionListener(e -> TimerManager.drain(880));
-        bar.add(bOk);
-        bar.add(bWrong);
-        bar.add(bHint);
-        bar.add(bDeny);
-        bar.add(bNext);
-        bar.add(bEnd);
-        bar.add(bDrain);
-        add(bar);
-    }
+   
     // ===== END TEMPORARY TEST CODE =====
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        lblTutorial = new javax.swing.JLabel();
+        btnPhone = new javax.swing.JButton();
+        btnPhoto = new javax.swing.JButton();
+        btnBag = new javax.swing.JButton();
+        lblNamePrompt = new javax.swing.JLabel();
+        txtNickname = new javax.swing.JTextField();
+        btnUnlock = new javax.swing.JButton();
+
+        setPreferredSize(new java.awt.Dimension(1000, 580));
+        setLayout(null);
+
+        lblTutorial.setText("Tutorial");
+        add(lblTutorial);
+        lblTutorial.setBounds(150, 50, 700, 30);
+
+        btnPhone.setText("Phone");
+        add(btnPhone);
+        btnPhone.setBounds(745, 303, 100, 48);
+
+        btnPhoto.setText("Photo");
+        add(btnPhoto);
+        btnPhoto.setBounds(808, 203, 36, 55);
+
+        btnBag.setText("Bag");
+        add(btnBag);
+        btnBag.setBounds(805, 394, 135, 150);
+
+        lblNamePrompt.setText("Prompt");
+        add(lblNamePrompt);
+        lblNamePrompt.setBounds(210, 48, 580, 36);
+
+        txtNickname.setText("Nickname");
+        add(txtNickname);
+        txtNickname.setBounds(332, 258, 258, 32);
+
+        btnUnlock.setText("Unlock");
+        add(btnUnlock);
+        btnUnlock.setBounds(420, 296, 160, 28);
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBag;
+    private javax.swing.JButton btnPhone;
+    private javax.swing.JButton btnPhoto;
+    private javax.swing.JButton btnUnlock;
+    private javax.swing.JLabel lblNamePrompt;
+    private javax.swing.JLabel lblTutorial;
+    private javax.swing.JTextField txtNickname;
+    // End of variables declaration//GEN-END:variables
 }
