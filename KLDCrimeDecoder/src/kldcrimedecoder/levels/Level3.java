@@ -191,7 +191,8 @@ private void styleShelfLabel(JLabel lbl, String number) {
     }//GEN-LAST:event_libShelf_005ActionPerformed
 
     private void libShelf_005MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseExited
-        libShelf_005.setBorderPainted(false);
+        libShelf_005.setBorderPainted(
+                false);
         libShelf_005.repaint();
 
  // TODO add your handling code here:

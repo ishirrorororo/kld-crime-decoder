@@ -24,7 +24,11 @@ public class GameState {
     private int timeLeftSeconds;
     private int denialMeter;          // hidden until the final screen
     private boolean gameOver;
+    private String nickname = "ARNIE";
 
+    public String getNickname() { return nickname; }
+    public void setNickname(String name) { nickname = name; }
+    
     private final List<String> inventory = new ArrayList<>();
     private final Map<String, String> playerChoices = new HashMap<>();
 
@@ -45,6 +49,7 @@ public class GameState {
         timeLeftSeconds = START_SECONDS;
         denialMeter = 0;
         gameOver = false;
+        nickname = "ARNIE";
         inventory.clear();
         playerChoices.clear();
     }

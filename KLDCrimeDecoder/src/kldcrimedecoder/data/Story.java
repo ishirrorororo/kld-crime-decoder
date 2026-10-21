@@ -31,15 +31,59 @@ public class Story {
         "Old Storage Room", // 9
         "The Mirror Room" // 10
     };
-
+    // Alli: LEVELS PROLOGUE TO 2
     // ============ LEVEL 0: PROLOGUE (draft, refined in Phase 5) ============
-    public static final String[][] PROLOGUE = {
-        {"Mom", "Arnie, breakfast! Don't be late again. Alli's mom already texted me twice."},
-        {"Arnie", "Second place again last week. Fine. I'm fine."},
-        {"Prof. Null", "Attendance. Alli? ... Alli?"},
-        {"Arnie", "She's never absent. Something is wrong."},
-        {"Arnie", "Wait. Why is Alli's phone in my bag?"},
-        {"Arnie", "I don't remember getting here."} // foreshadowing gap
+        // ============ PROLOGUE (Allison) ============
+    public static final String ITEM_ARNIE_PHONE = "Arnie's phone";
+    public static final String ITEM_TORN_PHOTO  = "Torn photo";
+    public static final String ITEM_ALLI_PHONE  = "Alli's phone";
+    public static final String ITEM_BRASS_KEY   = "Brass key";
+
+    // ---- Scene 0A: Arnie's bedroom ----
+    public static final String PROLOGUE_TUTORIAL
+            = "Click the phone, the torn photo, and the bag to collect them.";
+
+    public static final String[][] PROLOGUE_0A_INTRO = {
+        {"", "7:02 AM. A phone buzzes on the desk."}
+    };
+    public static final String[][] PROLOGUE_PHONE = {
+        {"Text from Alli's mom", "Arnie, did Alli stay at your place last night? She never came home."},
+        {"Arnie (thinking)", "What? She left before me. Her last text said see you tomorrow. Alli always keeps her word."}
+    };
+    public static final String[][] PROLOGUE_PHOTO = {
+        {"", "The two of you, ripped down the middle. Only Alli's half is left."},
+        {"Arnie (thinking)", "{slow} Alli... where are you?"}
+    };
+    // The bag has no lines in the script, so it is collected silently.
+    public static final String[][] PROLOGUE_0A_END = {
+        {"Arnie (thinking)", "I'll ask around at school."}
+    };
+
+    // ---- Scene 0B: Classroom ----
+    // Prof. Danel [neutral]
+    public static final String[][] PROLOGUE_0B_A = {
+        {"Prof. Danel", "Arnie."},
+        {"Arnie", "Present."},
+        {"Prof. Danel", "Alli? ...Alli?"}
+    };
+    // Prof. Danel [confused]
+    public static final String[][] PROLOGUE_0B_B = {
+        {"Prof. Danel", "Strange. She has never missed a class. Not once."},
+        {"Arnie (thinking)", "Never once. Even her attendance record outranks me."}
+    };
+    // Prof. Danel [neutral] again
+    public static final String[][] PROLOGUE_0B_C = {
+        {"Prof. Danel", "It's finals week, so the building stays open late. Take a fifteen-minute break. When the bell rings, we start."},
+        {"", "You reach into your bag for a pen. Your fingers close around two things that aren't yours: a phone, and a small brass key with a paper tag, the number too faded to read."},
+        {"Arnie (thinking)", "{slow} Alli's phone. In my bag. I don't remember putting it there."},
+        {"Arnie (thinking)", "And a key. Probably a locker key."},
+        {"", "The brass key is added to your inventory."}
+    };
+
+    // ---- Scene 0C: Name prompt ----
+    public static final String PROLOGUE_0C_PROMPT = "Lock screen: What does Alli call you?";
+    public static final String[][] PROLOGUE_0C_OPEN = {
+        {"", "The phone opens. An unread message from \"Amie\"."}
     };
     // =====================================================================
     // JOEL: LEVELS 3 TO 5
