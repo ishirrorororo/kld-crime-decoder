@@ -29,6 +29,7 @@ public class Level0Prologue extends ScenePanel {
     private static final int DANEL_X = 275, DANEL_Y = 130;     // center, bottom of screen
     private static final int MAX_NAME = GameState.MAX_NICKNAME;
     private static final int TOTAL_ITEMS = 3;                  // phone, photo, bag
+    private static final String MOM_TAG = "Alli's Mom";        // name tag while the phone is shown
 
     private final JButton[] hotspots;           // phone, photo, bag (made in the Design tab)
     private int collectedCount;
@@ -62,9 +63,13 @@ public class Level0Prologue extends ScenePanel {
     /** Fonts and colors (positions and texts come from the Design tab). */
     private void styleComponents() {
         lblTutorial.setText(Story.PROLOGUE_TUTORIAL);
-        lblTutorial.setFont(new Font("Consolas", Font.BOLD, 16));
+        lblTutorial.setFont(new Font("Consolas", Font.BOLD, 15));
         lblTutorial.setForeground(new Color(255, 230, 120));
+        lblTutorial.setBackground(new Color(0x0A0F1A));         // dark strip so it is readable on any picture
+        lblTutorial.setOpaque(true);
+        lblTutorial.setBorder(BorderFactory.createLineBorder(new Color(255, 200, 60), 2));
         lblTutorial.setHorizontalAlignment(SwingConstants.CENTER);
+        lblTutorial.setBounds(170, 10, 660, 30);                // top strip, above the phone picture
 
         lblNamePrompt.setText("");
         lblNamePrompt.setFont(new Font("Consolas", Font.BOLD, 18));
@@ -122,8 +127,12 @@ public class Level0Prologue extends ScenePanel {
             play(lines, afterLines);
         }
     }
-
-    /** Phone: lock screen shows Alli's mom's text, then the opened thread shows Arnie's thought. */
+    /**
+     * Phone sequence:
+     * 1) lock screen picture, the name tag says "Alli's Mom", the text bar stays empty;
+     * 2) after a click, the opened thread appears with the message drawn on the phone,
+     *    and Arnie's thought plays in the text bar.
+     */
     private void collectPhone() {
         if (busy) {
             return;
@@ -132,9 +141,10 @@ public class Level0Prologue extends ScenePanel {
         btnPhone.setVisible(false);
         GameState.getInstance().addItem(Story.ITEM_ARNIE_PHONE);
         collectedCount++;
-        showOverlay("arnie_phone");                                   // lock screen: text from Alli's mom
-        play(new String[][]{Story.PROLOGUE_PHONE[0]}, () -> {
-            showOverlay("arnie_msgs");                                // thread opened: Arnie thinks
+        showOverlay("arnie_phone");                                   // lock screen
+        play(new String[][]{{MOM_TAG, " "}}, () -> {                  // click to continue
+            showOverlay("arnie_msgs");                                // opened thread
+            showOverlayText(Story.PROLOGUE_PHONE[0][1]);              // mom's message on the phone
             play(new String[][]{Story.PROLOGUE_PHONE[1]}, this::afterCollect);
         });
     }
