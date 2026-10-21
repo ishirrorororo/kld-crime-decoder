@@ -1,4 +1,5 @@
 package kldcrimedecoder.engine;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  * Handles points. Wrong answers and hints also drain time
@@ -17,21 +18,30 @@ public class ScoreManager {
 
     /** Call when the player answers a puzzle correctly. */
     public static void onCorrect() {
+        Sfx.play("correct");
         int seconds = LevelManager.getSecondsOnLevel();
         int bonus = MAX_SPEED_BONUS * Math.max(0, BONUS_WINDOW_SEC - seconds) / BONUS_WINDOW_SEC;
+        
         GameState.getInstance().addScore(POINTS_CORRECT + bonus);
         GameManager.refreshTopBar();
+        
     }
 
     /** Call when the player answers wrong. */
     public static void onWrong() {
+        Sfx.play("wrong");
         GameState.getInstance().addScore(WRONG_POINTS);
         TimerManager.drain(WRONG_SECONDS);   // also refreshes the top bar
     }
 
     /** Call when the player uses a hint. */
+    public static void onHint(int number) {
+    GameState.getInstance().addScore(HINT_POINTS);
+    TimerManager.drain(number <= 1 ? 15 : 30);
+    Sfx.play("hint");
+}
+
     public static void onHint() {
-        GameState.getInstance().addScore(HINT_POINTS);
-        TimerManager.drain(HINT_SECONDS);
+        onHint(1);
     }
 }

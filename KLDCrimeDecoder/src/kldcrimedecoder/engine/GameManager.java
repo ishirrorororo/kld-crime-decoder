@@ -2,6 +2,9 @@ package kldcrimedecoder.engine;
 
 import kldcrimedecoder.ui.MainFrame;
 import kldcrimedecoder.ui.DialogueBox;
+import java.util.HashMap;
+import java.util.Map;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  * The "boss" class. Starts and ends the game, switches screens,
@@ -9,6 +12,17 @@ import kldcrimedecoder.ui.DialogueBox;
  * form can call it, for example GameManager.showCard("level2").
  */
 public class GameManager {
+    /** Looping sound for each screen: card name -> file name. */
+private static final Map<String, String> AMBIENCE = new HashMap<>();
+static {
+    AMBIENCE.put("menu", "menu_ticking");
+    AMBIENCE.put("level2", "keyboard");
+    AMBIENCE.put("level7", "keyboard_clock");
+    AMBIENCE.put("suspectBoard", "chatter");
+    AMBIENCE.put("level8", "hum");
+    AMBIENCE.put("level9", "drip");
+    AMBIENCE.put("level10", "tap");
+}
 
     private static MainFrame mainFrame;
 
@@ -31,15 +45,18 @@ public static DialogueBox getDialogue() {
     /** Switches the CardLayout to the screen with this name. */
     public static void showCard(String name) {
     if (dialogue != null) {
-        dialogue.hideBox();      // a new screen starts with no dialogue open
+        dialogue.hideBox();
     }
+    Sfx.ambience(AMBIENCE.get(name));        // no entry = silence
     if (mainFrame != null) {
         mainFrame.showCard(name);
     }
 }
 
+
     /** Called by the Start button. Resets everything and begins level 0. */
     public static void startNewGame() {
+        Sfx.clock(0);
         GameState.getInstance().reset();
         LevelManager.reset();
         refreshTopBar();
@@ -68,9 +85,10 @@ public static DialogueBox getDialogue() {
         }
         gs.setGameOver(true);
         TimerManager.stop();
-
+        Sfx.clock(0);
         if (isBadEnding()) {
             showCard("badEnding");
+            Sfx.play("bell");                        // the bell ends the break
         } else {
             showCard("goodEnding");
         }
@@ -84,7 +102,8 @@ public static DialogueBox getDialogue() {
 
     /** Used by the ending screens to return to the menu. */
     public static void backToMenu() {
-        TimerManager.stop();
-        showCard("menu");
-    }
+    TimerManager.stop();
+    Sfx.clock(0);                      // no clock tick on the menu
+    showCard("menu");
+    }   
 }

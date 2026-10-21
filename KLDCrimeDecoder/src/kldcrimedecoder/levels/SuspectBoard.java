@@ -30,6 +30,7 @@ import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.TimerManager;
 import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.ui.Theme;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  *
@@ -198,8 +199,8 @@ private void startLevel() {
     pnlPhone.setVisible(false);
     buildBoard();
 
-    // Sfx.play("footsteps");   // see the optional Sfx step from Level 3
-    // Sfx.play("chatter");
+     Sfx.play("footsteps");   // see the optional Sfx step from Level 3
+    
     speak(withTime(Story.BOARD_INTRO), () -> {
         boardActive = true;
         setFeedback(Story.BOARD_TAP);
@@ -281,9 +282,11 @@ private void styleCard(JLabel card, boolean read, boolean hover) {
 
 /** Tap a card: show its clue on the phone. */
 private void openClue(int index) {
+    Sfx.play("phone_open");
     if (!boardActive) {
         return;                                   // the intro or the choice is still going
     }
+    
     String[] row = Story.BOARD_CARDS[index];
     lblPhoneApp.setText(row[2]);
     lblPhoneMeta.setText(row[3]);

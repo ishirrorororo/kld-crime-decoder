@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import kldcrimedecoder.ui.Sfx;
 /**
  *
  * @author Joel
@@ -61,7 +62,7 @@ private void onShown() {
     GameState gs = GameState.getInstance();
     if (gs.getChoice(KEY_WALK, "no").equals("no")) {
         gs.putChoice(KEY_WALK, "yes");
-        // Sfx.play("creak");        // creaking floor, see the optional step at the end
+        Sfx.play("creak");        // creaking floor, see the optional step at the end
         if (GameManager.getDialogue() != null) {
             GameManager.getDialogue().play(Story.L3_WALK, null);
         }

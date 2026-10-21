@@ -67,7 +67,7 @@ cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
     addScreen("goodEnding", new GoodEnding());
     addScreen("badEnding",  new BadEnding());
 
-    showCard("menu");
+    GameManager.showCard("menu");      // plays the menu sound first
 //    GameManager.startNewGame();   // this line starts the clock
 //    LevelManager.jumpTo(0); // remove in comment if you want to jump to level
 }

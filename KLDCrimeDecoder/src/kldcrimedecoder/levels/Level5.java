@@ -152,6 +152,8 @@ public class Level5 extends javax.swing.JPanel {
         btnContinue.addActionListener(this::btnContinueActionPerformed);
         add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 340, 100, 34));
         add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 334, 690, 54));
+
+        lblBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_classroom.png"))); // NOI18N
         add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
     }// </editor-fold>//GEN-END:initComponents
 

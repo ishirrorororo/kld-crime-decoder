@@ -1,6 +1,7 @@
 package kldcrimedecoder.engine;
 
 import javax.swing.Timer;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  * Countdown clock. A javax.swing.Timer ticks once per second on the EDT,
@@ -36,7 +37,15 @@ public class TimerManager {
         if (gs.isGameOver()) {
             return;
         }
-        gs.setTimeLeftSeconds(gs.getTimeLeftSeconds() - seconds);
+        int before = gs.getTimeLeftSeconds();
+        gs.setTimeLeftSeconds(before - seconds);
+        int left = gs.getTimeLeftSeconds();
+        if (before > 300 && left <= 300) {
+            Sfx.clock(0.3);                          // under 5:00: the clock starts ticking
+        }
+        if (before > 120 && left <= 120) {
+            Sfx.clock(0.7);                          // under 2:00: louder
+        }
         GameManager.refreshTopBar();
 
         if (gs.getTimeLeftSeconds() <= 0) {

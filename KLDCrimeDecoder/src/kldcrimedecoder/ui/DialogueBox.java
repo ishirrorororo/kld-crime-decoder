@@ -210,7 +210,7 @@ private void showLine(String speaker, String text) {
     boolean slow = false;
     boolean dim = false;
     boolean again = true;
-    while (again) {                              // read the tags at the start
+        while (again) {                              // read the tags at the start
         again = false;
         if (fullText.startsWith("{slow}")) {
             slow = true;
@@ -220,6 +220,14 @@ private void showLine(String speaker, String text) {
             dim = true;
             again = true;
             fullText = fullText.substring(5).trim();
+        } else if (fullText.startsWith("{flicker}")) {
+            Sfx.play("glitch");
+            again = true;
+            fullText = fullText.substring(9).trim();
+        } else if (fullText.startsWith("{shake}")) {
+            Sfx.play("rumble");
+            again = true;
+            fullText = fullText.substring(7).trim();
         }
     }
     typeTimer.setDelay(slow ? 55 : 20);

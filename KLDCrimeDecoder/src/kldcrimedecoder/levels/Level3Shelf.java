@@ -152,6 +152,20 @@ journalPop.setVisible(false);
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        pnlPaper1 = new javax.swing.JPanel();
+        lblPaperPrompt1 = new javax.swing.JLabel();
+        btnHint1 = new javax.swing.JButton();
+        lblPaperFeedback1 = new javax.swing.JLabel();
+        btnClosePaper1 = new javax.swing.JButton();
+        pnlSlots1 = new javax.swing.JPanel();
+        pnlTiles1 = new javax.swing.JPanel();
+        lblPaperBg1 = new javax.swing.JLabel();
+        lblFeedback1 = new javax.swing.JLabel();
+        btnBack1 = new javax.swing.JButton();
+        btnContinue1 = new javax.swing.JButton();
+        btnSpine1 = new javax.swing.JButton();
+        lblShelfBg1 = new javax.swing.JLabel();
         pnlPaper = new javax.swing.JPanel();
         lblPaperPrompt = new javax.swing.JLabel();
         btnHint = new javax.swing.JButton();
@@ -166,18 +180,69 @@ journalPop.setVisible(false);
         btnSpine = new javax.swing.JButton();
         lblShelfBg = new javax.swing.JLabel();
 
+        jPanel1.setPreferredSize(new java.awt.Dimension(1000, 580));
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        pnlPaper1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblPaperPrompt1.setText("jLabel1");
+        pnlPaper1.add(lblPaperPrompt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 80, 285, 78));
+
+        btnHint1.setText("Hint");
+        btnHint1.addActionListener(this::btnHint1ActionPerformed);
+        pnlPaper1.add(btnHint1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 374, 115, 30));
+        pnlPaper1.add(lblPaperFeedback1, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 328, 270, 40));
+
+        btnClosePaper1.setText("Close");
+        btnClosePaper1.addActionListener(this::btnClosePaper1ActionPerformed);
+        pnlPaper1.add(btnClosePaper1, new org.netbeans.lib.awtextra.AbsoluteConstraints(195, 374, 115, 30));
+
+        javax.swing.GroupLayout pnlSlots1Layout = new javax.swing.GroupLayout(pnlSlots1);
+        pnlSlots1.setLayout(pnlSlots1Layout);
+        pnlSlots1Layout.setHorizontalGroup(
+            pnlSlots1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        pnlSlots1Layout.setVerticalGroup(
+            pnlSlots1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        pnlPaper1.add(pnlSlots1, new org.netbeans.lib.awtextra.AbsoluteConstraints(57, 190, 261, 40));
+        pnlPaper1.add(pnlTiles1, new org.netbeans.lib.awtextra.AbsoluteConstraints(53, 240, 270, 82));
+
+        lblPaperBg1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/paper.png"))); // NOI18N
+        pnlPaper1.add(lblPaperBg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -1, 376, 440));
+
+        jPanel1.add(pnlPaper1, new org.netbeans.lib.awtextra.AbsoluteConstraints(312, 70, 376, 439));
+        jPanel1.add(lblFeedback1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 216, 160));
+
+        btnBack1.setText("Back to the aisle");
+        btnBack1.addActionListener(this::btnBack1ActionPerformed);
+        jPanel1.add(btnBack1, new org.netbeans.lib.awtextra.AbsoluteConstraints(784, 20, 196, 36));
+
+        btnContinue1.setText("Continue");
+        btnContinue1.addActionListener(this::btnContinue1ActionPerformed);
+        jPanel1.add(btnContinue1, new org.netbeans.lib.awtextra.AbsoluteConstraints(784, 520, 196, 40));
+
+        btnSpine1.addActionListener(this::btnSpine1ActionPerformed);
+        jPanel1.add(btnSpine1, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 230, 26, 70));
+
+        lblShelfBg1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/shelf_005.png"))); // NOI18N
+        jPanel1.add(lblShelfBg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(236, 0, 527, 580));
+
         setPreferredSize(new java.awt.Dimension(1000, 580));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         pnlPaper.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblPaperPrompt.setText("jLabel1");
-        pnlPaper.add(lblPaperPrompt, new org.netbeans.lib.awtextra.AbsoluteConstraints(45, 108, 285, 78));
+        pnlPaper.add(lblPaperPrompt, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 50, 280, 78));
 
         btnHint.setText("Hint");
         btnHint.addActionListener(this::btnHintActionPerformed);
         pnlPaper.add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 374, 115, 30));
-        pnlPaper.add(lblPaperFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 328, 270, 40));
+        pnlPaper.add(lblPaperFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 290, 270, 40));
 
         btnClosePaper.setText("Close");
         btnClosePaper.addActionListener(this::btnClosePaperActionPerformed);
@@ -194,8 +259,8 @@ journalPop.setVisible(false);
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
-        pnlPaper.add(pnlSlots, new org.netbeans.lib.awtextra.AbsoluteConstraints(57, 190, 261, 40));
-        pnlPaper.add(pnlTiles, new org.netbeans.lib.awtextra.AbsoluteConstraints(53, 240, 270, 82));
+        pnlPaper.add(pnlSlots, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 140, 261, 40));
+        pnlPaper.add(pnlTiles, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 200, 270, 82));
 
         lblPaperBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/paper.png"))); // NOI18N
         pnlPaper.add(lblPaperBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -1, 376, 440));
@@ -244,6 +309,26 @@ journalPop.setVisible(false);
         hideDialogue();                            // so the box does not cover the paper
     pnlPaper.setVisible(true);
     }//GEN-LAST:event_btnSpineActionPerformed
+
+    private void btnHint1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHint1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnHint1ActionPerformed
+
+    private void btnClosePaper1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClosePaper1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnClosePaper1ActionPerformed
+
+    private void btnBack1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBack1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnBack1ActionPerformed
+
+    private void btnContinue1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnContinue1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnContinue1ActionPerformed
+
+    private void btnSpine1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSpine1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnSpine1ActionPerformed
    /** Plays lines in the dialogue box at the bottom of the screen. */
    /** Rebuilds the screen from the saved progress. Called every time the card is shown. */
 private void startLevel() {
@@ -513,18 +598,32 @@ private static BufferedImage scaleSharp(BufferedImage src, int width) {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
+    private javax.swing.JButton btnBack1;
     private javax.swing.JButton btnClosePaper;
+    private javax.swing.JButton btnClosePaper1;
     private javax.swing.JButton btnContinue;
+    private javax.swing.JButton btnContinue1;
     private javax.swing.JButton btnHint;
+    private javax.swing.JButton btnHint1;
     private javax.swing.JButton btnSpine;
+    private javax.swing.JButton btnSpine1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblFeedback;
+    private javax.swing.JLabel lblFeedback1;
     private javax.swing.JLabel lblPaperBg;
+    private javax.swing.JLabel lblPaperBg1;
     private javax.swing.JLabel lblPaperFeedback;
+    private javax.swing.JLabel lblPaperFeedback1;
     private javax.swing.JLabel lblPaperPrompt;
+    private javax.swing.JLabel lblPaperPrompt1;
     private javax.swing.JLabel lblShelfBg;
+    private javax.swing.JLabel lblShelfBg1;
     private javax.swing.JPanel pnlPaper;
+    private javax.swing.JPanel pnlPaper1;
     private javax.swing.JPanel pnlSlots;
+    private javax.swing.JPanel pnlSlots1;
     private javax.swing.JPanel pnlTiles;
+    private javax.swing.JPanel pnlTiles1;
     // End of variables declaration//GEN-END:variables
 /** A see-through layer over the whole screen. It only draws the journal. */
 private static class JournalPop extends JComponent {

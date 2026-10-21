@@ -6,6 +6,8 @@ package kldcrimedecoder.ui;
 import kldcrimedecoder.data.Story;
 import kldcrimedecoder.engine.GameManager;
 import javax.swing.JOptionPane;
+import kldcrimedecoder.ui.Sfx;
+
 
 /**
  *
