@@ -142,16 +142,16 @@ public class Level5 extends javax.swing.JPanel {
         pnlPuzzle.add(pnlCards, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 158, 880, 124));
 
         add(pnlPuzzle, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 30, 920, 292));
-        add(lblAmy, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 24, 240, 300));
+        add(lblAmy, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 240, 290));
 
         btnHint.setText("Hint");
         btnHint.addActionListener(this::btnHintActionPerformed);
-        add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 340, 100, 34));
+        add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 410, 100, 34));
 
         btnContinue.setText("Continue");
         btnContinue.addActionListener(this::btnContinueActionPerformed);
-        add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 340, 100, 34));
-        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 334, 690, 54));
+        add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 410, 100, 34));
+        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 400, 450, 54));
 
         lblBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_classroom.png"))); // NOI18N
         add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
