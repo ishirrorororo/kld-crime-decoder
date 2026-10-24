@@ -33,6 +33,7 @@ import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.ui.DragDropHelper;
 import kldcrimedecoder.ui.Theme;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  *
@@ -186,7 +187,7 @@ private void startLevel() {
     btnContinue.setEnabled(false);
     buildCards();
 
-    // Sfx.play("chair");                  // a chair scrapes, see the optional Sfx step from Level 3
+     Sfx.play("chair");                  // a chair scrapes, see the optional Sfx step from Level 3
     scene(Story.L5_INTRO, this::beginPuzzle);
 }
 
@@ -256,6 +257,7 @@ private Icon amyPicture(String mood, int w, int h) {
 
 /** A short screen shake: the background and Amy jump left and right. */
 private void shake() {
+    Sfx.play("rumble");
     final Point bg0 = lblBg.getLocation();
     final Point amy0 = lblAmy.getLocation();
     final int[] step = { 0 };
@@ -370,6 +372,7 @@ private void checkProof() {
 }
 
 private void onSolved(JLabel a, JLabel b) {
+    Sfx.play("evidence");
     puzzleActive = false;
     solved = true;
     ScoreManager.onCorrect();

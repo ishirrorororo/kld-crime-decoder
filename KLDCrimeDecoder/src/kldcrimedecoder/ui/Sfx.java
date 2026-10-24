@@ -34,6 +34,15 @@ public class Sfx {
     private static Clip clockClip;
     private static double clockVolume = 0;
     private static boolean muted = false;
+    /** Call once at startup: reads the files and wakes the audio system, so the first play is instant. */
+    public static void preload(String... names) {
+        for (String n : names) {
+            Clip c = open(n);
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
 
     /** Plays a short sound once. */
     public static void play(String name) {

@@ -31,6 +31,7 @@ import kldcrimedecoder.engine.TimerManager;
 import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.ui.DragDropHelper;
 import kldcrimedecoder.ui.Theme;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  *
@@ -349,6 +350,7 @@ private void showBack(JLabel card) {
 
 /** Tap = flip the card, select it, and show its portrait. */
 private void onCardClicked(JLabel card) {
+      Sfx.play("flip");
       if (!puzzleActive || Boolean.TRUE.equals(card.getClientProperty("dd.locked"))) {
       return;
   }
@@ -419,8 +421,9 @@ private boolean handleDrop(JLabel card, boolean droppedOnCleared) {
 
     if (placedCount == Story.L4_CARDS.length) {
         SwingUtilities.invokeLater(this::onSolved);   // after the card has moved in
-    }
+    }Sfx.play("drop");
     return true;
+    
 }
 
 private void onSolved() {

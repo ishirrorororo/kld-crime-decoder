@@ -94,7 +94,9 @@ public class MenuPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, Story.HOW_TO_PLAY,
                         "How to Play", JOptionPane.INFORMATION_MESSAGE));
         btnExit.addActionListener(e -> System.exit(0));
+        Sfx.preload("glitch", "menu_ticking");
     }
+    
 
     private void addButton(JButton b) {
         b.setAlignmentX(LEFT_ALIGNMENT);
@@ -110,7 +112,10 @@ public class MenuPanel extends JPanel {
     private void playJumpscareThenStart() {
         if (scaring) {
             return;                       // ignore double clicks
+            
         }
+        Sfx.ambience(null);          // the ticking stops: silence just before the scare
+        Sfx.play("glitch");          // the glitch sound starts with the first black flash
         if (scareImage == null) {         // picture missing: just start the game
             GameManager.startNewGame();
             return;
@@ -122,6 +127,9 @@ public class MenuPanel extends JPanel {
         Timer t = new Timer(SCARE_FRAME_MS, null);
         t.addActionListener(e -> {
             scareFrame++;
+            if (scareFrame == 5 || scareFrame == 10) {
+            Sfx.play("glitch", 0.6);        // a smaller hit on every black flash
+            }
             if (scareFrame >= SCARE_FRAMES) {
                 t.stop();
                 scaring = false;
@@ -219,6 +227,7 @@ public class MenuPanel extends JPanel {
             return null;
         }
     }
+    
 
     // ------------------------------------------------------------------
     //  Button style: dark see-through box, amber outline, arrow on hover
@@ -262,5 +271,7 @@ public class MenuPanel extends JPanel {
             g2.dispose();
             super.paintComponent(g);   // draws the text
         }
+        
     }
+    
 }

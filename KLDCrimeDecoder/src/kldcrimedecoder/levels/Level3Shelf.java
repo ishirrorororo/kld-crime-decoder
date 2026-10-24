@@ -38,6 +38,7 @@ import java.awt.RadialGradientPaint;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import javax.swing.JComponent;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  *
@@ -479,10 +480,12 @@ Timer pause = new Timer(1200, e -> {
     // the lines start when the journal has landed
     Timer talk = new Timer(POP_MS, e2 -> speak(Story.L3_FOUND, () -> btnContinue.setEnabled(true)));
     talk.setRepeats(false);
+    Sfx.play("thud");
     talk.start();
 });
 pause.setRepeats(false);
 pause.start();
+Sfx.play("evidence");
 }
 
 /** Plays lines in the dialogue box. "after" runs when the last line ends. */
@@ -543,7 +546,7 @@ private void playJournalPop(boolean animate) {
     final double y0 = spine.getCenterY();
     journalPop.setVisible(true);
     popStart = System.currentTimeMillis() - (animate ? 0 : POP_MS);   // no animation = already landed
-    // Sfx.play("thud");                                 // optional sound, see the Sfx step from Level 3
+    if (animate) { Sfx.play("book_slide"); }                                 // optional sound, see the Sfx step from Level 3
 
     popTimer = new Timer(16, e -> {
         long ms = System.currentTimeMillis() - popStart;

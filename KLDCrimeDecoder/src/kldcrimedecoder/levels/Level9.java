@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
+import kldcrimedecoder.ui.Sfx;
 
 /**
  *
@@ -15,6 +16,7 @@ public class Level9 extends javax.swing.JPanel {
      */
     public Level9() {
         initComponents();
+        Sfx.play("warning_bell");
     }
 
     /**
