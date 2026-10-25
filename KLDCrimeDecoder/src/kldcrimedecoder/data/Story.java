@@ -32,8 +32,7 @@ public class Story {
         "The Mirror Room" // 10
     };
     // Alli: LEVELS PROLOGUE TO 2
-    // ============ LEVEL 0: PROLOGUE (draft, refined in Phase 5) ============
-        // ============ PROLOGUE (Allison) ============
+    // ============ LEVEL 0: PROLOGUE (Allison) ============
     public static final String ITEM_ARNIE_PHONE = "Arnie's phone";
     public static final String ITEM_TORN_PHOTO  = "Torn photo";
     public static final String ITEM_ALLI_PHONE  = "Alli's phone";
@@ -46,6 +45,13 @@ public class Story {
     public static final String[][] PROLOGUE_0A_INTRO = {
         {"", "7:02 AM. A phone buzzes on the desk."}
     };
+
+    // Shown on the lock screen picture, before the message opens
+    public static final String[][] PROLOGUE_PHONE_NOTIF = {
+        {"Arnie", "Alli's Mom?"}
+    };
+
+    // Row 0 is drawn as the chat bubble on the phone; row 1 is Arnie's thought
     public static final String[][] PROLOGUE_PHONE = {
         {"Text from Alli's mom", "Arnie, did Alli stay at your place last night? She never came home."},
         {"Arnie (thinking)", "What? She left before me. Her last text said see you tomorrow. Alli always keeps her word."}
@@ -58,7 +64,7 @@ public class Story {
     public static final String[][] PROLOGUE_0A_END = {
         {"Arnie (thinking)", "I'll ask around at school."}
     };
-
+    
     // ---- Scene 0B: Classroom ----
     // Prof. Danel [neutral]
     public static final String[][] PROLOGUE_0B_A = {
