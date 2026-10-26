@@ -56,6 +56,9 @@ private static final double POP_Y = 175;     // above the dialogue band, which s
 
 private JournalPop journalPop;               // the see-through layer that draws the journal
 private Timer popTimer;
+private static final String KEY_FOUND = "level3.foundSeen";
+private Timer pauseTimer;        // the 1.2 s wait after solving
+private Timer talkTimer;         // the wait until the journal lands
 private long popStart;
 
 private WordScramblePuzzle puzzle;
@@ -288,7 +291,7 @@ journalPop.setVisible(false);
         if (solved) {
         return;
     }
-    ScoreManager.onHint();
+    ScoreManager.onHint(hintsUsed + 1);        // hint 1 = 15 s, hint 2 = 30 s
     int i = Math.min(hintsUsed, Story.L3_HINTS.length - 1);   // hint 1, then hint 2
     hintsUsed++;
     setPaperFeedback("Hint " + (i + 1) + ": " + Story.L3_HINTS[i], true);
@@ -345,7 +348,8 @@ private void startLevel() {
     setPaperFeedback("", true);
     btnHint.setEnabled(!solved);
     btnSpine.setVisible(!solved);              // after the puzzle the book is gone
-    btnContinue.setEnabled(solved);
+        boolean foundSeen = gs.getChoice(KEY_FOUND, "no").equals("yes");
+    btnContinue.setEnabled(solved && foundSeen);
     buildTiles();
 
     // intro: only the first time the player enters this screen
@@ -353,9 +357,12 @@ private void startLevel() {
         gs.putChoice(KEY_INTRO, "yes");
         speak(Story.L3_SHELF_INTRO, null);
     }
-    if (solved) {
-    playJournalPop(false);          // already solved: the journal just rests there
-}
+       if (solved) {
+        playJournalPop(false);              // already solved: the journal just rests there
+        if (!foundSeen) {
+            playFoundScene();               // the player left too early: play the lines now
+        }
+    }
 }
 
 /** Fresh tiles in the tray. If the puzzle is already solved, the word sits locked in the slots. */
@@ -407,6 +414,7 @@ private boolean slotAccepts(JPanel slot) {
     if (solved || slot.getComponentCount() > 0) {
         return false;                          // already has a tile
     }
+    Sfx.play("drop");
     SwingUtilities.invokeLater(this::checkWord);   // check AFTER the tile has moved in
     return true;
 }
@@ -472,20 +480,23 @@ private void onSolved() {
     setPaperFeedback(Story.L3_TILES_RIGHT, true);
 
     // a short pause so the player sees the word, then the journal pops out
-Timer pause = new Timer(1200, e -> {
-    pnlPaper.setVisible(false);
-    playJournalPop(true);                     // the journal pops out of the spine
-    btnSpine.setVisible(false);               // the spine is empty now
+    // a short pause so the player sees the word, then the journal pops out
+    pauseTimer = new Timer(1200, e -> {
+        pnlPaper.setVisible(false);
+        playJournalPop(true);                 // the journal pops out of the spine
+        btnSpine.setVisible(false);           // the spine is empty now
 
-    // the lines start when the journal has landed
-    Timer talk = new Timer(POP_MS, e2 -> speak(Story.L3_FOUND, () -> btnContinue.setEnabled(true)));
-    talk.setRepeats(false);
-    Sfx.play("thud");
-    talk.start();
-});
-pause.setRepeats(false);
-pause.start();
-Sfx.play("evidence");
+        // the journal lands after POP_MS: the thud and the lines start then
+        talkTimer = new Timer(POP_MS, e2 -> {
+            Sfx.play("thud");
+            playFoundScene();
+        });
+        talkTimer.setRepeats(false);
+        talkTimer.start();
+    });
+    pauseTimer.setRepeats(false);
+    pauseTimer.start();
+
 }
 
 /** Plays lines in the dialogue box. "after" runs when the last line ends. */
@@ -498,6 +509,13 @@ private void speak(String[][] lines, Runnable after) {
         return;
     }
     box.play(lines, after);
+}
+/** The "journal found" lines. Continue turns on only after the player has read them. */
+private void playFoundScene() {
+    speak(Story.L3_FOUND, () -> {
+        GameState.getInstance().putChoice(KEY_FOUND, "yes");
+        btnContinue.setEnabled(true);
+    });
 }
 
 private void hideDialogue() {
@@ -565,6 +583,12 @@ private void playJournalPop(boolean animate) {
 }
 
 private void stopJournalPop() {
+    if (pauseTimer != null) {
+    pauseTimer.stop();
+    }
+    if (talkTimer != null) {
+        talkTimer.stop();
+    }
     if (popTimer != null) {
         popTimer.stop();
     }
@@ -652,12 +676,18 @@ private static class JournalPop extends JComponent {
     }
 
     void place(double cx, double cy, double scale, double glow) {
-        this.cx = cx;
-        this.cy = cy;
-        this.scale = scale;
-        this.glow = glow;
-        repaint();
-    }
+    Rectangle before = dirty();
+    this.cx = cx;
+    this.cy = cy;
+    this.scale = scale;
+    this.glow = glow;
+    repaint(before.union(dirty()));            // only the area the book and its glow cover
+}
+
+private Rectangle dirty() {
+    int r = (int) (finalWidth() * 0.75 * Math.max(scale, 0.2)) + 4;
+    return new Rectangle((int) cx - r, (int) cy - r, r * 2, r * 2);
+}
 
     @Override
     protected void paintComponent(Graphics g) {

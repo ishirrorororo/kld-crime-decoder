@@ -101,7 +101,7 @@ public class Story {
         {"Arnie (thinking)", "Hidden on purpose. And meant to be found."},
         {"Arnie (thinking)", "{slow} I know this slant. I've seen it on my own homework."},
         {"Arnie (thinking)", "Alli's, probably. We write alike."},
-        {"Evidence", "Scratched into the cover, two tiny letters: A.R."},
+        {"Evidence", "{sfx:evidence} Scratched into the cover, two tiny letters: A.R."},
         {"Arnie (thinking)", "Probably nothing."}
     };
 

@@ -228,6 +228,13 @@ private void showLine(String speaker, String text) {
             Sfx.play("rumble");
             again = true;
             fullText = fullText.substring(7).trim();
+        } else if (fullText.startsWith("{sfx:")) {
+            int end = fullText.indexOf('}');
+            if (end > 0) {
+                Sfx.play(fullText.substring(5, end));      // {sfx:evidence} plays evidence.wav
+                fullText = fullText.substring(end + 1).trim();
+                again = true;
+            }
         }
     }
     typeTimer.setDelay(slow ? 55 : 20);
