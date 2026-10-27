@@ -91,6 +91,35 @@ public class Story {
     public static final String[][] PROLOGUE_0C_OPEN = {
         {"", "The phone opens. An unread message from \"Amie\"."}
     };
+    
+    // PASTE these inside your existing Story class (same {speaker, text} format as the prologue).
+    // If your speaker names use another format (e.g. "Arnie (thinking)"), just edit the first value.
+
+    public static final String LEVEL1_CODED = "ASSH AS VSFS";
+    public static final String LEVEL1_PLAIN = "MEET ME HERE";
+    public static final String ITEM_WIFI_LOG = "Library Wi-Fi log";
+    public static final String LEVEL1_WIFI = "Connected to KLD-Library, 9:38 PM";
+
+    public static final String[][] LEVEL1_INTRO = {
+        {"Arnie", "She never forgets a date. Even mine."},
+        {"Amie", "Looking for her? Warm. Colder than you think."},
+        {"Amie", "I left you a lock. Turn the wheel by the day you were born."}
+    };
+
+    public static final String[][] LEVEL1_AFTER_A = {
+        {"Arnie", "'Meet me here.' But here is a place, not a pronoun."}
+    };
+
+    // shown after the Wi-Fi log appears
+    public static final String[][] LEVEL1_AFTER_B = {
+        {"Arnie", "The library. That's where she was last online."},
+        {"Arnie", "That number came too easily. Why did it come so easily?"},
+        {"", "Evidence added: Library Wi-Fi log."}
+    };
+
+    public static final String[][] LEVEL1_OUT = {
+        {"", "You slip the phone into your pocket and walk to the library. Fourteen minutes left."}
+    };
     // =====================================================================
     // JOEL: LEVELS 3 TO 5
     // =====================================================================
