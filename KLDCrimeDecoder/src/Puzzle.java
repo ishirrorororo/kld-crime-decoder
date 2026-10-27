@@ -1,4 +1,4 @@
-package kldcrimedecoder.puzzles;
+package kldcrimedecoder.puzzle;
 
 /**
  * Base class for every puzzle. A level form only needs these three methods:

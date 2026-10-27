@@ -7,7 +7,7 @@ import kldcrimedecoder.data.Story;
  * Word scramble. The player unscrambles a word, and that word
  * tells them which book to pick from the JList.
  */
-public class WordScramblePuzzle extends Puzzle {
+public class WordScramblePuzzle implements Puzzle {
 
     private final String word;        // the answer, in capitals
     private final String scrambled;   // the mixed-up letters
@@ -44,19 +44,35 @@ public class WordScramblePuzzle extends Puzzle {
         return word;
     }
 
-    @Override
     public String getPrompt() {
         return "A note on shelf 005 is smudged:  " + scrambled
              + "\nUnscramble it to find the right book.";
     }
 
-    @Override
     public boolean check(String answer) {
         return lettersOnly(answer).equals(word.toLowerCase());
     }
 
-    @Override
     public String getHint() {
         return Story.HINT_SCRAMBLE;
+    }
+
+    @Override
+    public String getTitle() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public boolean isSolved() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public String getHint(int number) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    private Object lettersOnly(String answer) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
