@@ -68,8 +68,8 @@ cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
     addScreen("badEnding",  new BadEnding());
 
     showCard("menu");
-    GameManager.startNewGame();   // this line starts the clock
-//    LevelManager.jumpTo(3); // remove in comment if you want to jump to level
+//    GameManager.startNewGame();   // this line starts the clock
+//    LevelManager.jumpTo(0); // remove in comment if you want to jump to level
 }
 
 private void placeDialogue(DialogueBox box) {

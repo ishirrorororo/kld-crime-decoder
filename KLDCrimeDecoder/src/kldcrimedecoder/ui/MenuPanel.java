@@ -3,33 +3,58 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.ui;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.util.Random;
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.Timer;
+import javax.swing.plaf.basic.BasicButtonUI;
 import kldcrimedecoder.data.Story;
 import kldcrimedecoder.engine.GameManager;
-import javax.swing.JOptionPane;
-
 /**
  *
- * @author Joel
+ * @author rosaldo
  */
 public class MenuPanel extends javax.swing.JPanel {
+    // ---- picture files (in src/kldcrimedecoder/images/) ----
+    private static final String BG_FILE    = "menu_mirror.png";
+    private static final String SCARE_FILE = "menu_glitch.png";
+ 
+    // ---- jumpscare settings ----
+    private static final int SCARE_FRAME_MS = 45;   // time per frame
+    private static final int SCARE_FRAMES   = 14;   // 14 x 45 ms = about 0.6 seconds
+ 
+    private final BufferedImage bgImage    = load(BG_FILE);
+    private final BufferedImage scareImage = load(SCARE_FILE);
+    private final Random rng = new Random();
+ 
+    private boolean scaring = false;   // true while the jumpscare plays
+    private int scareFrame = 0;
 
-    /**
-     * Creates new form MenuPanel
-     */
-public MenuPanel() {
-    initComponents();
-
-    Theme.background(this);
-
-    lblTitle.setText(Story.GAME_TITLE);
-    lblTitle.setFont(Theme.TITLE);
-    lblTitle.setForeground(Theme.AMBER);
-
-    lblSubtitle.setText(Story.SUBTITLE);
-    Theme.label(lblSubtitle);
-
-    Theme.button(btnStart, btnHowToPlay, btnExit);
-}
+    public MenuPanel() {
+        initComponents();
+    
+        Theme.background(this);
+ 
+        lblTitle.setText("<html>" + Story.GAME_TITLE.replace(": ", ":<br>") + "</html>");
+        lblTitle.setFont(Theme.TITLE.deriveFont(38f));
+        lblTitle.setForeground(Theme.AMBER);
+ 
+        lblSubtitle.setText("<html><div style='width:250px'>" + Story.SUBTITLE + "</div></html>");
+        Theme.label(lblSubtitle);
+ 
+        styleButton(btnStart);
+        styleButton(btnHowToPlay);
+        styleButton(btnExit);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -46,72 +71,38 @@ public MenuPanel() {
         btnHowToPlay = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
 
-        setPreferredSize(new java.awt.Dimension(1000, 600));
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblTitle.setText("KLDCRIMe: Amie");
-        lblTitle.setAlignmentY(130.0F);
-        lblTitle.setMaximumSize(new java.awt.Dimension(90, 16));
+        lblTitle.setText("jLabel1");
+        add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 110, 420, 110));
 
-        lblSubtitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblSubtitle.setText("Someone is missing. Don't trust the first answer.");
-        lblSubtitle.setToolTipText("");
+        lblSubtitle.setText("jLabel2");
+        add(lblSubtitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 235, 300, 50));
 
-        btnStart.setText("Start Investigation");
-        btnStart.setMaximumSize(new java.awt.Dimension(125, 23));
-        btnStart.setPreferredSize(new java.awt.Dimension(240, 45));
+        btnStart.setText("Start");
         btnStart.addActionListener(this::btnStartActionPerformed);
+        add(btnStart, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 320, 260, 46));
 
         btnHowToPlay.setText("How to Play");
-        btnHowToPlay.setPreferredSize(new java.awt.Dimension(240, 45));
         btnHowToPlay.addActionListener(this::btnHowToPlayActionPerformed);
+        add(btnHowToPlay, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 380, 260, 40));
 
         btnExit.setText("Exit");
         btnExit.addActionListener(this::btnExitActionPerformed);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(379, 379, 379)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnHowToPlay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(381, Short.MAX_VALUE))
-            .addComponent(lblTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(lblSubtitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(136, 136, 136)
-                .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblSubtitle)
-                .addGap(70, 70, 70)
-                .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnHowToPlay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
-                .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+        add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 440, 260, 40));
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        GameManager.startNewGame();   // resets state, starts the timer, opens level 0
+         playJumpscareThenStart();
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnHowToPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHowToPlayActionPerformed
-          JOptionPane.showMessageDialog(this, Story.HOW_TO_PLAY,
-        "How to Play", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, Story.HOW_TO_PLAY,
+                "How to Play", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_btnHowToPlayActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         System.exit(0);
-// TODO add your handling code here:
     }//GEN-LAST:event_btnExitActionPerformed
 
 
@@ -122,4 +113,168 @@ public MenuPanel() {
     private javax.swing.JLabel lblSubtitle;
     private javax.swing.JLabel lblTitle;
     // End of variables declaration//GEN-END:variables
+    // ------------------------------------------------------------------
+    //  Jumpscare
+    // ------------------------------------------------------------------
+ 
+    private void playJumpscareThenStart() {
+        if (scaring) {
+            return;                       // ignore double clicks
+        }
+        if (scareImage == null) {         // picture missing: just start the game
+            GameManager.startNewGame();
+            return;
+        }
+        scaring = true;
+        scareFrame = 0;
+        setMenuVisible(false);            // hide the buttons so only the girl shows
+ 
+        Timer t = new Timer(SCARE_FRAME_MS, null);
+        t.addActionListener(e -> {
+            scareFrame++;
+            if (scareFrame >= SCARE_FRAMES) {
+                t.stop();
+                scaring = false;
+                scareFrame = 0;
+                setMenuVisible(true);     // so the menu is normal if the player comes back
+                repaint();
+                GameManager.startNewGame();
+            } else {
+                repaint();
+            }
+        });
+        t.start();
+        repaint();
+    }
+ 
+    private void setMenuVisible(boolean on) {
+        lblTitle.setVisible(on);
+        lblSubtitle.setVisible(on);
+        btnStart.setVisible(on);
+        btnHowToPlay.setVisible(on);
+        btnExit.setVisible(on);
+    }
+ 
+    // ------------------------------------------------------------------
+    //  Painting
+    // ------------------------------------------------------------------
+ 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+ 
+        if (!scaring) {
+            drawCover(g2, bgImage, 0, 0);
+        } else {
+            paintScare(g2);
+        }
+        g2.dispose();
+    }
+ 
+    /** One frame of the jumpscare: flicker, shaking slices, and a quick flash. */
+    private void paintScare(Graphics2D g2) {
+        int w = getWidth();
+        int h = getHeight();
+ 
+        // black flash on frame 0 and every few frames after, like a bad signal
+        if (scareFrame == 0 || scareFrame % 5 == 0) {
+            g2.setColor(Color.BLACK);
+            g2.fillRect(0, 0, w, h);
+            return;
+        }
+ 
+        // a little mirror between flickers so it feels like it breaks through
+        if (scareFrame % 4 == 0) {
+            drawCover(g2, bgImage, 0, 0);
+            return;
+        }
+ 
+        // the glitch girl, shaken sideways in horizontal slices
+        int slices = 18;
+        int sliceH = h / slices + 1;
+        for (int i = 0; i < slices; i++) {
+            int y = i * sliceH;
+            int shake = rng.nextInt(5) == 0 ? rng.nextInt(80) - 40 : rng.nextInt(10) - 5;
+            Graphics2D s = (Graphics2D) g2.create(0, y, w, sliceH);
+            drawCover(s, scareImage, shake, -y);
+            s.dispose();
+        }
+ 
+        // red-ish flash on a couple of frames
+        if (scareFrame % 3 == 0) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
+            g2.setColor(new Color(255, 0, 60));
+            g2.fillRect(0, 0, w, h);
+        }
+    }
+ 
+    /** Draws a picture so it fills the whole panel. The right side is kept, the left is cropped. */
+    private void drawCover(Graphics2D g2, BufferedImage img, int dx, int dy) {
+        if (img == null) {
+            return;
+        }
+        double scale = Math.max((double) getWidth() / img.getWidth(),
+                                (double) getHeight() / img.getHeight());
+        int dw = (int) Math.ceil(img.getWidth() * scale);
+        int dh = (int) Math.ceil(img.getHeight() * scale);
+        int x = getWidth() - dw + dx;          // stick to the right edge
+        int y = (getHeight() - dh) / 2 + dy;   // centered vertically
+        g2.drawImage(img, x, y, dw, dh, null);
+    }
+ 
+    private static BufferedImage load(String file) {
+        java.net.URL url = MenuPanel.class.getResource("/kldcrimedecoder/images/" + file);
+        if (url == null) {
+            System.err.println("Missing picture: kldcrimedecoder/images/" + file);
+            return null;
+        }
+        try {
+            return javax.imageio.ImageIO.read(url);
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+ 
+    // ------------------------------------------------------------------
+    //  Button style: dark see-through box, amber outline, arrow on hover
+    //  (the buttons themselves are normal JButtons from the Design tab)
+    // ------------------------------------------------------------------
+ 
+    private void styleButton(JButton b) {
+        b.setUI(new FlatButtonUI());
+        b.setFont(Theme.MONO);
+        b.setForeground(Theme.AMBER);
+        b.setContentAreaFilled(false);
+        b.setFocusPainted(false);
+        b.setOpaque(false);
+        b.setBorder(BorderFactory.createEmptyBorder());
+        b.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+    }
+ 
+    private static class FlatButtonUI extends BasicButtonUI {
+        @Override
+        public void paint(Graphics g, JComponent c) {
+            boolean hover = ((AbstractButton) c).getModel().isRollover();
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            int w = c.getWidth() - 1;
+            int h = c.getHeight() - 1;
+ 
+            g2.setColor(hover ? new Color(40, 55, 90, 230) : new Color(11, 18, 32, 200));
+            g2.fillRoundRect(0, 0, w, h, 16, 16);
+            g2.setColor(Theme.AMBER);
+            g2.drawRoundRect(0, 0, w, h, 16, 16);
+ 
+            // little arrow on the left when hovered (like the reference)
+            if (hover) {
+                int cy = h / 2;
+                g2.fillPolygon(new int[]{12, 12, 20}, new int[]{cy - 5, cy + 5, cy}, 3);
+            }
+            g2.dispose();
+            super.paint(g, c);   // draws the text
+        }
+    }
 }

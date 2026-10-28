@@ -43,6 +43,8 @@ public class Level4 extends javax.swing.JPanel {
     private static final Color CARD_BACK  = new Color(0xD7E3EE);   // pale blue = back of the card
     private static final Color INK        = new Color(0x1F3A93);   // blue ink
     private static final Color BROWN      = new Color(0x5A4632);
+    /** true = every selected card shows the silhouette, so the picture does not give the answer away. */
+    private static final boolean SILHOUETTE_ONLY = true;
 
     private int placedCount;        // cards sorted correctly so far
     private int hintsUsed;
@@ -73,32 +75,41 @@ lblTitle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
     // ---- background picture (a colored placeholder if the file is missing) ----
     lblBg.setIcon(loadImage("room_library.png", 1000, 580, "room_library.png (missing)"));
 
-    // ---- the journal page, in blue ink ----
-    pnlJournal.setBackground(PAPER);
-    pnlJournal.setBorder(BorderFactory.createLineBorder(BROWN, 3));
-    lblNamesTitle.setFont(new Font("Consolas", Font.PLAIN, 12));
+    // ---- the journal: the open-book picture is the page ----
+    pnlJournal.setOpaque(false);
+    pnlJournal.setBorder(null);
+    Icon book = loadBook("journal_book.png", 720);
+    if (book != null) {
+        lblBook.setIcon(book);
+    } else {                                   // no picture: a plain paper page, like before
+        pnlJournal.setOpaque(true);
+        pnlJournal.setBackground(PAPER);
+        pnlJournal.setBorder(BorderFactory.createLineBorder(BROWN, 3));
+    }
+    lblNamesTitle.setText("Tap a card to flip it.");
+    lblNamesTitle.setFont(new Font("Consolas", Font.PLAIN, 11));
     lblNamesTitle.setForeground(BROWN);
     for (JLabel t : new JLabel[] { lblClearedTitle, lblSuspectTitle }) {
-        t.setFont(new Font("Consolas", Font.BOLD, 14));
+        t.setFont(new Font("Consolas", Font.BOLD, 13));
         t.setForeground(INK);
         t.setHorizontalAlignment(SwingConstants.CENTER);
     }
     lblPortrait.setBorder(BorderFactory.createLineBorder(BROWN, 2));
-    lblPortraitName.setFont(new Font("Georgia", Font.BOLD, 16));
+    lblPortraitName.setFont(new Font("Georgia", Font.BOLD, 14));
     lblPortraitName.setForeground(INK);
-    lblFact.setFont(new Font("Georgia", Font.PLAIN, 14));
+    lblFact.setFont(new Font("Georgia", Font.PLAIN, 13));
     lblFact.setForeground(INK);
     lblFact.setVerticalAlignment(SwingConstants.TOP);
 
     // ---- the three empty panels get their layouts here ----
     pnlCards.setOpaque(false);
-    pnlCards.setLayout(new GridLayout(2, 3, 10, 10));
+    pnlCards.setLayout(new GridLayout(3, 2, 6, 6));        // 3 rows x 2 columns on the left page
     for (JPanel box : new JPanel[] { pnlCleared, pnlSuspect }) {
-        box.setBackground(new Color(0xF6F0E0));
+        box.setOpaque(false);                              // drawn on the page
         box.setLayout(new GridLayout(3, 1, 0, 6));
         box.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BROWN, 2),
-                BorderFactory.createEmptyBorder(6, 6, 6, 6)));
+                BorderFactory.createDashedBorder(BROWN, 2, 5, 3, true),
+                BorderFactory.createEmptyBorder(4, 4, 4, 4)));
     }
 
     // ---- the two boxes accept cards ----
@@ -134,6 +145,7 @@ lblTitle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
         lblSuspectTitle = new javax.swing.JLabel();
         pnlCleared = new javax.swing.JPanel();
         pnlSuspect = new javax.swing.JPanel();
+        lblBook = new javax.swing.JLabel();
         lblFeedback = new javax.swing.JLabel();
         btnHint = new javax.swing.JButton();
         btnContinue = new javax.swing.JButton();
@@ -143,71 +155,74 @@ lblTitle.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
         lblTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblTitle.setText("The Journal");
-        add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 170, 28));
+        add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 524, 150, 30));
 
         pnlJournal.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblNamesTitle.setText("Names in the journal. Tap a card to flip it.");
-        pnlJournal.add(lblNamesTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, -1, -1));
+        pnlJournal.add(lblNamesTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 40, 240, 18));
 
         javax.swing.GroupLayout pnlCardsLayout = new javax.swing.GroupLayout(pnlCards);
         pnlCards.setLayout(pnlCardsLayout);
         pnlCardsLayout.setHorizontalGroup(
             pnlCardsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 470, Short.MAX_VALUE)
+            .addGap(0, 284, Short.MAX_VALUE)
         );
         pnlCardsLayout.setVerticalGroup(
             pnlCardsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 178, Short.MAX_VALUE)
+            .addGap(0, 218, Short.MAX_VALUE)
         );
 
-        pnlJournal.add(pnlCards, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 34, 470, 178));
-        pnlJournal.add(lblPortrait, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 224, 100, 112));
-        pnlJournal.add(lblPortraitName, new org.netbeans.lib.awtextra.AbsoluteConstraints(124, 224, 360, 24));
-        pnlJournal.add(lblFact, new org.netbeans.lib.awtextra.AbsoluteConstraints(124, 252, 360, 84));
+        pnlJournal.add(pnlCards, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 60, 284, 218));
+        pnlJournal.add(lblPortrait, new org.netbeans.lib.awtextra.AbsoluteConstraints(42, 286, 76, 88));
+        pnlJournal.add(lblPortraitName, new org.netbeans.lib.awtextra.AbsoluteConstraints(126, 286, 200, 20));
+        pnlJournal.add(lblFact, new org.netbeans.lib.awtextra.AbsoluteConstraints(126, 308, 200, 80));
 
         lblClearedTitle.setText("CLEARED");
-        pnlJournal.add(lblClearedTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 8, 190, 22));
+        pnlJournal.add(lblClearedTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 60, 136, 20));
 
         lblSuspectTitle.setText("SUSPECT");
-        pnlJournal.add(lblSuspectTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 8, 190, 22));
+        pnlJournal.add(lblSuspectTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 60, 136, 20));
 
         javax.swing.GroupLayout pnlClearedLayout = new javax.swing.GroupLayout(pnlCleared);
         pnlCleared.setLayout(pnlClearedLayout);
         pnlClearedLayout.setHorizontalGroup(
             pnlClearedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 190, Short.MAX_VALUE)
+            .addGap(0, 136, Short.MAX_VALUE)
         );
         pnlClearedLayout.setVerticalGroup(
             pnlClearedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGap(0, 292, Short.MAX_VALUE)
         );
 
-        pnlJournal.add(pnlCleared, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 34, 190, 300));
+        pnlJournal.add(pnlCleared, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 80, 136, 292));
 
         javax.swing.GroupLayout pnlSuspectLayout = new javax.swing.GroupLayout(pnlSuspect);
         pnlSuspect.setLayout(pnlSuspectLayout);
         pnlSuspectLayout.setHorizontalGroup(
             pnlSuspectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 190, Short.MAX_VALUE)
+            .addGap(0, 136, Short.MAX_VALUE)
         );
         pnlSuspectLayout.setVerticalGroup(
             pnlSuspectLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGap(0, 292, Short.MAX_VALUE)
         );
 
-        pnlJournal.add(pnlSuspect, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 34, 190, 300));
+        pnlJournal.add(pnlSuspect, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 80, 136, 292));
 
-        add(pnlJournal, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 44, 940, 350));
-        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(215, 400, 500, 56));
+        lblBook.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/journal_book.png"))); // NOI18N
+        pnlJournal.add(lblBook, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 720, 496));
+
+        add(pnlJournal, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 14, 720, 496));
+        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(172, 516, 586, 56));
 
         btnHint.setText("Hint");
         btnHint.addActionListener(this::btnHintActionPerformed);
-        add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 408, 110, 34));
+        add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(766, 524, 100, 34));
 
         btnContinue.setText("Continue");
         btnContinue.addActionListener(this::btnContinueActionPerformed);
-        add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 408, 120, 34));
+        add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(874, 524, 100, 34));
 
         lblBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_library.png"))); // NOI18N
         add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
@@ -318,25 +333,25 @@ private void showFront(JLabel card) {
     String[] row = (String[]) card.getClientProperty("row");
     card.setBackground(CARD_FRONT);
     card.setForeground(INK);
-    card.setFont(new Font("Georgia", Font.BOLD, 15));
+    card.setFont(new Font("Georgia", Font.BOLD, 14));
     card.setBorder(BorderFactory.createLineBorder(BROWN, 2));
-    card.setText("<html><body style='width:120px'><div align='center'>" + row[0] + "</div></body></html>");
+    card.setText("<html><body style='width:100px'><div align='center'>" + row[0] + "</div></body></html>");
 }
 
 private void showBack(JLabel card) {
     String[] row = (String[]) card.getClientProperty("row");
     card.setBackground(CARD_BACK);
     card.setForeground(INK);
-    card.setFont(new Font("Georgia", Font.PLAIN, 12));
+    card.setFont(new Font("Georgia", Font.PLAIN, 10));
     card.setBorder(BorderFactory.createLineBorder(BROWN, 2));
-    card.setText("<html><body style='width:128px'><div align='center'>" + row[1] + "</div></body></html>");
+    card.setText("<html><body style='width:108px'><div align='center'>" + row[1] + "</div></body></html>");
 }
 
 /** Tap = flip the card, select it, and show its portrait. */
 private void onCardClicked(JLabel card) {
-    if (!puzzleActive) {
-        return;
-    }
+      if (!puzzleActive || Boolean.TRUE.equals(card.getClientProperty("dd.locked"))) {
+      return;
+  }
     boolean flippedNow = !Boolean.TRUE.equals(card.getClientProperty("flipped"));
     card.putClientProperty("flipped", flippedNow);
     if (flippedNow) {
@@ -354,7 +369,11 @@ private void onCardClicked(JLabel card) {
 
     // small portrait + the fact (the fact shows only while the card is flipped)
     String[] row = (String[]) card.getClientProperty("row");
-    lblPortrait.setIcon(loadImage(portraitFile(row[0]), 100, 112, row[0]));
+      Icon pic = SILHOUETTE_ONLY ? Theme.silhouette(72, 84) : Theme.portrait(row[0], 72, 84);
+if (pic == null) {                                       // no pictures in the project yet
+    pic = loadImage(portraitFile(row[0]), 72, 84, row[0]);
+}
+lblPortrait.setIcon(pic);
     lblPortrait.setVisible(true);
     lblPortraitName.setText(row[0]);
     lblFact.setText(flippedNow ? "<html>" + row[1] + "</html>" : "");
@@ -388,6 +407,8 @@ private boolean handleDrop(JLabel card, boolean droppedOnCleared) {
 
     // right box: the card stays and cannot be moved again
     DragDropHelper.lock(card);
+      card.putClientProperty("flipped", Boolean.FALSE);
+  showFront(card);
     card.setBorder(BorderFactory.createLineBorder(BROWN, 2));
     if (card == selected) {
     selected = null;
@@ -448,10 +469,54 @@ private void setFeedback(String text, boolean good) {
     lblFeedback.setVisible(!text.isEmpty());
 }
 
+/** Loads the open-book picture, cuts off the empty edges, and scales it with sharp pixels. Null if missing. */
+private static Icon loadBook(String file, int width) {
+    java.net.URL url = Level4.class.getResource("/kldcrimedecoder/images/" + file);
+    if (url == null) {
+        return null;
+    }
+    try {
+        BufferedImage src = javax.imageio.ImageIO.read(url);
+
+        // find the box that holds the visible pixels (the file has empty space around the book)
+        int minX = src.getWidth();
+        int minY = src.getHeight();
+        int maxX = -1;
+        int maxY = -1;
+        for (int y = 0; y < src.getHeight(); y++) {
+            for (int x = 0; x < src.getWidth(); x++) {
+                if ((src.getRGB(x, y) >>> 24) > 10) {      // this pixel is not transparent
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+        if (maxX < 0) {
+            return null;                                   // the picture is empty
+        }
+        BufferedImage trimmed = src.getSubimage(minX, minY, maxX - minX + 1, maxY - minY + 1);
+
+        // scale it: nearest neighbor keeps the pixel art sharp
+        int height = trimmed.getHeight() * width / trimmed.getWidth();
+        BufferedImage out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = out.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.drawImage(trimmed, 0, 0, width, height, null);
+        g.dispose();
+        return new ImageIcon(out);
+    } catch (java.io.IOException e) {
+        return null;
+    }
+}
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnContinue;
     private javax.swing.JButton btnHint;
     private javax.swing.JLabel lblBg;
+    private javax.swing.JLabel lblBook;
     private javax.swing.JLabel lblClearedTitle;
     private javax.swing.JLabel lblFact;
     private javax.swing.JLabel lblFeedback;

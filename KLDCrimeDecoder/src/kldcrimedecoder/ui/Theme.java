@@ -9,12 +9,83 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 /**
  * One place for colors and fonts. Forms call these in their
  * constructors, after initComponents(), so we never touch the blue code.
  */
 public class Theme {
+    /** The picture used for any character that has no portrait file. */
+public static final String SILHOUETTE_FILE = "cleared_characters.png";
+
+/**
+ * Loads /kldcrimedecoder/images/<file>, cuts off the empty edges,
+ * and fits the picture inside w x h. Returns null if the file is missing.
+ */
+public static Icon image(String file, int w, int h) {
+    java.net.URL url = Theme.class.getResource("/kldcrimedecoder/images/" + file);
+    if (url == null) {
+        return null;
+    }
+    try {
+        BufferedImage trimmed = trim(javax.imageio.ImageIO.read(url));
+        double scale = Math.min((double) w / trimmed.getWidth(), (double) h / trimmed.getHeight());
+        int tw = Math.max(1, (int) Math.round(trimmed.getWidth() * scale));
+        int th = Math.max(1, (int) Math.round(trimmed.getHeight() * scale));
+        return new ImageIcon(trimmed.getScaledInstance(tw, th, Image.SCALE_AREA_AVERAGING));
+    } catch (java.io.IOException e) {
+        return null;
+    }
+}
+
+/** "Amy Mercado" becomes portrait_amy_mercado.png. A name with no file gets the silhouette. */
+public static Icon portrait(String name, int w, int h) {
+    String file = "portrait_" + name.toLowerCase().replace(' ', '_') + ".png";
+    Icon pic = image(file, w, h);
+    return pic != null ? pic : image(SILHOUETTE_FILE, w, h);
+}
+
+public static Icon silhouette(int w, int h) {
+    return image(SILHOUETTE_FILE, w, h);
+}
+
+/** Cuts the transparent edges off a picture. */
+private static BufferedImage trim(BufferedImage src) {
+    int minX = src.getWidth();
+    int minY = src.getHeight();
+    int maxX = -1;
+    int maxY = -1;
+    for (int y = 0; y < src.getHeight(); y++) {
+        for (int x = 0; x < src.getWidth(); x++) {
+            if ((src.getRGB(x, y) >>> 24) > 10) {      // this pixel is not transparent
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            }
+        }
+    }
+    if (maxX < 0) {
+        return src;                                    // empty picture
+    }
+    return src.getSubimage(minX, minY, maxX - minX + 1, maxY - minY + 1);
+}
+/** The picture with its empty edges cut off, or null if the file is missing. */
+public static BufferedImage trimmedImage(String file) {
+    java.net.URL url = Theme.class.getResource("/kldcrimedecoder/images/" + file);
+    if (url == null) {
+        return null;
+    }
+    try {
+        return trim(javax.imageio.ImageIO.read(url));
+    } catch (java.io.IOException e) {
+        return null;
+    }
+}
 
     // ---- colors ----
     public static final Color BG     = new Color(0x0B1220);  // background

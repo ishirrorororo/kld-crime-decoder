@@ -4,6 +4,14 @@
  */
 package kldcrimedecoder.levels;
 
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import kldcrimedecoder.engine.GameManager;
+import kldcrimedecoder.engine.GameState;
+import kldcrimedecoder.engine.LevelManager;
+import kldcrimedecoder.engine.ScoreManager;
+import kldcrimedecoder.engine.TimerManager;
+
 /**
  *
  * @author Joel
@@ -15,6 +23,24 @@ public class Level6 extends javax.swing.JPanel {
      */
     public Level6() {
         initComponents();
+        // ===== TEMPORARY TEST CODE: DELETE IN PHASE 5 =====
+setLayout(new FlowLayout());
+JButton bOk    = new JButton("Correct");
+JButton bWrong = new JButton("Wrong");
+JButton bHint  = new JButton("Hint");
+JButton bDeny  = new JButton("Denial +60");
+JButton bNext  = new JButton("Next level");
+JButton bEnd   = new JButton("Finish game");
+JButton bDrain = new JButton("Drain 880s");
+bOk.addActionListener(e -> ScoreManager.onCorrect());
+bWrong.addActionListener(e -> ScoreManager.onWrong());
+bHint.addActionListener(e -> ScoreManager.onHint());
+bDeny.addActionListener(e -> GameState.getInstance().addDenial(60));
+bNext.addActionListener(e -> LevelManager.nextLevel());
+bEnd.addActionListener(e -> GameManager.finishGame());
+bDrain.addActionListener(e -> TimerManager.drain(880));
+add(bOk); add(bWrong); add(bHint); add(bDeny); add(bNext); add(bEnd); add(bDrain);
+// ===== END TEMPORARY TEST CODE =====
     }
 
     /**
