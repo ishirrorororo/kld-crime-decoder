@@ -73,7 +73,7 @@ public class Level0Prologue extends ScenePanel {
             }
         });
     }
- 
+ /*what the hell */
     private void styleComponents() {
         lblTutorial.setText(Story.PROLOGUE_TUTORIAL);
         lblTutorial.setFont(new Font("Consolas", Font.BOLD, 15));
