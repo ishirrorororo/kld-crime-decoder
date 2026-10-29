@@ -55,14 +55,7 @@ public class Level0Prologue extends ScenePanel {
         hotspots = new JButton[]{btnPhone, btnPhoto, btnBag};
         styleComponents();
  
-        btnPhone.addActionListener(e -> collectPhone());
-        btnPhoto.addActionListener(e -> collect(btnPhoto, Story.PROLOGUE_PHOTO, Story.ITEM_TORN_PHOTO, null));
-        btnBag.addActionListener(e -> collect(btnBag, null, null, null));   // collected silently
- 
         limitNickname();
-        txtNickname.addActionListener(e -> unlockPhone());   // Enter also unlocks
-        btnUnlock.addActionListener(e -> unlockPhone());
- 
         showNamePrompt(false);
         setScene("room_bedroom", BEDROOM_BG);               // visible even before the first show event
  
@@ -144,29 +137,12 @@ public class Level0Prologue extends ScenePanel {
         }
     }
  
-    /**
-     * Phone sequence:
-     * 1) lock screen picture (arnie_phone), name tag "Arnie", text "Alli's Mom?";
-     * 2) after a click, the opened thread (arnie_msgs) shows mom's message drawn
-     *    on the phone, and Arnie's thought plays in the text bar.
-     */
-    private void collectPhone() {
-        if (busy) {
-            return;
-        }
-        busy = true;
-        btnPhone.setVisible(false);
-        GameState.getInstance().addItem(Story.ITEM_ARNIE_PHONE);
-        collectedCount++;
-        showOverlay("arnie_phone");                                   // lock screen
-        play(Story.PROLOGUE_PHONE_NOTIF, () -> {                      // click to continue
-            showOverlay("arnie_msgs");                                // opened thread
-            showOverlayText(Story.PROLOGUE_PHONE[0][1]);              // mom's message on the phone
-            play(new String[][]{Story.PROLOGUE_PHONE[1]}, this::afterCollect);
-        });
-    }
- 
-    /** Runs after any item's dialogue; starts Scene 0B when all three are collected. */
+   
+    // =====================================================
+    // SCENE 0B: Classroom (Prof. Danel: neutral, confused, neutral)
+    // She is shown on the left, only on her own lines.
+    // =====================================================
+        /** Runs after any item's dialogue; starts Scene 0B when all three are collected. */
     private void afterCollect() {
         hideOverlay();
         busy = false;
@@ -178,11 +154,6 @@ public class Level0Prologue extends ScenePanel {
             play(Story.PROLOGUE_0A_END, this::startScene0B);
         }
     }
- 
-    // =====================================================
-    // SCENE 0B: Classroom (Prof. Danel: neutral, confused, neutral)
-    // She is shown on the left, only on her own lines.
-    // =====================================================
     private void startScene0B() {
         lblTutorial.setVisible(false);
         GameManager.startTimer();                   // the timer starts in the classroom
@@ -245,16 +216,7 @@ public class Level0Prologue extends ScenePanel {
         txtNickname.requestFocusInWindow();
     }
  
-    private void unlockPhone() {
-        if (busy) {
-            return;                                          // ignore double Enter / double click
-        }
-        busy = true;
-        GameState.getInstance().setNickname(txtNickname.getText().trim()); // GameState cleans it; blank -> ARNIE
-        showNamePrompt(false);
-        setScene("alli_phone", PHONE_BG, true);         // the phone opens (9:02 + notification)
-        play(Story.PROLOGUE_0C_OPEN, LevelManager::nextLevel);   // go to Level 1
-    }
+
  
     // =====================================================
     // Helpers
@@ -370,17 +332,19 @@ public class Level0Prologue extends ScenePanel {
         btnPhone.setAlignmentY(325.0F);
         btnPhone.addActionListener(this::btnPhoneActionPerformed);
         add(btnPhone);
-        btnPhone.setBounds(750, 316, 90, 50);
+        btnPhone.setBounds(730, 320, 90, 50);
 
         btnPhoto.setText("jButton1");
         btnPhoto.setAlignmentX(872.0F);
         btnPhoto.setAlignmentY(305.0F);
+        btnPhoto.addActionListener(this::btnPhotoActionPerformed);
         add(btnPhoto);
         btnPhoto.setBounds(800, 210, 40, 50);
 
         btnBag.setText("jButton1");
         btnBag.setAlignmentX(805.0F);
         btnBag.setAlignmentY(410.0F);
+        btnBag.addActionListener(this::btnBagActionPerformed);
         add(btnBag);
         btnBag.setBounds(800, 420, 140, 150);
 
@@ -406,15 +370,59 @@ public class Level0Prologue extends ScenePanel {
 
     private void txtNicknameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNicknameActionPerformed
         // TODO add your handling code here:
+        btnUnlock.doClick();                        // pressing Enter does the same as the Unlock button
+         
     }//GEN-LAST:event_txtNicknameActionPerformed
 
     private void btnUnlockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnlockActionPerformed
-        // TODO add your handling code here:
+        if (busy) {
+            return;                                 // ignore double Enter / double click
+        }
+        busy = true;
+        GameState.getInstance().setNickname(txtNickname.getText().trim()); // blank -> ARNIE
+        showNamePrompt(false);
+        setScene("alli_phone", PHONE_BG, true);     // the phone opens
+        play(Story.PROLOGUE_0C_OPEN, LevelManager::nextLevel);
     }//GEN-LAST:event_btnUnlockActionPerformed
 
     private void btnPhoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPhoneActionPerformed
-        // TODO add your handling code here:
+         if (busy) {
+            return;                                 // wait for the dialogue to finish
+        }
+        busy = true;
+        btnPhone.setVisible(false);                 // collected, so it disappears
+        GameState.getInstance().addItem(Story.ITEM_ARNIE_PHONE);
+        collectedCount++;
+        showOverlay("arnie_phone");                                   // lock screen
+        play(Story.PROLOGUE_PHONE_NOTIF, () -> {                      // click to continue
+            showOverlay("arnie_msgs");                                // opened thread
+            showOverlayText(Story.PROLOGUE_PHONE[0][1]);              // mom's message on the phone
+            play(new String[][]{Story.PROLOGUE_PHONE[1]}, this::afterCollect);
+        });                             
     }//GEN-LAST:event_btnPhoneActionPerformed
+
+    private void btnBagActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBagActionPerformed
+        // TODO add your handling code here:
+        if (busy) {
+            return;
+        }
+        busy = true;
+        btnBag.setVisible(false);
+        collectedCount++;
+        afterCollect();                            // collected silently (no dialogue)
+    
+    }//GEN-LAST:event_btnBagActionPerformed
+
+    private void btnPhotoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPhotoActionPerformed
+        if (busy) {
+            return;
+        }
+        busy = true;
+        btnPhoto.setVisible(false);
+        GameState.getInstance().addItem(Story.ITEM_TORN_PHOTO);
+        collectedCount++;
+        play(Story.PROLOGUE_PHOTO, this::afterCollect);
+    }//GEN-LAST:event_btnPhotoActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBag;

@@ -7,10 +7,11 @@ import kldcrimedecoder.data.Story;
  * Word scramble. The player unscrambles a word, and that word
  * tells them which book to pick from the JList.
  */
-public class WordScramblePuzzle extends Puzzle {
+public class WordScramblePuzzle implements Puzzle {
 
     private final String word;        // the answer, in capitals
     private final String scrambled;   // the mixed-up letters
+    private boolean solved;           // becomes true after a correct check()
 
     public WordScramblePuzzle(String word) {
         this.word = word.toUpperCase();
@@ -36,6 +37,11 @@ public class WordScramblePuzzle extends Puzzle {
         return new String(letters);
     }
 
+    /** Keeps only the letters, in lowercase, so "Dune!" and "dune" both match. */
+    private static String lettersOnly(String s) {
+        return (s == null) ? "" : s.replaceAll("[^A-Za-z]", "").toLowerCase();
+    }
+
     public String getScrambled() {
         return scrambled;
     }
@@ -44,19 +50,34 @@ public class WordScramblePuzzle extends Puzzle {
         return word;
     }
 
-    @Override
     public String getPrompt() {
         return "A note on shelf 005 is smudged:  " + scrambled
              + "\nUnscramble it to find the right book.";
     }
 
-    @Override
+    /** Checks the player's answer. Marks the puzzle solved when it is correct. */
     public boolean check(String answer) {
-        return lettersOnly(answer).equals(word.toLowerCase());
+        boolean correct = lettersOnly(answer).equals(word.toLowerCase());
+        if (correct) {
+            solved = true;
+        }
+        return correct;
+    }
+
+    // ===== Puzzle interface =====
+
+    @Override
+    public String getTitle() {
+        return "Word Scramble";
     }
 
     @Override
-    public String getHint() {
-        return Story.HINT_SCRAMBLE;
+    public boolean isSolved() {
+        return solved;
+    }
+
+    @Override
+    public String getHint(int number) {
+        return Story.HINT_SCRAMBLE;     // one hint for every number
     }
 }
