@@ -25,6 +25,7 @@ import javax.swing.text.DocumentFilter;
 import kldcrimedecoder.data.Story;
 import kldcrimedecoder.engine.*;
  
+/*wow*/
 /**
  * Prologue: 0A bedroom (click to collect), 0B classroom, 0C name prompt.
  * Buttons, labels and the text field are made in the Design tab
@@ -345,6 +346,7 @@ public class Level0Prologue extends ScenePanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
         lblTutorial = new javax.swing.JLabel();
         btnPhone = new javax.swing.JButton();
         btnPhoto = new javax.swing.JButton();
@@ -352,6 +354,10 @@ public class Level0Prologue extends ScenePanel {
         txtNickname = new javax.swing.JTextField();
         lblNamePrompt = new javax.swing.JLabel();
         btnUnlock = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_bedroom.png"))); // NOI18N
+        jLabel1.setText("jLabel1");
 
         setLayout(null);
 
@@ -362,22 +368,24 @@ public class Level0Prologue extends ScenePanel {
         btnPhone.setText("jButton1");
         btnPhone.setAlignmentX(755.0F);
         btnPhone.setAlignmentY(325.0F);
+        btnPhone.addActionListener(this::btnPhoneActionPerformed);
         add(btnPhone);
-        btnPhone.setBounds(734, 297, 100, 56);
+        btnPhone.setBounds(750, 316, 90, 50);
 
         btnPhoto.setText("jButton1");
         btnPhoto.setAlignmentX(872.0F);
         btnPhoto.setAlignmentY(305.0F);
         add(btnPhoto);
-        btnPhoto.setBounds(802, 207, 22, 40);
+        btnPhoto.setBounds(800, 210, 40, 50);
 
         btnBag.setText("jButton1");
         btnBag.setAlignmentX(805.0F);
         btnBag.setAlignmentY(410.0F);
         add(btnBag);
-        btnBag.setBounds(807, 390, 126, 149);
+        btnBag.setBounds(800, 420, 140, 150);
 
         txtNickname.setText("jTextField1");
+        txtNickname.addActionListener(this::txtNicknameActionPerformed);
         add(txtNickname);
         txtNickname.setBounds(320, 250, 262, 40);
 
@@ -386,15 +394,35 @@ public class Level0Prologue extends ScenePanel {
         lblNamePrompt.setBounds(250, 20, 500, 36);
 
         btnUnlock.setText("Unlock");
+        btnUnlock.addActionListener(this::btnUnlockActionPerformed);
         add(btnUnlock);
         btnUnlock.setBounds(380, 305, 160, 40);
+
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_bedroom.png"))); // NOI18N
+        jLabel2.setText("jLabel2");
+        add(jLabel2);
+        jLabel2.setBounds(0, -9, 1000, 620);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void txtNicknameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNicknameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNicknameActionPerformed
+
+    private void btnUnlockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnlockActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnUnlockActionPerformed
+
+    private void btnPhoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPhoneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnPhoneActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBag;
     private javax.swing.JButton btnPhone;
     private javax.swing.JButton btnPhoto;
     private javax.swing.JButton btnUnlock;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel lblNamePrompt;
     private javax.swing.JLabel lblTutorial;
     private javax.swing.JTextField txtNickname;
