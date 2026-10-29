@@ -3,15 +3,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
-
-import java.awt.FlowLayout;
-import javax.swing.JButton;
-import kldcrimedecoder.engine.GameManager;
-import kldcrimedecoder.engine.GameState;
-import kldcrimedecoder.engine.LevelManager;
-import kldcrimedecoder.engine.ScoreManager;
-import kldcrimedecoder.engine.TimerManager;
-
+ 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import javax.swing.BorderFactory;
+import javax.swing.SwingConstants;
+import kldcrimedecoder.data.Story;
+import kldcrimedecoder.engine.*;
+import kldcrimedecoder.puzzles.CipherWheel;
+import kldcrimedecoder.puzzles.Puzzle;
+import kldcrimedecoder.ui.CipherWheelPanel;
+ 
 /**
  *
  * @author Joel
@@ -23,24 +27,25 @@ public class Level1 extends javax.swing.JPanel {
      */
     public Level1() {
         initComponents();
-        // ===== TEMPORARY TEST CODE: DELETE IN PHASE 5 =====
-setLayout(new FlowLayout());
-JButton bOk    = new JButton("Correct");
-JButton bWrong = new JButton("Wrong");
-JButton bHint  = new JButton("Hint");
-JButton bDeny  = new JButton("Denial +60");
-JButton bNext  = new JButton("Next level");
-JButton bEnd   = new JButton("Finish game");
-JButton bDrain = new JButton("Drain 880s");
-bOk.addActionListener(e -> ScoreManager.onCorrect());
-bWrong.addActionListener(e -> ScoreManager.onWrong());
-bHint.addActionListener(e -> ScoreManager.onHint());
-bDeny.addActionListener(e -> GameState.getInstance().addDenial(60));
-bNext.addActionListener(e -> LevelManager.nextLevel());
-bEnd.addActionListener(e -> GameManager.finishGame());
-bDrain.addActionListener(e -> TimerManager.drain(880));
-add(bOk); add(bWrong); add(bHint); add(bDeny); add(bNext); add(bEnd); add(bDrain);
-// ===== END TEMPORARY TEST CODE =====
+        wheelPanel = new CipherWheelPanel(wheel);       // the only hand-made component
+        WheelPanel.setBounds(344, 80, 240, 240);   // inside the phone screen
+        add(WheelPanel);
+        styleComponents();
+ 
+        btnLeft.addActionListener(e -> turn(-1));
+        btnRight.addActionListener(e -> turn(1));
+        btnHint.addActionListener(e -> lblHint.setText(wrapText(wheel.getHint())));
+        btnUnlock.addActionListener(e -> tryUnlock());
+ 
+        showPuzzle(false);
+        setScene("alli_phone", PHONE_BG, true);
+ 
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                startScene();
+            }
+        });
     }
 
     /**
