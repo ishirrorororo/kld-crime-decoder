@@ -11,6 +11,7 @@ public class WordScramblePuzzle implements Puzzle {
 
     private final String word;        // the answer, in capitals
     private final String scrambled;   // the mixed-up letters
+    private boolean solved = false;   // becomes true after a correct answer
 
     public WordScramblePuzzle(String word) {
         this.word = word.toUpperCase();
@@ -36,6 +37,11 @@ public class WordScramblePuzzle implements Puzzle {
         return new String(letters);
     }
 
+    /** Removes everything except letters and lowercases the result. */
+    private static String lettersOnly(String s) {
+        return s.replaceAll("[^A-Za-z]", "").toLowerCase();
+    }
+
     public String getScrambled() {
         return scrambled;
     }
@@ -44,17 +50,36 @@ public class WordScramblePuzzle implements Puzzle {
         return word;
     }
 
+    // ---- Methods required by the Puzzle interface ----
+
+    @Override
+    public String getTitle() {
+        return "Word Scramble";
+    }
+
+    @Override
+    public boolean isSolved() {
+        return solved;
+    }
+
+    @Override
+    public String getHint(int number) {
+        return Story.HINT_SCRAMBLE;
+    }
+
+    // ---- Extra methods (not in Puzzle, so no @Override) ----
+
     public String getPrompt() {
         return "A note on shelf 005 is smudged:  " + scrambled
              + "\nUnscramble it to find the right book.";
     }
 
     public boolean check(String answer) {
-        return lettersOnly(answer).equals(word.toLowerCase());
-    }
-
-    public String getHint() {
-        return Story.HINT_SCRAMBLE;
+        boolean correct = lettersOnly(answer).equals(word.toLowerCase());
+        if (correct) {
+            solved = true;
+        }
+        return correct;
     }
 
     @Override
