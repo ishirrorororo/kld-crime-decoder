@@ -120,7 +120,7 @@ public class Level0Prologue extends ScenePanel {
         play(Story.PROLOGUE_0A_INTRO, () -> busy = false);
     }
  
-    /** Collects one item. lines can be null (silent). overlayName can be null. */
+
     private void collect(JButton button, String[][] lines, String item, String overlayName) {
         if (busy) {
             return;                                 // wait for the dialogue to finish
