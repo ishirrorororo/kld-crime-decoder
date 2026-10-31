@@ -7,7 +7,7 @@ import kldcrimedecoder.data.Story;
  * Word scramble. The player unscrambles a word, and that word
  * tells them which book to pick from the JList.
  */
-public class WordScramblePuzzle implements Puzzle {
+public class WordScramblePuzzle extends Puzzle {
 
     private final String word;        // the answer, in capitals
     private final String scrambled;   // the mixed-up letters
@@ -37,11 +37,6 @@ public class WordScramblePuzzle implements Puzzle {
         return new String(letters);
     }
 
-    /** Removes everything except letters and lowercases the result. */
-    private static String lettersOnly(String s) {
-        return s.replaceAll("[^A-Za-z]", "").toLowerCase();
-    }
-
     public String getScrambled() {
         return scrambled;
     }
@@ -50,54 +45,40 @@ public class WordScramblePuzzle implements Puzzle {
         return word;
     }
 
-    // ---- Methods required by the Puzzle interface ----
+    // ---- Extra methods the level forms can use ----
 
-    @Override
     public String getTitle() {
         return "Word Scramble";
     }
 
-    @Override
     public boolean isSolved() {
         return solved;
     }
 
-    @Override
+    /** Hint used by the level form (the number is ignored for now). */
     public String getHint(int number) {
         return Story.HINT_SCRAMBLE;
     }
 
-    // ---- Extra methods (not in Puzzle, so no @Override) ----
+    @Override
+    public String getHint() {
+        return Story.HINT_SCRAMBLE;
+    }
 
+    // ---- Methods required by the abstract Puzzle class ----
+
+    @Override
     public String getPrompt() {
         return "A note on shelf 005 is smudged:  " + scrambled
              + "\nUnscramble it to find the right book.";
     }
 
+    @Override
     public boolean check(String answer) {
-        boolean correct = lettersOnly(answer).equals(word.toLowerCase());
+        boolean correct = lettersOnly(answer).equals(lettersOnly(word));
         if (correct) {
             solved = true;
         }
         return correct;
-    }
-
-    @Override
-    public String getTitle() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public boolean isSolved() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public String getHint(int number) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    private Object lettersOnly(String answer) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

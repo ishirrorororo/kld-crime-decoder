@@ -6,7 +6,7 @@ package kldcrimedecoder.levels;
 
 /**
  *
- * @author Joel
+ * @author Rosaldo
  */
 public class Level10 extends javax.swing.JPanel {
 

@@ -13,6 +13,9 @@ import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.GameManager;
 
 public class MainFrame extends javax.swing.JFrame {
+
+    /** DEV ONLY: shows the level-jump dropdown in the top bar. Turn off before submitting. */
+    private static final boolean DEV_MODE = true;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
 
@@ -67,7 +70,28 @@ cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
     addScreen("goodEnding", new GoodEnding());
     addScreen("badEnding",  new BadEnding());
 
+    // ===== DEV TOOL: level jumper. Set DEV_MODE to false before submitting. =====
     showCard("menu");
+    if (DEV_MODE) {
+        String[] items = {"DEV: jump to...", "Level 0", "Level 1", "Level 2", "Level 3", "Level 4",
+                          "Level 5", "Level 6", "Level 7", "Level 8", "Level 9", "Level 10",
+                          "Good ending", "Bad ending", "Menu"};
+        javax.swing.JComboBox<String> cboDev = new javax.swing.JComboBox<>(items);
+        cboDev.setFocusable(false);
+        cboDev.addActionListener(e -> {
+            int i = cboDev.getSelectedIndex();
+            if (i >= 1 && i <= 11) {
+                GameManager.devJumpTo(i - 1);
+            } else if (i == 12) {
+                GameManager.showCard("goodEnding");
+            } else if (i == 13) {
+                GameManager.showCard("badEnding");
+            } else if (i == 14) {
+                GameManager.backToMenu();
+            }
+        });
+        pnlTopBar.add(cboDev, java.awt.BorderLayout.CENTER);
+    }
 //    GameManager.startNewGame();   // this line starts the clock
 //    LevelManager.jumpTo(0); // remove in comment if you want to jump to level
 }

@@ -47,6 +47,15 @@ public static DialogueBox getDialogue() {
         showCard(LevelManager.currentCard());
     }
 
+    /** DEV ONLY: start the clock and jump straight to a level (0 to 10). */
+    public static void devJumpTo(int level) {
+        GameState.getInstance().reset();
+        LevelManager.reset();
+        TimerManager.start();
+        LevelManager.jumpTo(level);
+        refreshTopBar();
+    }
+
     /** Updates the timer and score labels in the top bar. */
     public static void refreshTopBar() {
         if (mainFrame == null) {
