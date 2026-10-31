@@ -18,6 +18,7 @@ import kldcrimedecoder.ui.Theme;
  */
 public class GoodEnding extends javax.swing.JPanel {
     // background pictures (the files are in the images folder)
+    private static final String BG_BATHROOM    = "bathroom_last.png";    
     private static final String BG_HALLWAY  = "room_hallway.png";
     private static final String BG_ALLI_OUT = "alliOut.png";      // Alli in the dark room
     private static final String ITEM_KEY    = "brass_key.png";    // pops up on the first line
@@ -29,8 +30,9 @@ public class GoodEnding extends javax.swing.JPanel {
  
     // {bg:file.png} at the start of a line changes the background
     private static final String[][] STORY = {
-        {"Arnie [scared]", "{bg:" + BG_HALLWAY + "}{item:" + ITEM_KEY + "}The key. It was in my bag the whole time."},
-        {"", "{bg:" + BG_ALLI_OUT + "}The reflection thins, then goes. You walk back to the closet and open the small door behind the shelves with the brass key. Alli steps out, blinking in the light."},
+        {"Arnie [scared]", "{bg:" + BG_BATHROOM + "}{item:" + ITEM_KEY + "}The key. It was in my bag the whole time. The reflection thins, then goes."},
+        {"", "{bg:" + BG_HALLWAY + "}You walk back to the closet and open the small door behind the shelves with the brass key."},
+        {"", "{bg:" + BG_ALLI_OUT + "} Alli steps out, blinking in the light."},
         {"Alli [furious]", "{bg:" + BG_HALLWAY + "}You locked me in a closet, Arnie."},
         {"Arnie [sad]", "I know. I'm so sorry. I didn't know why until now."},
         {"Alli [angry]", "Don't say it like it fixes anything."},

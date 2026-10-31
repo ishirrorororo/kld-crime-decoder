@@ -51,9 +51,9 @@ public class Level10 extends javax.swing.JPanel {
         {"", "{bg:" + BG_START + "}You lock yourself in the bathroom and splash water on your face. The tap keeps running. You look up."},
         {"", "{bg:" + BG_FACE + "}For the first time, you see your own face."},
         {"", "The reflection doesn't blink."},
-        {"Amie [glitch]", "{glitch}{bg:" + BG_AMIE + "}Took you long enough. I did leave a trail."},
+        {"....", "{glitch}{bg:" + BG_AMIE + "}Took you long enough. I did leave a trail."},
         {"Arnie [guilty]", "Who are you?"},
-        {"Amie [glitch]", "You know exactly who I am. You've been wearing me for years."},
+        {"....", "You know exactly who I am. You've been wearing me for years."},
         {"", "{bg:" + BG_MIRROR + "}The mirror fogs over. Letters appear in the steam."}
     };
  
