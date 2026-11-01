@@ -24,6 +24,14 @@ import javax.swing.border.Border;
  */
 public class DialogueBox extends javax.swing.JPanel {
     /** MainFrame uses these two numbers to place the box. */
+    
+private java.util.function.Consumer<String> speakerChangeListener;
+
+public void setSpeakerChangeListener(
+        java.util.function.Consumer<String> listener) {
+    this.speakerChangeListener = listener;
+}
+
 public static final int BOX_WIDTH  = 1000;
 public static final int BOX_HEIGHT = 240;
 
@@ -202,6 +210,11 @@ private static Border frame() {
 /** Starts typing one line. */
 /** Starts typing one line. */
 private void showLine(String speaker, String text) {
+    
+    if (speakerChangeListener != null) {
+    speakerChangeListener.accept(speaker);
+    }
+    
     boolean hasName = speaker != null && !speaker.isEmpty();
     pnlName.setVisible(hasName);                 // narration has no name plate
     lblSpeaker.setText(hasName ? speaker : "");

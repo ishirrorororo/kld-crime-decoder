@@ -79,6 +79,14 @@ public class Level9 extends JPanel {
         
         pnlLockArtDesign.setVisible(false);
         
+            // CHARACTER SPRITE SETUP
+        lblCharacterSprite.setText("");
+        lblCharacterSprite.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblCharacterSprite.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        lblCharacterSprite.setOpaque(false);
+        lblCharacterSprite.setVisible(false);
+        
+        
         // BACKGROUND LABEL FROM GUI BUILDER
         setComponentZOrder(
                 jLabel1,
@@ -106,20 +114,19 @@ public class Level9 extends JPanel {
         // LEVEL TITLE
         // =====================================================
 
-        lblTitle.setBounds(
-                14, 524, 170, 30);
+        lblTitle.setBounds(14, 524, 170, 30);
 
         Theme.heading(lblTitle);
 
         lblTitle.setOpaque(true);
-        lblTitle.setBackground(
-                new Color(0x0B1220));
+        lblTitle.setBackground(new Color(0x0B1220));
 
         lblTitle.setBorder(
-                BorderFactory.createEmptyBorder(
-                        2, 8, 2, 8));
+                BorderFactory.createEmptyBorder(2, 8, 2, 8));
 
-        add(lblTitle);
+        add(lblTitle,
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                        14, 524, 170, 30));
 
         // =====================================================
         // FOUR NUMBER WHEELS
@@ -134,12 +141,14 @@ public class Level9 extends JPanel {
             wheels[i] = new CombinationWheel(
                     () -> updateCodePreview());
 
-            wheels[i].setBounds(
-                    wheelX[i], 280, 32, 82);
-
             wheels[i].setEnabled(false);
 
-            pnlLockArtDesign.add(wheels[i]);
+            pnlLockArtDesign.add(wheels[i],
+                new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                    wheelX[i], 280, 32, 82
+                )
+            );
+
         }
 
 
@@ -153,7 +162,9 @@ public class Level9 extends JPanel {
         btnPhone.addActionListener(
                 e -> togglePhone());
 
-        add(btnPhone);
+        add(btnPhone,
+            new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                14, 14, 110, 34));
 
 
         // =====================================================
@@ -195,7 +206,9 @@ public class Level9 extends JPanel {
 
         pnlPhone.setVisible(false);
 
-        add(pnlPhone);
+        add(pnlPhone,
+        new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                300, 20, 400, 110));
 
 
         // =====================================================
@@ -219,7 +232,9 @@ public class Level9 extends JPanel {
                         BorderFactory.createEmptyBorder(
                                 4, 8, 4, 8)));
 
-        add(lblFeedback);
+        add(lblFeedback,
+            new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                172, 516, 460, 56));
 
 
         // =====================================================
@@ -232,7 +247,9 @@ public class Level9 extends JPanel {
         btnUnlock.addActionListener(
                 e -> checkCode());
 
-        add(btnUnlock);
+        add(btnUnlock,
+            new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                642, 524, 105, 34));
 
 
         // =====================================================
@@ -245,7 +262,9 @@ public class Level9 extends JPanel {
         btnHint.addActionListener(
                 e -> showHint());
 
-        add(btnHint);
+        add(btnHint,
+        new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                756, 524, 100, 34));
 
 
         // =====================================================
@@ -258,7 +277,9 @@ public class Level9 extends JPanel {
         btnContinue.addActionListener(
                 e -> LevelManager.nextLevel());
 
-        add(btnContinue);
+        add(btnContinue,
+        new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                866, 524, 118, 34));
 
 
         // =====================================================
@@ -309,6 +330,55 @@ public class Level9 extends JPanel {
         // KEEP PADLOCK BUTTON IN FRONT
         setComponentZOrder(
                 btnPadlock, 0);
+    }
+    
+    private void showCharacter(String imageName) {
+
+        if (imageName == null || imageName.isEmpty()) {
+            lblCharacterSprite.setVisible(false);
+            return;
+        }
+
+        java.net.URL imageURL = getClass().getResource(
+                "/kldcrimedecoder/images/" + imageName
+        );
+
+        if (imageURL == null) {
+            System.out.println("Character image not found: " + imageName);
+            lblCharacterSprite.setVisible(false);
+            return;
+        }
+
+        javax.swing.ImageIcon icon = new javax.swing.ImageIcon(imageURL);
+
+        java.awt.Image image = icon.getImage().getScaledInstance(
+                lblCharacterSprite.getWidth(),
+                lblCharacterSprite.getHeight(),
+                java.awt.Image.SCALE_SMOOTH
+        );
+
+        lblCharacterSprite.setIcon(new javax.swing.ImageIcon(image));
+        lblCharacterSprite.setVisible(true);
+        lblCharacterSprite.repaint();
+
+        // CONNECT DIALOGUE SPEAKERS TO CHARACTER SPRITES
+        if (GameManager.getDialogue() != null) {
+
+            GameManager.getDialogue().setSpeakerChangeListener(speaker -> {
+
+                if ("Jenna".equals(speaker)) {
+                    showCharacter("jenna_neutral.png");
+
+                } else if ("Arnie".equals(speaker)
+                        || "Arnie (thinking)".equals(speaker)) {
+                    showCharacter("arnie_neutral.png");
+
+                } else {
+                    showCharacter(null);
+                }
+
+            });
+        }
     }
 
     // =========================================================
@@ -573,6 +643,7 @@ public class Level9 extends JPanel {
         btnPadlock = new javax.swing.JButton();
         pnlLockArtDesign = new javax.swing.JPanel();
         lblLockArt = new javax.swing.JLabel();
+        lblCharacterSprite = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(1000, 600));
@@ -589,11 +660,13 @@ public class Level9 extends JPanel {
         pnlLockArtDesign.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblLockArt.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblLockArt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/padlock_puzzle.png"))); // NOI18N
         lblLockArt.setAutoscrolls(true);
-        lblLockArt.setCursor(new java.awt.Cursor(java.awt.Cursor.MOVE_CURSOR));
-        pnlLockArtDesign.add(lblLockArt, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 70, -1, 410));
+        lblLockArt.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        pnlLockArtDesign.add(lblLockArt, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -10, 330, -1));
 
-        add(pnlLockArtDesign, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 0, 640, 600));
+        add(pnlLockArtDesign, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 40, 330, 450));
+        add(lblCharacterSprite, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 130, 360, 350));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_hallway.png"))); // NOI18N
         jLabel1.setLabelFor(jLabel1);
@@ -615,6 +688,7 @@ public class Level9 extends JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnPadlock;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lblCharacterSprite;
     private javax.swing.JLabel lblLockArt;
     private javax.swing.JPanel pnlLockArtDesign;
     // End of variables declaration//GEN-END:variables
