@@ -28,7 +28,7 @@ public class Story {
         "The Project Room", // 6
         "Library, Late Night", // 7
         "Security Office", // 8
-        "Old Storage Room", // 9
+        "The Hallway Closet", // 9
         "The Mirror Room" // 10
     };
 
@@ -274,6 +274,42 @@ public class Story {
             "You carry it with you, but you never look at it.",
             "shadow|my shadow"}
     };
+    
+    
+     // ============ THE HALLWAY CLOSET (Level 9) ============
+
+    public static final String[][] L9_INTRO = {
+        {"", "Six minutes. You reach the end of the hallway. A padlock hangs on the closet door. Behind you, quick footsteps."},
+        {"Jenna", "I followed you. I know I shouldn't have. Arnie, you haven't slept, have you?"},
+        {"Arnie", "Jenna. Help me with the lock."},
+        {"Jenna", "It's a four-digit padlock. Alli and I put it on during foundation week. She picked the code herself. She said it's the one date she never forgets."},
+        {"Jenna", "She even put it on her phone. Check her wallpaper."}
+    };
+
+    public static final String L9_PROMPT =
+        "The four-digit padlock waits. Check Alli's phone for the date.";
+
+    public static final String L9_WRONG =
+            "The padlock does not budge. The wheels are not set to the correct date.";
+
+    public static final String L9_RIGHT =
+            "Click. The padlock opens.";
+
+    public static final String[] L9_HINTS = {
+        "The wallpaper. The banner across the top.",
+        "March fourteenth. Day first, then month: 14, 03."
+    };
+
+    public static final String[][] L9_SOLVED = {
+        {"", "The padlock clicks. The door swings in on a narrow supply closet. Mops. A bag you recognize: Alli's. And pinned to the back wall, a folded note in handwriting you know too well."},
+        {"Evidence", "You're close. Now look at yourself."},
+        {"Arnie (thinking)", "That's my handwriting."},
+        {"", "{flicker} A voice that isn't quite yours: \"Don't read it.\""},
+        {"", "Behind the shelves, a small second door. A keyhole, with a number scratched beside it."},
+        {"Arnie (thinking)", "{shake} I... I need some air."},
+        {"", "You push past Jenna and run."}
+    };
+
 
     // ============ HINTS ============
     public static final String HINT_CAESAR
