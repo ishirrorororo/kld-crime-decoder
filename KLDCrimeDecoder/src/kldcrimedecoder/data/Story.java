@@ -252,14 +252,14 @@ public class Story {
     // The numbers connect across levels:
     //   shift 14 = the day of the science fair (Level 1)
     //   shelf 005 = the month the fair was held (Level 2)
-    //   lock 1405 = day + month, a date only Arnie remembers (Level 9)
+    //   lock 1403 = day + month, a date only Arnie remembers (Level 9)
     public static final String CAESAR_PLAIN = "meet me here";
     public static final int CAESAR_SHIFT = 14;
     public static final int BINARY_VALUE = 5;
     public static final int BINARY_BITS = 8;
     public static final String SCRAMBLE_WORD = "COMPILER";
     public static final String MORSE_WORD = "NOTES";
-    public static final String LOCK_CODE = "1405";
+    public static final String LOCK_CODE = "1403";
 
     // ============ RIDDLES (Level 5) ============
     // Each row: {question, hint, accepted answers separated by |}

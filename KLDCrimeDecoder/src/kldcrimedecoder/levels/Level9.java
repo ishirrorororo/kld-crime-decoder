@@ -2,23 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-
-
 package kldcrimedecoder.levels;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,7 +17,7 @@ import kldcrimedecoder.data.Story;
 import kldcrimedecoder.engine.GameManager;
 import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
-import kldcrimedecoder.puzzles.PadlockCode;
+import kldcrimedecoder.puzzles.PadlockPuzzle;
 import kldcrimedecoder.ui.CombinationWheel;
 import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.ui.Theme;
@@ -42,22 +32,14 @@ public class Level9 extends JPanel {
 
     private static final String SECRET = "1403";
 
-    private static final int LOCK_ART_SIZE = 460;
-
-    private final PadlockCode lock =
-            new PadlockCode(SECRET);
+    private final PadlockPuzzle lock =
+            new PadlockPuzzle(SECRET);
 
     private final CombinationWheel[] wheels =
             new CombinationWheel[4];
 
     private final JLabel lblTitle =
             new JLabel("The Hallway Closet");
-
-    private final JPanel pnlLockArt =
-            new JPanel(null);
-
-    private final JLabel lblLockArt =
-            new JLabel();
 
     private final JButton btnPhone =
             new JButton("Phone");
@@ -83,15 +65,36 @@ public class Level9 extends JPanel {
     private final JButton btnContinue =
             new JButton("Continue");
 
-    private final JLabel lblBg =
-            new JLabel();
-
     private int hintsUsed;
     private boolean puzzleActive;
+    private boolean padlockClickable = false;
+
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
 
     public Level9() {
 
-        setLayout(null);
+        initComponents();
+        
+        pnlLockArtDesign.setVisible(false);
+        
+        // BACKGROUND LABEL FROM GUI BUILDER
+        setComponentZOrder(
+                jLabel1,
+                getComponentCount() - 1);
+
+        btnPadlock.setText("");
+        btnPadlock.setContentAreaFilled(false);
+        btnPadlock.setOpaque(false);
+        btnPadlock.setFocusPainted(false);
+        btnPadlock.setBorderPainted(false);
+        btnPadlock.setRolloverEnabled(true);
+
+        btnPadlock.setCursor(
+                new java.awt.Cursor(
+                        java.awt.Cursor.HAND_CURSOR));
+
 
         setPreferredSize(
                 new java.awt.Dimension(
@@ -99,25 +102,18 @@ public class Level9 extends JPanel {
 
         setBackground(Theme.BG);
 
-        // BACKGROUND
-        lblBg.setBounds(
-                0, 0, DESIGN_WIDTH, DESIGN_HEIGHT);
-
-        lblBg.setIcon(loadImage(
-                "room_hallway.png",
-                DESIGN_WIDTH,
-                DESIGN_HEIGHT,
-                "room_hallway.png (missing)"));
-
-        add(lblBg);
-
+        // =====================================================
         // LEVEL TITLE
-        lblTitle.setBounds(14, 524, 170, 30);
+        // =====================================================
+
+        lblTitle.setBounds(
+                14, 524, 170, 30);
 
         Theme.heading(lblTitle);
 
         lblTitle.setOpaque(true);
-        lblTitle.setBackground(new Color(0x0B1220));
+        lblTitle.setBackground(
+                new Color(0x0B1220));
 
         lblTitle.setBorder(
                 BorderFactory.createEmptyBorder(
@@ -125,24 +121,10 @@ public class Level9 extends JPanel {
 
         add(lblTitle);
 
-        // PADLOCK SPRITE
-        pnlLockArt.setBounds(
-                270, 34, LOCK_ART_SIZE, LOCK_ART_SIZE);
-
-        pnlLockArt.setOpaque(false);
-
-        lblLockArt.setBounds(
-                0, 0, LOCK_ART_SIZE, LOCK_ART_SIZE);
-
-        lblLockArt.setIcon(loadImage(
-                "padlock_combination.png",
-                LOCK_ART_SIZE,
-                LOCK_ART_SIZE,
-                "padlock_combination.png (missing)"));
-
-        pnlLockArt.add(lblLockArt);
-
+        // =====================================================
         // FOUR NUMBER WHEELS
+        // =====================================================
+
         int[] wheelX = {
             168, 200, 232, 264
         };
@@ -157,21 +139,29 @@ public class Level9 extends JPanel {
 
             wheels[i].setEnabled(false);
 
-            pnlLockArt.add(wheels[i]);
+            pnlLockArtDesign.add(wheels[i]);
         }
 
-        add(pnlLockArt);
 
+        // =====================================================
         // PHONE BUTTON
-        btnPhone.setBounds(14, 14, 110, 34);
+        // =====================================================
+
+        btnPhone.setBounds(
+                14, 14, 110, 34);
 
         btnPhone.addActionListener(
                 e -> togglePhone());
 
         add(btnPhone);
 
+
+        // =====================================================
         // PHONE WALLPAPER
-        pnlPhone.setBounds(300, 20, 400, 110);
+        // =====================================================
+
+        pnlPhone.setBounds(
+                300, 20, 400, 110);
 
         pnlPhone.setBackground(
                 new Color(0x10151F));
@@ -187,8 +177,11 @@ public class Level9 extends JPanel {
                 "<html>MAR 14: ARNIE'S BIRTHDAY.<br>"
                 + "Ube cake!</html>");
 
-        lblPhoneBanner.setFont(Theme.MONO_BOLD);
-        lblPhoneBanner.setForeground(Theme.AMBER);
+        lblPhoneBanner.setFont(
+                Theme.MONO_BOLD);
+
+        lblPhoneBanner.setForeground(
+                Theme.AMBER);
 
         pnlPhone.add(lblPhoneBanner);
 
@@ -204,13 +197,18 @@ public class Level9 extends JPanel {
 
         add(pnlPhone);
 
+
+        // =====================================================
         // FEEDBACK
+        // =====================================================
+
         lblFeedback.setBounds(
                 172, 516, 460, 56);
 
         Theme.label(lblFeedback);
 
         lblFeedback.setOpaque(true);
+
         lblFeedback.setBackground(
                 new Color(0x0B1220));
 
@@ -223,7 +221,11 @@ public class Level9 extends JPanel {
 
         add(lblFeedback);
 
+
+        // =====================================================
         // TRY LOCK BUTTON
+        // =====================================================
+
         btnUnlock.setBounds(
                 642, 524, 105, 34);
 
@@ -232,7 +234,11 @@ public class Level9 extends JPanel {
 
         add(btnUnlock);
 
+
+        // =====================================================
         // HINT BUTTON
+        // =====================================================
+
         btnHint.setBounds(
                 756, 524, 100, 34);
 
@@ -241,7 +247,11 @@ public class Level9 extends JPanel {
 
         add(btnHint);
 
+
+        // =====================================================
         // CONTINUE BUTTON
+        // =====================================================
+
         btnContinue.setBounds(
                 866, 524, 118, 34);
 
@@ -250,6 +260,11 @@ public class Level9 extends JPanel {
 
         add(btnContinue);
 
+
+        // =====================================================
+        // BUTTON STYLING
+        // =====================================================
+
         Theme.button(
                 btnHint,
                 btnContinue,
@@ -257,29 +272,59 @@ public class Level9 extends JPanel {
                 btnPhoneClose,
                 btnUnlock);
 
+
+        // =====================================================
+        // INITIAL BUTTON STATES
+        // =====================================================
+
         btnContinue.setEnabled(false);
         btnUnlock.setEnabled(false);
         btnHint.setEnabled(false);
         btnPhone.setEnabled(false);
 
+        // Keep the padlock enabled so it can detect mouse hovering.
+        btnPadlock.setEnabled(true);
+        padlockClickable = false;
+
+
+        // =====================================================
         // START LEVEL WHEN DISPLAYED
-        addComponentListener(new ComponentAdapter() {
+        // =====================================================
+
+        addComponentListener(
+                new ComponentAdapter() {
 
             @Override
-            public void componentShown(ComponentEvent e) {
+            public void componentShown(
+                    ComponentEvent e) {
+
                 startLevel();
             }
         });
 
-        // KEEP BACKGROUND BEHIND OTHER COMPONENTS
+        // =====================================================
+        // COMPONENT LAYERING
+        // =====================================================
+
+        // KEEP PADLOCK BUTTON IN FRONT
         setComponentZOrder(
-                lblBg, getComponentCount() - 1);
+                btnPadlock, 0);
     }
 
-    private void startLevel() {
+    // =========================================================
+    // START LEVEL
+    // =========================================================
+
+        private void startLevel() {
 
         hintsUsed = 0;
         puzzleActive = false;
+        padlockClickable = false;
+        pnlLockArtDesign.setVisible(false);
+        btnPadlock.setVisible(true);
+
+        // Keep enabled for hover detection.
+        btnPadlock.setEnabled(true);
 
         pnlPhone.setVisible(false);
 
@@ -294,18 +339,38 @@ public class Level9 extends JPanel {
         btnPhone.setEnabled(false);
 
         for (CombinationWheel wheel : wheels) {
+
             wheel.setDigit(0);
             wheel.setEnabled(false);
         }
 
         speak(
                 Story.L9_INTRO,
-                this::beginPuzzle);
+                () -> {
+
+                    padlockClickable = true;
+
+                    setFeedback(
+                            "Click the padlock to inspect it.",
+                            true);
+                });
     }
+
+
+    // =========================================================
+    // BEGIN PUZZLE
+    // =========================================================
 
     private void beginPuzzle() {
 
         puzzleActive = true;
+
+        // SHOW THE COMBINATION PUZZLE
+        pnlLockArtDesign.setVisible(true);
+        setComponentZOrder(pnlLockArtDesign, 0);
+
+        // HIDE THE INVISIBLE PADLOCK CLICK AREA
+        btnPadlock.setVisible(false);
 
         for (CombinationWheel wheel : wheels) {
             wheel.setEnabled(true);
@@ -317,7 +382,14 @@ public class Level9 extends JPanel {
 
         setFeedback(
                 Story.L9_PROMPT, true);
+
+        repaint();
     }
+
+
+    // =========================================================
+    // UPDATE CODE PREVIEW
+    // =========================================================
 
     private void updateCodePreview() {
 
@@ -337,6 +409,11 @@ public class Level9 extends JPanel {
         }
     }
 
+
+    // =========================================================
+    // CHECK CODE
+    // =========================================================
+
     private void checkCode() {
 
         if (!puzzleActive) return;
@@ -355,6 +432,11 @@ public class Level9 extends JPanel {
         }
     }
 
+
+    // =========================================================
+    // WRONG ANSWER
+    // =========================================================
+
     private void onWrong() {
 
         ScoreManager.onWrong();
@@ -362,6 +444,11 @@ public class Level9 extends JPanel {
         setFeedback(
                 Story.L9_WRONG, false);
     }
+
+
+    // =========================================================
+    // PUZZLE SOLVED
+    // =========================================================
 
     private void onSolved() {
 
@@ -387,6 +474,11 @@ public class Level9 extends JPanel {
                 () -> btnContinue.setEnabled(true));
     }
 
+
+    // =========================================================
+    // SHOW HINT
+    // =========================================================
+
     private void showHint() {
 
         if (!puzzleActive) return;
@@ -405,6 +497,11 @@ public class Level9 extends JPanel {
                 true);
     }
 
+
+    // =========================================================
+    // PHONE
+    // =========================================================
+
     private void togglePhone() {
 
         pnlPhone.setVisible(
@@ -418,6 +515,11 @@ public class Level9 extends JPanel {
             pnlPhone.repaint();
         }
     }
+
+
+    // =========================================================
+    // DIALOGUE
+    // =========================================================
 
     private void speak(
             String[][] lines,
@@ -438,6 +540,11 @@ public class Level9 extends JPanel {
         box.play(lines, after);
     }
 
+
+    // =========================================================
+    // FEEDBACK
+    // =========================================================
+
     private void setFeedback(
             String text,
             boolean good) {
@@ -446,75 +553,14 @@ public class Level9 extends JPanel {
                 good ? Theme.AMBER : BAD);
 
         lblFeedback.setText(
-                "<html>" +
-                text.replace("\n", "<br>") +
-                "</html>");
+                "<html>"
+                + text.replace("\n", "<br>")
+                + "</html>");
 
         lblFeedback.setVisible(
                 !text.isEmpty());
     }
-
-    private static Icon loadImage(
-            String file,
-            int width,
-            int height,
-            String label) {
-
-        java.net.URL url =
-                Level9.class.getResource(
-                        "/kldcrimedecoder/images/" + file);
-
-        if (url != null) {
-
-            Image image =
-                    new ImageIcon(url)
-                            .getImage()
-                            .getScaledInstance(
-                                    width,
-                                    height,
-                                    Image.SCALE_SMOOTH);
-
-            return new ImageIcon(image);
-        }
-
-        BufferedImage placeholder =
-                new BufferedImage(
-                        width,
-                        height,
-                        BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D g =
-                placeholder.createGraphics();
-
-        g.setRenderingHint(
-                RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-
-        g.setColor(new Color(0x2B3A55));
-        g.fillRect(0, 0, width, height);
-
-        g.setColor(Theme.AMBER);
-        g.drawRect(0, 0, width - 1, height - 1);
-
-        g.setFont(
-                new Font("Consolas", Font.PLAIN, 14));
-
-        FontMetrics metrics =
-                g.getFontMetrics();
-
-        g.drawString(
-                label,
-                Math.max(
-                        2,
-                        (width - metrics.stringWidth(label)) / 2),
-                height / 2);
-
-        g.dispose();
-
-        return new ImageIcon(placeholder);
-    }
-
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -524,23 +570,52 @@ public class Level9 extends JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        btnPadlock = new javax.swing.JButton();
+        pnlLockArtDesign = new javax.swing.JPanel();
+        lblLockArt = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(1000, 600));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        btnPadlock.setContentAreaFilled(false);
+        btnPadlock.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnPadlock.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
+        btnPadlock.setNextFocusableComponent(btnPadlock);
+        btnPadlock.addActionListener(this::btnPadlockActionPerformed);
+        add(btnPadlock, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 290, 50, 80));
+
+        pnlLockArtDesign.setOpaque(false);
+        pnlLockArtDesign.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblLockArt.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblLockArt.setAutoscrolls(true);
+        lblLockArt.setCursor(new java.awt.Cursor(java.awt.Cursor.MOVE_CURSOR));
+        pnlLockArtDesign.add(lblLockArt, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 70, -1, 410));
+
+        add(pnlLockArtDesign, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 0, 640, 600));
+
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_hallway.png"))); // NOI18N
+        jLabel1.setLabelFor(jLabel1);
         jLabel1.setText("jLabel1");
         add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
-
-        jLabel2.setText("jLabel2");
-        add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 330, -1, -1));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnPadlockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPadlockActionPerformed
+        if (!padlockClickable) {
+        return;
+        }
+
+        padlockClickable = false;
+
+        beginPuzzle();
+    }//GEN-LAST:event_btnPadlockActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnPadlock;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel lblLockArt;
+    private javax.swing.JPanel pnlLockArtDesign;
     // End of variables declaration//GEN-END:variables
 }
