@@ -18,8 +18,7 @@ public class GameState {
     /** Key used to store the word the player types for the final cipher. */
     public static final String KEY_FINAL_WORD = "finalKeyWord";
 
-    /** Nickname rules (prologue Scene 0C). */
-    public static final int MAX_NICKNAME = 8;
+    /** What the player is called until they type their own name (Scene 0C). */
     public static final String DEFAULT_NICKNAME = "ARNIE";
 
     private static GameState instance;
@@ -55,16 +54,14 @@ public class GameState {
         playerChoices.clear();
     }
 
-    // ---- nickname ----
-    public String getNickname() { return nickname; }
+    // ---- nickname (typed in Scene 0C) ----
+    public String getNickname() {
+        return nickname;
+    }
 
-    /** Letters only, max 8 letters, upper-cased. Blank or null -> default ARNIE. */
     public void setNickname(String name) {
-        String cleaned = (name == null) ? "" : name.replaceAll("[^A-Za-z]", "").toUpperCase();
-        if (cleaned.length() > MAX_NICKNAME) {
-            cleaned = cleaned.substring(0, MAX_NICKNAME);
-        }
-        nickname = cleaned.isEmpty() ? DEFAULT_NICKNAME : cleaned;
+        String n = (name == null) ? "" : name.trim();
+        nickname = n.isEmpty() ? DEFAULT_NICKNAME : n.toUpperCase();
     }
 
     // ---- score ----
@@ -99,16 +96,6 @@ public class GameState {
             inventory.add(item);
         }
     }
-
-    /** Overload: add several items at once, e.g. addItem(PHONE, KEY). */
-    public void addItem(String... items) {
-        for (String item : items) {
-            addItem(item);
-        }
-    }
-
-    /** Removes an item (e.g. a key after it is used). Returns true if it was there. */
-    public boolean removeItem(String item) { return inventory.remove(item); }
 
     public boolean hasItem(String item) { return inventory.contains(item); }
 

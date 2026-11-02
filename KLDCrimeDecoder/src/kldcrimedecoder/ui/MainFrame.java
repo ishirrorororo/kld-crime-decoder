@@ -68,8 +68,8 @@ cardPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
     addScreen("badEnding",  new BadEnding());
 
     showCard("menu");
-    GameManager.startNewGame();   // this line starts the clock
-//    LevelManager.jumpTo(3); // remove in comment if you want to jump to level
+//    GameManager.startNewGame();   // this line starts the clock
+  //LevelManager.jumpTo(0); // remove in comment if you want to jump to level
 }
 
 private void placeDialogue(DialogueBox box) {
@@ -160,6 +160,12 @@ public void setTimerText(int secondsLeft) {
     int s = secondsLeft % 60;
     lblTimer.setText(String.format("Time before the bell rings: %02d:%02d", m, s));
 }
+
+    /** Shows or hides the timer in the top bar. */
+public void setTimerVisible(boolean visible) {
+        lblTimer.setVisible(visible);
+        lblScore.setVisible(visible);
+    }
 
 /** Updates the score label (called by ScoreManager in Phase 2). */
 public void setScoreText(int score) {

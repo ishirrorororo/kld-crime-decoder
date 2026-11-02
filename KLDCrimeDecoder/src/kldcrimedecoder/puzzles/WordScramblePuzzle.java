@@ -1,83 +1,51 @@
 package kldcrimedecoder.puzzles;
 
 import java.util.Random;
-import kldcrimedecoder.data.Story;
 
 /**
- * Word scramble. The player unscrambles a word, and that word
- * tells them which book to pick from the JList.
+ * Same calls your teammates already use in Level 3:
+ *   new WordScramblePuzzle(Story.SCRAMBLE_WORD)   and   puzzle.check(word)
+ * If you already have this file, keep yours and only compare it with this one.
  */
-public class WordScramblePuzzle implements Puzzle {
+public class WordScramblePuzzle extends Puzzle {
 
-    private final String word;        // the answer, in capitals
-    private final String scrambled;   // the mixed-up letters
-    private boolean solved;           // becomes true after a correct check()
+    private final String word;
+    private final String scrambled;
 
     public WordScramblePuzzle(String word) {
+        super(null);
         this.word = word.toUpperCase();
-        this.scrambled = scramble(this.word);
+        this.scrambled = shuffle(this.word);
     }
 
-    /** Mixes the letters. The seed is fixed, so the result is always the same. */
-    private static String scramble(String w) {
-        char[] letters = w.toCharArray();
-        Random rnd = new Random(w.hashCode());
-        // Try a few times so the result is different from the original word.
-        for (int attempt = 0; attempt < 20; attempt++) {
-            for (int i = letters.length - 1; i > 0; i--) {   // Fisher-Yates shuffle
+    private static String shuffle(String w) {
+        char[] c = w.toCharArray();
+        Random rnd = new Random();
+        for (int attempt = 0; attempt < 20; attempt++) {      // try not to return the same word
+            for (int i = c.length - 1; i > 0; i--) {
                 int j = rnd.nextInt(i + 1);
-                char tmp = letters[i];
-                letters[i] = letters[j];
-                letters[j] = tmp;
+                char t = c[i];
+                c[i] = c[j];
+                c[j] = t;
             }
-            if (!new String(letters).equals(w)) {
+            if (!new String(c).equals(w)) {
                 break;
             }
         }
-        return new String(letters);
-    }
-
-    /** Keeps only the letters, in lowercase, so "Dune!" and "dune" both match. */
-    private static String lettersOnly(String s) {
-        return (s == null) ? "" : s.replaceAll("[^A-Za-z]", "").toLowerCase();
+        return new String(c);
     }
 
     public String getScrambled() {
         return scrambled;
     }
 
-    public String getWord() {
-        return word;
-    }
-
-    public String getPrompt() {
-        return "A note on shelf 005 is smudged:  " + scrambled
-             + "\nUnscramble it to find the right book.";
-    }
-
-    /** Checks the player's answer. Marks the puzzle solved when it is correct. */
+    @Override
     public boolean check(String answer) {
-        boolean correct = lettersOnly(answer).equals(word.toLowerCase());
-        if (correct) {
-            solved = true;
-        }
-        return correct;
+        return answer != null && answer.trim().equalsIgnoreCase(word);
     }
 
-    // ===== Puzzle interface =====
-
-    @Override
-    public String getTitle() {
-        return "Word Scramble";
-    }
-
-    @Override
-    public boolean isSolved() {
-        return solved;
-    }
-
-    @Override
-    public String getHint(int number) {
-        return Story.HINT_SCRAMBLE;     // one hint for every number
+    /** POLYMORPHISM (overloading): the same check, but from tiles/characters. */
+    public boolean check(char[] letters) {
+        return check(new String(letters));
     }
 }

@@ -1,3 +1,4 @@
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
@@ -180,7 +181,7 @@ private void styleShelfLabel(JLabel lbl, String number) {
         add(libShelf_005, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 50, 380, 500));
 
         ShelfBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/library_shelf.png"))); // NOI18N
-        add(ShelfBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -20, 1000, 600));
+        add(ShelfBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
     }// </editor-fold>//GEN-END:initComponents
 
     private void libShelf_005ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libShelf_005ActionPerformed
@@ -191,8 +192,7 @@ private void styleShelfLabel(JLabel lbl, String number) {
     }//GEN-LAST:event_libShelf_005ActionPerformed
 
     private void libShelf_005MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_libShelf_005MouseExited
-        libShelf_005.setBorderPainted(
-                false);
+        libShelf_005.setBorderPainted(false);
         libShelf_005.repaint();
 
  // TODO add your handling code here:
@@ -236,3 +236,4 @@ private void styleShelfLabel(JLabel lbl, String number) {
     private javax.swing.JButton libShelf_006;
     // End of variables declaration//GEN-END:variables
 }
+

@@ -122,8 +122,8 @@ public class SuspectBoard extends javax.swing.JPanel {
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblTitle.setText("The Suspect Board");
-        add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 200, 28));
-        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 8, 730, 32));
+        add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 236, 28));
+        add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(276, 8, 694, 32));
 
         javax.swing.GroupLayout pnlBoardLayout = new javax.swing.GroupLayout(pnlBoard);
         pnlBoard.setLayout(pnlBoardLayout);
@@ -196,11 +196,15 @@ private void buildBoard() {
 
 /** One pinned card: portrait, name, and a short reason. */
 private JLabel makeCard(final int index, String[] row) {
+    Icon pic = Theme.portrait(row[0], 100, 112);
+if (pic == null) {
+    pic = loadImage(portraitFile(row[0]), 100, 112, row[0]);   // placeholder box
+}
     final JLabel card = new JLabel(
-            "<html><body style='width:128px'><div align='center'><b>" + row[0]
-            + "</b><br><small>" + row[1] + "</small></div></body></html>",
-            loadImage(portraitFile(row[0]), 100, 112, row[0]),
-            SwingConstants.CENTER) {
+        "<html><div align='center'><b>" + row[0] + "</b><br><small>"
+        + wrap(row[1], 20) + "</small></div></html>",
+        pic,
+        SwingConstants.CENTER) {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -354,6 +358,23 @@ private static Icon loadImage(String file, int w, int h, String label) {
 private void setFeedback(String text) {
     lblFeedback.setText(text);
     lblFeedback.setVisible(!text.isEmpty());
+}
+/** Breaks a sentence into short lines, so it never runs past the edge of the card. */
+private static String wrap(String text, int maxChars) {
+    StringBuilder out = new StringBuilder();
+    int line = 0;
+    for (String word : text.split(" ")) {
+        if (line > 0 && line + 1 + word.length() > maxChars) {
+            out.append("<br>");                  // start a new line
+            line = 0;
+        } else if (line > 0) {
+            out.append(' ');
+            line++;
+        }
+        out.append(word);
+        line += word.length();
+    }
+    return out.toString();
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -9,16 +9,6 @@ import kldcrimedecoder.ui.DialogueBox;
  * form can call it, for example GameManager.showCard("level2").
  */
 public class GameManager {
-    
-        /** Prologue bedroom: no clock yet. */
-    public static void pauseTimer() {
-        TimerManager.stop();
-    }
-
-    /** Prologue classroom: the 15 minutes start here. */
-    public static void startTimer() {
-        TimerManager.start();
-    }
 
     private static MainFrame mainFrame;
 
@@ -45,6 +35,12 @@ public static DialogueBox getDialogue() {
     }
     if (mainFrame != null) {
         mainFrame.showCard(name);
+    }
+}
+
+public static void setTimerVisible(boolean visible) {
+    if (mainFrame != null) {
+        mainFrame.setTimerVisible(visible);
     }
 }
 

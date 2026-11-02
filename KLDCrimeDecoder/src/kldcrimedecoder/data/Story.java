@@ -11,11 +11,11 @@ public class Story {
     public static final String SUBTITLE = "Someone is missing. Don't trust the first answer.";
 
     public static final String HOW_TO_PLAY
-            = "You are Arnie. Alli is missing.\n\n"
-            + "- Solve each puzzle to move to the next level.\n"
-            + "- Wrong answers and hints cost you time.\n"
-            + "- Beat the bell before the timer hits 00:00.\n"
-            + "- Read the clues carefully. Some of them are about you.";
+        = "You are Arnie. Alli is missing.\n\n"
+        + "- Solve each puzzle to move to the next level.\n"
+        + "- Wrong answers and hints cost you time.\n"
+        + "- Beat the bell before the timer hits 00:00.\n"
+        + "- Read the clues carefully. Some of them are about you.";
 
     // ============ LEVEL TITLES (index = level number) ============
     public static final String[] LEVEL_TITLES = {
@@ -31,94 +31,92 @@ public class Story {
         "Old Storage Room", // 9
         "The Mirror Room" // 10
     };
-    // Alli: LEVELS PROLOGUE TO 2
-    // ============ LEVEL 0: PROLOGUE (Allison) ============
-    public static final String ITEM_ARNIE_PHONE = "Arnie's phone";
-    public static final String ITEM_TORN_PHOTO  = "Torn photo";
-    public static final String ITEM_ALLI_PHONE  = "Alli's phone";
-    public static final String ITEM_BRASS_KEY   = "Brass key";
 
-    // ---- Scene 0A: Arnie's bedroom ----
-    public static final String PROLOGUE_TUTORIAL
-            = "Click the phone, the torn photo, and the bag to collect them.";
-
-    public static final String[][] PROLOGUE_0A_INTRO = {
-        {"", "7:02 AM. A phone buzzes on the desk."}
+    // ============ LEVEL 0: PROLOGUE (draft, refined in Phase 5) ============
+    public static final String[][] PROLOGUE = {
+        {"Mom", "Arnie, breakfast! Don't be late again. Alli's mom already texted me twice."},
+        {"Arnie", "Second place again last week. Fine. I'm fine."},
+        {"Prof. Null", "Attendance. Alli? ... Alli?"},
+        {"Arnie", "She's never absent. Something is wrong."},
+        {"Arnie", "Wait. Why is Alli's phone in my bag?"},
+        {"Arnie", "I don't remember getting here."} // foreshadowing gap
+    }; 
+    
+        // ============ PROLOGUE to Level 2 ============
+    // ---- Prologue 0A ----
+    public static final String P0A_TUTORIAL = "Click the phone, the torn photo, and the bag to collect them.";
+    public static final String P0A_MOM_TEXT =
+    "Arnie, did Alli stay at your place last night? She never came home.";
+    public static final String[][] P0A_INTRO = {
+        { "Narrator", "7:02 AM. A phone buzzes on the desk." }
+    };
+    public static final String[][] P0A_PHONE_LOCK = {
+        { "Arnie", "Alli's mom?" }
     };
 
-    // Shown on the lock screen picture, before the message opens
-    public static final String[][] PROLOGUE_PHONE_NOTIF = {
-        {"Arnie", "Alli's Mom?"}
+    public static final String[][] P0A_PHONE = {
+    { "Arnie (thinking)", "What? She left before me. Her last text said see you tomorrow. Alli always keeps her word." }
+};
+    public static final String[][] P0A_PHOTO = {
+    { "Narrator", "The two of you, ripped down the middle. Only Alli's half is left." },
+    { "Arnie (thinking)", "{slow} Alli... where are you?" }
+};
+    public static final String[][] P0A_BAG = {
+    { "Arnie (thinking)", "I'll ask around at school." }
+};
+  
+ 
+    // ---- Prologue 0B ----
+    public static final String[][] P0B_CLASS = {
+        { "Prof. Danel [neutral]", "Arnie." },
+        { "Arnie", "Present." },
+        { "Prof. Danel [neutral]", "Alli? ...Alli?" },
+        { "Prof. Danel [confused]", "Strange. She has never missed a class. Not once." },
+        { "Arnie (thinking)", "Never once. Even her attendance record outranks me." },
+        { "Prof. Danel [neutral]", "It's finals week, so the building stays open late. Take a fifteen-minute break. When the bell rings, we start." }
     };
 
-    // Row 0 is drawn as the chat bubble on the phone; row 1 is Arnie's thought
-    public static final String[][] PROLOGUE_PHONE = {
-        {"Text from Alli's mom", "Arnie, did Alli stay at your place last night? She never came home."},
-        {"Arnie (thinking)", "What? She left before me. Her last text said see you tomorrow. Alli always keeps her word."}
-    };
-    public static final String[][] PROLOGUE_PHOTO = {
-        {"", "The two of you, ripped down the middle. Only Alli's half is left."},
-        {"Arnie (thinking)", "{slow} Alli... where are you?"}
-    };
-    // The bag has no lines in the script, so it is collected silently.
-    public static final String[][] PROLOGUE_0A_END = {
-        {"Arnie (thinking)", "I'll ask around at school."}
+    public static final String[][] P0B_KEY = {
+        { "Narrator", "You reach into your bag for a pen. Your fingers close around two things that aren't yours: a phone, and a small brass key with a paper tag, the number too faded to read." },
+        { "Arnie (thinking)", "{slow} Alli's phone. In my bag. I don't remember putting it there." },
+        { "Arnie (thinking)", "And a key. Probably a locker key." }                  
     };
     
-    // ---- Scene 0B: Classroom ----
-    // Prof. Danel [neutral]
-    public static final String[][] PROLOGUE_0B_A = {
-        {"Prof. Danel", "Arnie."},
-        {"Arnie", "Present."},
-        {"Prof. Danel", "Alli? ...Alli?"}
+    public static final String[][] P0B_KEY_ADDED = {
+        { "Narrator", "The brass key is added to your inventory." }
     };
-    // Prof. Danel [confused]
-    public static final String[][] PROLOGUE_0B_B = {
-        {"Prof. Danel", "Strange. She has never missed a class. Not once."},
-        {"Arnie (thinking)", "Never once. Even her attendance record outranks me."}
+ 
+    // ---- Prologue 0C ----
+     public static final String P0C_PROMPT = "What does Alli call you?";
+    public static final String[][] P0C_INTRO = {
+        { "Narrator", "Alli's phone is locked." },
+        { "Arnie (thinking)", "Of course it is. One question on the screen. Only one answer." }
     };
-    // Prof. Danel [neutral] again
-    public static final String[][] PROLOGUE_0B_C = {
-        {"Prof. Danel", "It's finals week, so the building stays open late. Take a fifteen-minute break. When the bell rings, we start."},
-        {"", "You reach into your bag for a pen. Your fingers close around two things that aren't yours: a phone, and a small brass key with a paper tag, the number too faded to read."},
-        {"Arnie (thinking)", "{slow} Alli's phone. In my bag. I don't remember putting it there."},
-        {"Arnie (thinking)", "And a key. Probably a locker key."},
-        {"", "The brass key is added to your inventory."}
-    };
-
-    // ---- Scene 0C: Name prompt ----
-    public static final String PROLOGUE_0C_PROMPT = "Lock screen: What does Alli call you?";
-    public static final String[][] PROLOGUE_0C_OPEN = {
-        {"", "The phone opens. An unread message from \"Amie\"."}
+    public static final String[][] P0C_OPEN = {
+        { "Narrator", "The phone opens. An unread message from \"Amie\"." }
     };
     
-    // PASTE these inside your existing Story class (same {speaker, text} format as the prologue).
-    // If your speaker names use another format (e.g. "Arnie (thinking)"), just edit the first value.
-
-    public static final String LEVEL1_CODED = "ASSH AS VSFS";
-    public static final String LEVEL1_PLAIN = "MEET ME HERE";
-    public static final String ITEM_WIFI_LOG = "Library Wi-Fi log";
-    public static final String LEVEL1_WIFI = "Connected to KLD-Library, 9:38 PM";
-
-    public static final String[][] LEVEL1_INTRO = {
-        {"Arnie", "She never forgets a date. Even mine."},
-        {"Amie", "Looking for her? Warm. Colder than you think."},
-        {"Amie", "I left you a lock. Turn the wheel by the day you were born."}
+        // ============ LEVEL 2: Library Computers ============
+    public static final String[][] L2_INTRO = {
+        { "Reisha [happy]", "Break-time rush? Come in. Which computer do you need?" },
+        { "Arnie", "I need last night's login log." },
+        { "Reisha [happy]", "Staff only. But it's you, so." },
+        { "Narrator", "The screen lists two logins: ALLI, 9:38 PM. AMIE, 9:40 PM." },
+        { "Reisha [confused]", "Two accounts, one library, two minutes apart. Alli never shares. Ever." },
+        { "Reisha [confused]", "And someone stuck this on the monitor." }
     };
-
-    public static final String[][] LEVEL1_AFTER_A = {
-        {"Arnie", "'Meet me here.' But here is a place, not a pronoun."}
+    public static final String L2_NOTE = "Shelf = the total of the lit bulbs.";
+    public static final String L2_PROMPT = "Click the lit bulbs to add them up. Type the total in the catalog search.";
+    public static final String L2_DARK = "That bulb is dark. Only the lit bulbs count.";
+    public static final String L2_RIGHT = "Click. Something falls into place.";
+    public static final String L2_WRONG = "Wrong door. Try another.";
+    public static final String[] L2_HINTS = {
+        "Only the lit bulbs count. Add their numbers.",
+        "The lit ones are 4 and 1."
     };
-
-    // shown after the Wi-Fi log appears
-    public static final String[][] LEVEL1_AFTER_B = {
-        {"Arnie", "The library. That's where she was last online."},
-        {"Arnie", "That number came too easily. Why did it come so easily?"},
-        {"", "Evidence added: Library Wi-Fi log."}
-    };
-
-    public static final String[][] LEVEL1_OUT = {
-        {"", "You slip the phone into your pocket and walk to the library. Fourteen minutes left."}
+    public static final String[][] L2_SOLVED = {
+        { "Arnie (thinking)", "Five. Shelf five." },
+        { "Arnie (thinking)", "{slow} Nine-forty. I was home at nine-forty. I think I was home." }
     };
     // =====================================================================
     // JOEL: LEVELS 3 TO 5
@@ -338,7 +336,7 @@ public class Story {
     public static final int BINARY_BITS = 8;
     public static final String SCRAMBLE_WORD = "COMPILER";
     public static final String MORSE_WORD = "NOTES";
-    public static final String LOCK_CODE = "1405";
+    public static final String LOCK_CODE = "1403";
 
     // ============ RIDDLES (Level 5) ============
     // Each row: {question, hint, accepted answers separated by |}
@@ -370,4 +368,48 @@ public class Story {
             = "Some things can't be fixed in a day. But she stayed to listen.";
 
     public static final String BAD_LAST_LINE = "You lost to yourself.";
+    
+        // ---- items (Prologue and Level 1) ----
+    public static final String ITEM_OWN_PHONE = "Arnie's phone";
+    public static final String ITEM_TORN_PHOTO = "Torn photo";
+    public static final String ITEM_BAG = "School bag";
+    public static final String ITEM_ALLI_PHONE = "Alli's phone";
+    public static final String ITEM_KEY = "Brass key";
+    public static final String ITEM_WIFI_LOG = "Library Wi-Fi log";
+        // ============ LEVEL 1: Alli's Phone ============
+    public static final String L1_CODED = "ASSH AS VSFS";
+
+    public static final String[][] L1_INTRO = {
+        { "Narrator", "Break time. You hide Alli's phone under your desk. The wallpaper is a photo of the two of you." },
+        { "Arnie (thinking)", "She never forgets a date. Even mine." }
+    };
+    public static final String L1_TAP_MESSAGES = "Tap Messages to read the new text.";
+
+    public static final String[][] L1_AMIE = {
+        { "Amie (text)", "Looking for her? Warm. Colder than you think." },
+        { "Amie (text)", "I left you a lock. Turn the wheel by the day you were born." }
+    };
+    public static final String L1_PUZZLE = "Turn the wheel until the message makes sense, then press Unlock.";
+
+    public static final String L1_RIGHT = "Click. Something falls into place.";
+    public static final String L1_WRONG = "No. That's not what the page is saying.";
+    public static final String L1_HINT_INTRO = "{slow} Fine. A nudge. Just this once.";
+    public static final String[] L1_HINTS = {
+        "Amie says the day you were born. Check the wallpaper.",
+        "The reminder says March 14. Turn the wheel 14."
+    };
+
+    public static final String[][] L1_SOLVED = {
+        { "Arnie (thinking)", "\"Meet me here.\" But here is a place, not a pronoun." }
+    };
+    public static final String[][] L1_WIFI = {
+        { "Narrator", "The Wi-Fi tab opens by itself. Connected to KLD-Library, 9:38 PM." },
+        { "Arnie (thinking)", "The library. That's where she was last online." },
+        { "Arnie (thinking)", "{flicker} That number came too easily. Why did it come so easily?" },
+        { "Narrator", "Library Wi-Fi log added to your inventory." }
+    };
+    public static final String L1_TAP_BACK = "Tap the arrow to put the phone away.";
+    public static final String[][] L1_OUT = {
+        { "Narrator", "You slip the phone into your pocket and walk to the library. Fourteen minutes left." }
+    };
 }

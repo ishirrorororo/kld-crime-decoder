@@ -164,6 +164,10 @@ public void say(String speaker, String text) {
     play(new String[][] { { speaker, text } }, null);
 }
 
+public void play(String text, Runnable onFinished) {
+    play(new String[][] { { "", text } }, onFinished);
+}
+
 /**
  * Shows a line AND a box of choices. onPick gets the number of the
  * option the player clicked (0 for the first one).

@@ -34,4 +34,16 @@ public class ScoreManager {
         GameState.getInstance().addScore(HINT_POINTS);
         TimerManager.drain(HINT_SECONDS);
     }
+    
+    /** Hint that costs a custom number of seconds. */
+    public static void onHint(int seconds) {
+        GameState.getInstance().addScore(HINT_POINTS);
+        TimerManager.drain(seconds);
+    }
+
+    /** Wrong answer that costs a custom number of seconds. */
+    public static void onWrong(int seconds) {
+        GameState.getInstance().addScore(WRONG_POINTS);
+        TimerManager.drain(seconds);
+    }
 }
