@@ -32,6 +32,7 @@ import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.engine.TimerManager;
 import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.puzzles.ClockclipsPuzzle;
+import kldcrimedecoder.ui.Theme;
 
 /**
  * Level 8: The Front Desk (Joel). Four camera clips sit on the four screens of the monitor.
@@ -59,7 +60,7 @@ public class Level8 extends javax.swing.JPanel {
     private Phase phase = Phase.INTRO;
 
     // Joel's height on screen (his picture is scaled to this, keeping its proportions)
-    private static final int SPRITE_H = 390;
+    private static final int SPRITE_H = 430;
 
     // The four monitor screens, measured for room_monitor.png (760 x 468) placed at x=20, y=24.
     // Each clip is 344 x 181 and sits on a screen, just under the monitor frame.
@@ -246,6 +247,8 @@ public class Level8 extends javax.swing.JPanel {
         deskPanel.setVisible(false);
         lblJoel.setVisible(false);
         btnContinue.setVisible(false);
+        
+        kldcrimedecoder.ui.Theme.button(btnCheck, btnHint, btnRewind, btnSkip, btnContinue);
     }
 
     /** The picture set on the label in the Design tab, or else the picture file, or null if neither exists. */
@@ -846,7 +849,7 @@ public class Level8 extends javax.swing.JPanel {
         add(deskPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, -1, -1));
 
         lblJoel.setText("joel");
-        add(lblJoel, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 300, 390));
+        add(lblJoel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 340, 430));
 
         lblBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_desk.png"))); // NOI18N
         lblBackground.setText("bg");

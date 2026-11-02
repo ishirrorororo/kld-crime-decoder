@@ -28,6 +28,7 @@ import kldcrimedecoder.engine.GameState;
 import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.puzzles.LogSortPuzzle;
+import kldcrimedecoder.ui.Theme;
 
 /**
  * Level 7: Aimee Ferrer. The scene and the log screen: drag six login entries into the AimeeF or AMIE column.
@@ -52,7 +53,7 @@ public class Level7 extends javax.swing.JPanel {
 
     private static final int TRAY = LogSortPuzzle.UNSORTED, COL_AIMEE = LogSortPuzzle.AIMEE, COL_AMIE = LogSortPuzzle.AMIE;
     // same as lblAimee's Width/Height in the Design tab (Properties -> Layout)
-    private static final int SPRITE_W = 300, SPRITE_H = 390;
+    private static final int SPRITE_W = 340, SPRITE_H = 430;
     private static final int SEATED_H = 330;     // the seated Aimee at the computer keeps her own size
 
     // darker versions of the palette for text that sits on the cream paper
@@ -268,6 +269,8 @@ public class Level7 extends javax.swing.JPanel {
         lblAimee.setVisible(false);
         lblAimeeSeated.setVisible(false);
         btnContinue.setVisible(false);
+        
+        kldcrimedecoder.ui.Theme.button(btnCheck, btnHint, btnContinue);
     }
 
     /** White-cream text on the green bar of the sheet. */
@@ -770,7 +773,7 @@ public class Level7 extends javax.swing.JPanel {
 
         lblAimee.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/portrait_aimee_ferrer.png"))); // NOI18N
         lblAimee.setText("Aimee");
-        add(lblAimee, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 320, 380));
+        add(lblAimee, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 340, 430));
 
         lblBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/library_comp.png"))); // NOI18N
         add(lblBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -10, 1000, 600));

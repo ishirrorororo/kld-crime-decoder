@@ -23,6 +23,7 @@ import kldcrimedecoder.engine.GameState;
 import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.puzzles.AcrosticPuzzle;
+import kldcrimedecoder.ui.Theme;
 
 /**
  * Level 6: Amariah Navarro. The scene and the phone screen. The puzzle's data and answer
@@ -55,7 +56,7 @@ public class Level6 extends javax.swing.JPanel {
     private boolean updatingBar = false;     // true while the code (not the player) moves the scroll bar
 
     // same as lblAmariah's Width/Height in the Design tab (Properties -> Layout). Change SPRITE_H to resize all her pictures.
-    private static final int SPRITE_W = 300, SPRITE_H = 390;
+    private static final int SPRITE_W = 340, SPRITE_H = 430;
     private static final java.util.regex.Pattern MOOD = java.util.regex.Pattern.compile("^(.*?)\\s*\\[(\\w+)\\]$");
     private static final String KEY_BOARD = "level6.boardSeen";
     private String[][] openingLines;                   // the narration lines played while she leans on the lockers
@@ -183,6 +184,8 @@ public class Level6 extends javax.swing.JPanel {
         lblAmariah.setVisible(false);
         lblAmariahLeaning.setVisible(false);
         btnContinue.setVisible(false);
+        
+        kldcrimedecoder.ui.Theme.button(btnSubmit, btnHint, btnContinue);
     }
 
     // ===== Scene flow =====
@@ -660,7 +663,7 @@ public class Level6 extends javax.swing.JPanel {
         add(btnContinue, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 500, 160, 40));
 
         lblAmariah.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/portrait_amariah_navarro.png"))); // NOI18N
-        add(lblAmariah, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 300, 390));
+        add(lblAmariah, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 340, 430));
 
         lblPhoneBuzz.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/phone_buzz_small.png"))); // NOI18N
         add(lblPhoneBuzz, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 160, 314, 314));
