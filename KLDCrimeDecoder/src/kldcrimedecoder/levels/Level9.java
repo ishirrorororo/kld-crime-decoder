@@ -834,7 +834,7 @@ private Shake padlockShake;
         add(pnlLockArtDesign, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 40, -1, -1));
 
         lblJennaScared.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_scared.png"))); // NOI18N
-        add(lblJennaScared, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 340, 430));
+        add(lblJennaScared, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 340, 430));
 
         lblJennaSuspicious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_suspicious.png"))); // NOI18N
         add(lblJennaSuspicious, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
