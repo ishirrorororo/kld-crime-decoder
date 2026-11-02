@@ -32,6 +32,10 @@ import kldcrimedecoder.ui.Theme;
 import kldcrimedecoder.ui.SpeakerSprites;
 import kldcrimedecoder.ui.Shake;
 
+import java.util.HashMap;
+import java.util.Map;
+import kldcrimedecoder.ui.Fade;
+
 public class Level9 extends JPanel {
     
     private SpeakerSprites sprites;
@@ -54,11 +58,6 @@ public class Level9 extends JPanel {
     private static final int POP_FROM_DY = -160;
     private static final int POP_MS = 1000;
     
-    private static final String PHONE_FILE = "alli_homescreen.png";
-    private static final int PHONE_W = 240;          // phone size on screen
-    private static final int PHONE_H = 420;
-    private static final int PHONE_X = 690;          // where it ends up
-    private static final int PHONE_Y = 40;
     private static final int PHONE_FROM_DY = 220;
     private static final int PHONE_POP_MS = 400;
     
@@ -66,9 +65,34 @@ public class Level9 extends JPanel {
     private static final int SHAKE_MS = 450;     // how long the shake lasts
     private static final int SHAKE_COUNT = 4;    // how many left-right swings
     
+    private static final int SCENE_SHAKE_PX = 10;
+    private static final int SCENE_SHAKE_MS = 500;
+    private static final int SCENE_SHAKE_COUNT = 5;
+
+    private Shake sceneShake;
+    
     private static final int UNLOCK_HOP_PX = -24;     // how far the open lock snaps from
     private static final int UNLOCK_HOP_MS = 350;
     private static final int UNLOCK_HOLD_MS = 1200;   // how long the open lock stays on screen
+    
+    // dark and light spells in milliseconds, starting dark
+        private static final int[] FLICKER_MS = {
+        70, 90, 50, 140, 60, 70, 40, 160,
+        80, 120, 50, 90, 60, 110, 70, 260
+    };
+        
+    private static final int SCENE_FADE_MS = 600;
+
+    private final Map<JLabel, Fade> fades = new HashMap<>();
+    private JLabel currentScene;
+        
+    private static final int NOTE_FADE_MS = 400;
+
+    private Fade noteFade;
+    private PopIn notePop;
+
+    private Timer flickerTimer;
+    private int flickerStep;
 
     private PopIn unlockHop;
     private Timer unlockTimer;
@@ -99,6 +123,8 @@ private Shake padlockShake;
 
     private boolean puzzleActive;
     private boolean padlockClickable;
+    private boolean barVisible = true;     // is the bottom bar allowed to show?
+    private boolean hasFeedback;           // does the feedback box have text?
 
     // =========================================================
     // CONSTRUCTOR
@@ -108,23 +134,55 @@ private Shake padlockShake;
 
         initComponents();
         
+        noteFade = new Fade(lblNote);
+        notePop = new PopIn(lblNote, 0, 40, 400);      // the note rises 40 pixels into place
+        makeHotspot(btnNote);
+        
+        fades.put(lblSceneDoor, new Fade(lblSceneDoor));
+        fades.put(lblSceneCloset, new Fade(lblSceneCloset));
+        
         makeHotspot(btnAppWifi, btnAppVoicemail, btnAppFacebook, btnPhoneNav);
         showPhoneScreen(PhoneScreen.HOME);
         padlockPopIn = new PopIn(pnlLockArtDesign, 0, POP_FROM_DY, POP_MS);
         padlockShake = new Shake(pnlLockArtDesign, SHAKE_PX, SHAKE_MS, SHAKE_COUNT);
+        
+        sceneShake = new Shake(
+            SCENE_SHAKE_PX, SCENE_SHAKE_MS, SCENE_SHAKE_COUNT,
+            jLabel1, lblSceneDoor, lblSceneCloset,
+            lblJennaScared, lblJennaSuspicious, lblJennaNeutral, lblJennaConfused,
+            lblArnieNeutral, lblArnieSad);
+        
         unlockHop = new PopIn(lblUnLockArt, 0, UNLOCK_HOP_PX, UNLOCK_HOP_MS);
         phonePopIn = new PopIn(pnlPhone, 0, PHONE_FROM_DY, PHONE_POP_MS);
         pnlLockArtDesign.setVisible(false);
         lblBgPuzzle.setVisible(false);
         
+        lblFlicker.setVisible(false);
+        lblNote.setVisible(false);
+        btnNote.setVisible(false);
+        lblSceneDoor.setVisible(false);
+        lblSceneCloset.setVisible(false);
+        lblUnLockArt.setVisible(false);
+        
+        fades.put(lblSceneSecondDoor, new Fade(lblSceneSecondDoor));
+        lblSceneSecondDoor.setVisible(false);
+        
         sprites = new SpeakerSprites()
-        .add("jenna", "scared", lblJennaScared)
-        .add("jenna", "suspicious", lblJennaSuspicious)
-        .add("jenna", "neutral", lblJennaNeutral)
-        .add("jenna", "confused", lblJennaConfused)
-                
-        .add("arnie", "neutral", lblArnieNeutral)
-        .add("arnie", "sad", lblArnieSad);
+            .add("jenna", "scared", lblJennaScared)
+            .add("jenna", "suspicious", lblJennaSuspicious)
+            .add("jenna", "neutral", lblJennaNeutral)
+            .add("jenna", "confused", lblJennaConfused)
+
+            .add("arnie", "neutral", lblArnieNeutral)
+            .add("arnie", "sad", lblArnieSad)
+
+            .effect("flicker", this::flicker)
+            .effect("shake", () -> sceneShake.start())
+            .effect("door", () -> showScene(lblSceneDoor))
+            .effect("closet", () -> showScene(lblSceneCloset))
+            .effect("hidenote", this::hideNote)
+            .effect("seconddoor", () -> showScene(lblSceneSecondDoor))
+            .effect("hallway", () -> showScene(null));
 
         // PADLOCK BUTTON
         btnPadlock.setText("");
@@ -281,9 +339,14 @@ private Shake padlockShake;
         // Components added after the background would hide behind it.
         // =====================================================
 
+        int n = getComponentCount();
+
         setComponentZOrder(btnPadlock, 0);
-        setComponentZOrder(jLabel1, getComponentCount() - 1);
-        setComponentZOrder(lblBgPuzzle, getComponentCount() - 2);
+        setComponentZOrder(jLabel1, n - 1);          // hallway: the very back
+        setComponentZOrder(lblBgPuzzle, n - 2);      // padlock close-up
+        setComponentZOrder(lblSceneDoor, n - 3);     // open door
+        setComponentZOrder(lblSceneCloset, n - 4);   // closet: in front of the door
+        setComponentZOrder(lblSceneSecondDoor, n - 5);
     }
 
     // =========================================================
@@ -291,6 +354,8 @@ private Shake padlockShake;
     // =========================================================
 
     private void startLevel() {
+        
+        setBottomBar(true);
 
         lock = new PadlockPuzzle();      // a fresh lock and fresh hints
 
@@ -303,6 +368,15 @@ private Shake padlockShake;
         padlockPopIn.stop();
         
         padlockShake.stop();
+        
+        stopFlicker();
+        
+        hideNote();
+        btnNote.setVisible(false);
+        
+        showScene(null);
+        
+        sceneShake.stop();
         
         unlockHop.stop();
 
@@ -437,12 +511,9 @@ private Shake padlockShake;
                 Story.L9_RIGHT, true);
 
         playUnlock(() -> {
-            lblBgPuzzle.setVisible(false);
             pnlLockArtDesign.setVisible(false);
 
-            speak(
-                    Story.L9_SOLVED,
-                    () -> btnContinue.setEnabled(true));
+            speak(Story.L9_SOLVED, this::waitForNote);
         });
     }
 
@@ -516,7 +587,7 @@ private Shake padlockShake;
             pnlPhone.setVisible(false);
         }
         
-        // =========================================================
+    // =========================================================
     // UNLOCK ANIMATION
     // =========================================================
 
@@ -529,14 +600,144 @@ private Shake padlockShake;
         unlockTimer.setRepeats(false);
         unlockTimer.start();
     }
+    
+    // =========================================================
+    // FLICKER
+    // =========================================================
+
+    private void flicker() {
+
+        stopFlicker();
+
+        flickerStep = 0;
+        setComponentZOrder(lblFlicker, 0);     // above the hallway and the sprites
+        lblFlicker.setVisible(true);           // step 0 is dark
+
+        flickerTimer = new Timer(FLICKER_MS[0], e -> {
+
+            flickerStep++;
+
+            if (flickerStep >= FLICKER_MS.length) {
+                stopFlicker();
+                return;
+            }
+
+            lblFlicker.setVisible(flickerStep % 2 == 0);   // even = dark, odd = light
+            flickerTimer.setDelay(FLICKER_MS[flickerStep]);
+        });
+        flickerTimer.start();
+    }
+    
+        // =========================================================
+    // THE NOTE
+    // =========================================================
+
+    /** The closet scene has been read: the hint bar asks for the note, which becomes clickable. */
+    private void waitForNote() {
+
+        setFeedback(Story.L9_NOTE_PROMPT, true);
+
+        btnNote.setVisible(true);
+        setComponentZOrder(btnNote, 0);       // above the scene and the sprites
+    }
+
+    /** The note was clicked and the closet line is over: show the note, play the rest. */
+    private void startNoteScene() {
+
+        showNote();
+
+        speak(
+                Story.L9_NOTE,
+                () -> btnContinue.setEnabled(true));
+    }
+
+    private void showNote() {
+
+        setComponentZOrder(lblNote, 0);
+        noteFade.start(NOTE_FADE_MS, null);
+        notePop.start(null);
+    }
+
+    private void hideNote() {
+
+        noteFade.stop();
+        notePop.stop();
+        lblNote.setVisible(false);
+    }
+    
+    /** Shows one scene picture, or none if you pass null. */
+    /** Fades in a scene picture over the old one, or clears them if you pass null. */
+    private void showScene(JLabel next) {
+
+        for (Fade f : fades.values()) {
+            f.stop();                              // finish any fade in progress
+        }
+
+        final JLabel previous = currentScene;
+        currentScene = next;
+
+        for (JLabel s : fades.keySet()) {
+            if (s != previous && s != next) {
+                s.setVisible(false);
+            }
+        }
+
+        if (next == null) {
+            if (previous != null) {
+                previous.setVisible(false);
+            }
+            return;
+        }
+
+        if (next == previous) {
+            next.setVisible(true);
+            return;
+        }
+
+        fades.get(next).start(SCENE_FADE_MS, () -> {
+            if (previous != null) {
+                previous.setVisible(false);
+            }
+            lblBgPuzzle.setVisible(false);     // the close-up goes away only now
+        });
+    }
+
+    private void stopFlicker() {
+
+        if (flickerTimer != null) {
+            flickerTimer.stop();
+            flickerTimer = null;
+        }
+        lblFlicker.setVisible(false);
+    }
 
     // =========================================================
     // DIALOGUE
     // =========================================================
+    
+    /** Shows or hides the bottom bar (title, feedback box, Try Lock, Hint, Continue). */
+    private void setBottomBar(boolean show) {
+
+        barVisible = show;
+
+        lblTitle.setVisible(show);
+        btnUnlock.setVisible(show);
+        btnHint.setVisible(show);
+        btnContinue.setVisible(show);
+        lblFeedback.setVisible(show && hasFeedback);
+    }
 
     private void speak(String[][] lines, Runnable after) {
-            sprites.play(lines, after);
-        }
+
+        setBottomBar(false);                 // nothing peeks out under the dialogue box
+
+        sprites.play(lines, () -> {
+            setBottomBar(true);
+            if (after != null) {
+                after.run();
+            }
+        });
+    }
 
     // =========================================================
     // FEEDBACK
@@ -554,8 +755,8 @@ private Shake padlockShake;
                 + text.replace("\n", "<br>")
                 + "</html>");
 
-        lblFeedback.setVisible(
-                !text.isEmpty());
+        hasFeedback = !text.isEmpty();
+        lblFeedback.setVisible(barVisible && hasFeedback);
     }
 
     /**
@@ -591,8 +792,14 @@ private Shake padlockShake;
         lblPhoneWifi = new javax.swing.JLabel();
         lblPhoneVoicemail = new javax.swing.JLabel();
         lblPhoneFacebook = new javax.swing.JLabel();
+        lblFlicker = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         lblBgPuzzle = new javax.swing.JLabel();
+        lblSceneDoor = new javax.swing.JLabel();
+        lblSceneCloset = new javax.swing.JLabel();
+        lblNote = new javax.swing.JLabel();
+        btnNote = new javax.swing.JButton();
+        lblSceneSecondDoor = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(1000, 600));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -627,22 +834,22 @@ private Shake padlockShake;
         add(pnlLockArtDesign, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 40, -1, -1));
 
         lblJennaScared.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_scared.png"))); // NOI18N
-        add(lblJennaScared, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 360, 350));
+        add(lblJennaScared, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 468, 455));
 
         lblJennaSuspicious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_suspicious.png"))); // NOI18N
-        add(lblJennaSuspicious, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 360, 350));
+        add(lblJennaSuspicious, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
 
         lblJennaNeutral.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_neutral.png"))); // NOI18N
-        add(lblJennaNeutral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 360, 350));
+        add(lblJennaNeutral, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
 
         lblJennaConfused.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_confused.png"))); // NOI18N
-        add(lblJennaConfused, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 360, 350));
+        add(lblJennaConfused, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
 
         lblArnieNeutral.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/arnie_neutral.png"))); // NOI18N
-        add(lblArnieNeutral, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 150, 360, 350));
+        add(lblArnieNeutral, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 40, 468, 455));
 
         lblArnieSad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/arnie_sad.png"))); // NOI18N
-        add(lblArnieSad, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 150, 360, 350));
+        add(lblArnieSad, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 40, 468, 455));
 
         pnlPhone.setOpaque(false);
         pnlPhone.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -676,18 +883,18 @@ private Shake padlockShake;
         pnlPhone.add(lblPhoneHome, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 440, 440));
 
         lblPhoneWifi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/wifi.png"))); // NOI18N
-        lblPhoneWifi.setText("jLabel2");
         pnlPhone.add(lblPhoneWifi, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 440, 440));
 
         lblPhoneVoicemail.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/voicemail.png"))); // NOI18N
-        lblPhoneVoicemail.setText("jLabel2");
         pnlPhone.add(lblPhoneVoicemail, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 440, 440));
 
         lblPhoneFacebook.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/fb_post.png"))); // NOI18N
-        lblPhoneFacebook.setText("jLabel2");
         pnlPhone.add(lblPhoneFacebook, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 440, 440));
 
         add(pnlPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 50, 440, 440));
+
+        lblFlicker.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/flicker_dark.png"))); // NOI18N
+        add(lblFlicker, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_hallway.png"))); // NOI18N
         jLabel1.setLabelFor(jLabel1);
@@ -696,6 +903,23 @@ private Shake padlockShake;
 
         lblBgPuzzle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_closet.png"))); // NOI18N
         add(lblBgPuzzle, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
+
+        lblSceneDoor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/closet_door_open.png"))); // NOI18N
+        add(lblSceneDoor, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
+
+        lblSceneCloset.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_closet_in.png"))); // NOI18N
+        add(lblSceneCloset, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
+
+        lblNote.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/the_note.png"))); // NOI18N
+        add(lblNote, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, 380, 336));
+
+        btnNote.setText("jButton1");
+        btnNote.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnNote.addActionListener(this::btnNoteActionPerformed);
+        add(btnNote, new org.netbeans.lib.awtextra.AbsoluteConstraints(432, 260, 64, 48));
+
+        lblSceneSecondDoor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/second_door.png"))); // NOI18N
+        add(lblSceneSecondDoor, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnPadlockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPadlockActionPerformed
@@ -728,11 +952,19 @@ private Shake padlockShake;
         showPhoneScreen(PhoneScreen.HOME);
     }//GEN-LAST:event_btnPhoneNavActionPerformed
 
+    private void btnNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNoteActionPerformed
+        btnNote.setVisible(false);
+        setFeedback("", true);
+
+        startNoteScene();
+    }//GEN-LAST:event_btnNoteActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAppFacebook;
     private javax.swing.JButton btnAppVoicemail;
     private javax.swing.JButton btnAppWifi;
+    private javax.swing.JButton btnNote;
     private javax.swing.JButton btnPadlock;
     private javax.swing.JButton btnPhoneClose;
     private javax.swing.JButton btnPhoneNav;
@@ -740,15 +972,20 @@ private Shake padlockShake;
     private javax.swing.JLabel lblArnieNeutral;
     private javax.swing.JLabel lblArnieSad;
     private javax.swing.JLabel lblBgPuzzle;
+    private javax.swing.JLabel lblFlicker;
     private javax.swing.JLabel lblJennaConfused;
     private javax.swing.JLabel lblJennaNeutral;
     private javax.swing.JLabel lblJennaScared;
     private javax.swing.JLabel lblJennaSuspicious;
     private javax.swing.JLabel lblLockArt;
+    private javax.swing.JLabel lblNote;
     private javax.swing.JLabel lblPhoneFacebook;
     private javax.swing.JLabel lblPhoneHome;
     private javax.swing.JLabel lblPhoneVoicemail;
     private javax.swing.JLabel lblPhoneWifi;
+    private javax.swing.JLabel lblSceneCloset;
+    private javax.swing.JLabel lblSceneDoor;
+    private javax.swing.JLabel lblSceneSecondDoor;
     private javax.swing.JLabel lblUnLockArt;
     private javax.swing.JPanel pnlLockArtDesign;
     private javax.swing.JPanel pnlPhone;

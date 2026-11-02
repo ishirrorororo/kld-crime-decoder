@@ -305,11 +305,18 @@ public class Story {
         "Click the padlock on the closet door to inspect it.";
 
     public static final String[][] L9_SOLVED = {
-        {"", "The padlock clicks. The door swings in on a narrow supply closet. Mops. A bag you recognize: Alli's. And pinned to the back wall, a folded note in handwriting you know too well."},
-        {"Evidence", "You're close. Now look at yourself."},
+        {"", "{door} The padlock clicks open... "},
+        {"", "{closet} The door swings in on a narrow supply closet. "},
+    };
+        
+    public static final String L9_NOTE_PROMPT =
+        "Click the folded note on the wall.";
+        
+    public static final String[][] L9_NOTE = {   
+        {"The note:", "You're close. Now look at yourself."},
         {"Arnie (thinking)", "That's my handwriting."},
-        {"", "{flicker} A voice that isn't quite yours: \"Don't read it.\""},
-        {"", "Behind the shelves, a small second door. A keyhole, with a number scratched beside it."},
+        {"", "{hidenote} {flicker} A voice that isn't quite yours: \"Don't read it.\""},
+        {"", "{seconddoor} Behind the shelves, a small second door. A keyhole, with a number scratched beside it."},
         {"Arnie [sad]", "{shake} I... I need some air."},
         {"", "You push past Jenna and run."}
     };

@@ -5,25 +5,31 @@ import javax.swing.JComponent;
 import javax.swing.Timer;
 
 /**
- * A short left-right shake for any component. It fades out and always
- * ends exactly where the component started.
- * Example: new Shake(pnlLockArtDesign, 12, 450, 4) shakes the panel
- * 12 pixels each way, 4 times, over 450 ms.
+ * A short left-right shake for one or more components. It fades out and
+ * always ends exactly where each component started.
+ *
+ * One component:   new Shake(pnlLockArtDesign, 12, 450, 4)
+ * Several at once: new Shake(10, 500, 5, lblBackground, lblSprite)
+ * (amplitude in pixels, duration in ms, number of left-right swings)
  */
 public class Shake {
 
     private static final int FRAME_MS = 15;
 
-    private final JComponent target;
+    private final JComponent[] targets;
     private final int amplitude;
     private final int durationMs;
     private final int shakes;
 
     private Timer timer;
-    private Point home;
+    private Point[] homes;
 
     public Shake(JComponent target, int amplitude, int durationMs, int shakes) {
-        this.target = target;
+        this(amplitude, durationMs, shakes, target);
+    }
+
+    public Shake(int amplitude, int durationMs, int shakes, JComponent... targets) {
+        this.targets = targets;
         this.amplitude = amplitude;
         this.durationMs = durationMs;
         this.shakes = shakes;
@@ -31,9 +37,13 @@ public class Shake {
 
     /** Plays the shake. Calling it again restarts it cleanly. */
     public void start() {
-        stop();                                   // puts the target back home first
+        stop();                                   // puts everything back home first
 
-        home = target.getLocation();
+        homes = new Point[targets.length];
+        for (int i = 0; i < targets.length; i++) {
+            homes[i] = targets[i].getLocation();
+        }
+
         final long begin = System.currentTimeMillis();
 
         timer = new Timer(FRAME_MS, e -> {
@@ -42,9 +52,12 @@ public class Shake {
                     : Math.min(1.0, (System.currentTimeMillis() - begin) / (double) durationMs);
 
             // swings left and right, getting smaller until it stops
-            double offset = amplitude * (1.0 - t) * Math.sin(t * shakes * 2.0 * Math.PI);
+            int offset = (int) Math.round(
+                    amplitude * (1.0 - t) * Math.sin(t * shakes * 2.0 * Math.PI));
 
-            target.setLocation(home.x + (int) Math.round(offset), home.y);
+            for (int i = 0; i < targets.length; i++) {
+                targets[i].setLocation(homes[i].x + offset, homes[i].y);
+            }
 
             if (t >= 1.0) {
                 stop();
@@ -53,13 +66,13 @@ public class Shake {
         timer.start();
     }
 
-    /** Stops a running shake and puts the target back. Safe at any time. */
+    /** Stops a running shake and puts everything back. Safe at any time. */
     public void stop() {
         if (timer != null) {
             timer.stop();
             timer = null;
-            if (home != null) {
-                target.setLocation(home);
+            for (int i = 0; i < targets.length; i++) {
+                targets[i].setLocation(homes[i]);
             }
         }
     }

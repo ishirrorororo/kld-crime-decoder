@@ -42,6 +42,7 @@ private Runnable onFinished;     // runs after the last line
 private String fullText = "";    // the whole current line
 private int shown;               // how many characters are showing
 private boolean choosing;        // true while waiting for a choice
+private boolean locked;          // true: clicking does not move the story on
     /**
      * Creates new form DialogueBox
      */
@@ -182,6 +183,7 @@ public void hideBox() {
     queue = null;
     onFinished = null;
     choosing = false;
+    locked = false;
     pnlChoices.removeAll();
     setVisible(false);
 }
@@ -189,6 +191,26 @@ public void hideBox() {
 public boolean isOpen() {
     return isVisible();
 }
+
+/** While locked, clicking the box does not move the story on. */
+public void setLocked(boolean locked) {
+    this.locked = locked;
+    if (locked) {
+        btnNext.setVisible(false);
+    }
+}
+
+/** Unlocks the box and moves on, as if the player had clicked it. */
+public void unlockAndContinue() {
+    locked = false;
+    if (typeTimer.isRunning()) {              // finish typing the line at once
+        typeTimer.stop();
+        shown = fullText.length();
+        txaLine.setText(fullText);
+    }
+    advance();
+}
+
 /** Thin light line, a dark gap, then a second thin line. */
 private static Border frame() {
     return BorderFactory.createCompoundBorder(
@@ -237,13 +259,13 @@ private void typeNext() {
     txaLine.setText(fullText.substring(0, Math.min(shown, fullText.length())));
     if (shown >= fullText.length()) {
         typeTimer.stop();
-        btnNext.setVisible(!choosing);           // arrow = "click to continue"
+        btnNext.setVisible(!choosing && !locked);   // arrow = "click to continue"
     }
 }
 
 /** Click: first show the whole line, then go to the next one. */
 private void advance() {
-    if (choosing) {
+    if (choosing || locked) {
         return;                                  // the player must pick an option
     }
     if (typeTimer.isRunning()) {

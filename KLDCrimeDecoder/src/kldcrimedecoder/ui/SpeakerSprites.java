@@ -35,8 +35,11 @@ public class SpeakerSprites {
     private static final String DEFAULT_MOOD = "neutral";
     private static final String NARRATION_MARK = "@";
 
-    // "jenna:worried" -> the label that shows Jenna looking worried
+    // "jenna:scared" -> the label that shows Jenna looking scared
     private final Map<String, JLabel> labels = new LinkedHashMap<>();
+    
+    // "flicker" -> the code to run when a line starts with {flicker}
+    private final Map<String, Runnable> effects = new LinkedHashMap<>();
 
     /** Registers one sprite label. Returns this, so calls can be chained. */
     public SpeakerSprites add(String character, String mood, JLabel label) {
@@ -44,6 +47,35 @@ public class SpeakerSprites {
         label.setVisible(false);
         labels.put(key(character, mood), label);
         return this;
+    }
+    
+    /** Registers an effect for a tag like {flicker}. Returns this, so calls can be chained. */
+    public SpeakerSprites effect(String tag, Runnable action) {
+        effects.put(tag.toLowerCase(), action);
+        return this;
+    }
+
+    /** Runs and removes leading {tags} that have a registered effect. */
+    private String runEffects(String text) {
+
+        String rest = text == null ? "" : text;
+        boolean again = true;
+
+        while (again) {
+            again = false;
+
+            for (Map.Entry<String, Runnable> e : effects.entrySet()) {
+                String tag = "{" + e.getKey() + "}";
+
+                if (rest.startsWith(tag)) {
+                    rest = rest.substring(tag.length()).trim();
+                    e.getValue().run();
+                    again = true;
+                    break;
+                }
+            }
+        }
+        return rest;
     }
 
     private static String key(String character, String mood) {
@@ -90,7 +122,9 @@ public class SpeakerSprites {
 
         show(speaker, mood);
 
-        box.play(new String[][] { { nameInBox, lines[i][1] } },
+        String text = runEffects(lines[i][1]);
+
+        box.play(new String[][] { { nameInBox, text } },
                 () -> playFrom(lines, i + 1, after));
     }
 
