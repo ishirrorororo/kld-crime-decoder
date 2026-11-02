@@ -44,7 +44,7 @@ public class PadlockPuzzle extends Puzzle {
     public String getHint() {
         int index = Math.min(hintsGiven, Story.L9_HINTS.length - 1);
         hintsGiven++;
-        return Story.L9_HINTS[index];
+        return Story.L9_HINTS[index][1];
     }
 
     /** How many hints have been shown so far. */

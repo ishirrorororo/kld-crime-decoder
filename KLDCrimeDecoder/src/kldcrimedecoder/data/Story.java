@@ -279,15 +279,15 @@ public class Story {
      // ============ THE HALLWAY CLOSET (Level 9) ============
 
     public static final String[][] L9_INTRO = {
-        {"", "Six minutes. You reach the end of the hallway. A padlock hangs on the closet door. Behind you, quick footsteps."},
-        {"Jenna", "I followed you. I know I shouldn't have. Arnie, you haven't slept, have you?"},
-        {"Arnie", "Jenna. Help me with the lock."},
-        {"Jenna", "It's a four-digit padlock. Alli and I put it on during foundation week. She picked the code herself. She said it's the one date she never forgets."},
-        {"Jenna", "She even put it on her phone. Check her wallpaper."}
+        {"@Jenna [scared]", "Six minutes. You reach the end of the hallway. A padlock hangs on the closet door. Behind you, quick footsteps."},
+        {"Jenna [suspicious]", "I followed you. I know I shouldn't have. Arnie, you haven't slept, have you?"},
+        {"Arnie [neutral]", "Jenna. Help me with the lock."},
+        {"Jenna [neutral]", "It's a four-digit padlock. Alli and I put it on during foundation week. She picked the code herself. She said it's the one date she never forgets."},
+        {"Jenna [confused]", "She even put it on her phone. Check her wallpaper."}
     };
 
     public static final String L9_PROMPT =
-        "The four-digit padlock waits. Check Alli's phone for the date.";
+        "Click the up and down arrows or use your scroll wheel. Then select Try Lock.";
 
     public static final String L9_WRONG =
             "The padlock does not budge. The wheels are not set to the correct date.";
@@ -295,10 +295,14 @@ public class Story {
     public static final String L9_RIGHT =
             "Click. The padlock opens.";
 
-    public static final String[] L9_HINTS = {
-        "The wallpaper. The banner across the top.",
-        "March fourteenth. Day first, then month: 14, 03."
+    public static final String[][] L9_HINTS = {
+        {"", "The wallpaper. The banner across the bottom."},
+        {"", "Two clues you already solved were numbers: the shift and the shelf. Day first, then month."},
+        {"", "March fourteenth. Day first, then month: 14... 03."}
     };
+    
+    public static final String L9_CLICK_PROMPT =
+        "Click the padlock on the closet door to inspect it.";
 
     public static final String[][] L9_SOLVED = {
         {"", "The padlock clicks. The door swings in on a narrow supply closet. Mops. A bag you recognize: Alli's. And pinned to the back wall, a folded note in handwriting you know too well."},
@@ -306,7 +310,7 @@ public class Story {
         {"Arnie (thinking)", "That's my handwriting."},
         {"", "{flicker} A voice that isn't quite yours: \"Don't read it.\""},
         {"", "Behind the shelves, a small second door. A keyhole, with a number scratched beside it."},
-        {"Arnie (thinking)", "{shake} I... I need some air."},
+        {"Arnie [sad]", "{shake} I... I need some air."},
         {"", "You push past Jenna and run."}
     };
 
