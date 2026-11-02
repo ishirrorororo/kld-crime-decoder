@@ -52,7 +52,8 @@ public class Level7 extends javax.swing.JPanel {
 
     private static final int TRAY = LogSortPuzzle.UNSORTED, COL_AIMEE = LogSortPuzzle.AIMEE, COL_AMIE = LogSortPuzzle.AMIE;
     // same as lblAimee's Width/Height in the Design tab (Properties -> Layout)
-    private static final int SPRITE_W = 230, SPRITE_H = 330;
+    private static final int SPRITE_W = 300, SPRITE_H = 390;
+    private static final int SEATED_H = 330;     // the seated Aimee at the computer keeps her own size
 
     // darker versions of the palette for text that sits on the cream paper
     private static final Color INK_DARK = new Color(0x3A2F20);
@@ -79,12 +80,39 @@ public class Level7 extends javax.swing.JPanel {
 
     private ImageIcon standingIcon, seatedIcon;      // Aimee sprites: her normal portrait, and her sitting at Computer 4
 
+    // Aimee's expressions: aimee_<mood>.png (confused, sad, scared, suspicious, neutral...), picked by the tag in Story.java
+    private static final java.util.regex.Pattern MOOD = java.util.regex.Pattern.compile("^(.*?)\\s*\\[(\\w+)\\]$");
+    private static final String KEY_BOARD = "level7.boardSeen";
+    // same as lblAimeeSeated's X, Y, Width, Height in the Design tab (the glow button is placed over her picture)
+    private static final int SEAT_X = -20, SEAT_Y = 110, SEAT_W = 300, SEAT_H = 380;
+    private String[][] openingLines;                   // the narration lines played while she sits at the computer
+    private final java.util.Map<String, ImageIcon> moodIcons = new java.util.HashMap<>();
+    private String currentMood = "neutral";
+    private boolean waitingForClick = false;           // true while the player must click Aimee to start the talk
+    private Runnable afterClick;
+    private javax.swing.JButton btnTalk;               // invisible button over the seated Aimee (glows on hover)
+    private kldcrimedecoder.ui.BoardOverlay board;     // the corkboard scene shown before the level
+
     /**
      * Creates new form Level7
      */
     public Level7() {
         initComponents();
         setupLevel7();
+
+        // invisible button over the seated Aimee: gold glow on hover (HoverGlow), click starts the talk
+        btnTalk = new javax.swing.JButton();
+        int tw = (seatedIcon == null) ? SEAT_W : seatedIcon.getIconWidth();
+        int th = (seatedIcon == null) ? SEAT_H : seatedIcon.getIconHeight();
+        add(btnTalk, new org.netbeans.lib.awtextra.AbsoluteConstraints(
+                SEAT_X + (SEAT_W - tw) / 2, SEAT_Y + (SEAT_H - th), tw, th), 0);
+        kldcrimedecoder.ui.HoverGlow.install(btnTalk);
+        btnTalk.addActionListener(e -> talkClicked());
+        btnTalk.setVisible(false);
+
+        board = new kldcrimedecoder.ui.BoardOverlay(2);          // 2 names cleared (Amy, Amariah)
+        add(board, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580), 0);   // index 0 = drawn on top
+        board.setVisible(false);
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -133,12 +161,12 @@ public class Level7 extends javax.swing.JPanel {
             final int idx = i;
             final JLabel e = entries[i];
             e.setIcon(tagIcon);
-            e.setText(tagHtml(puzzle.getEntry(i)));
+            e.setText(tagHtml(puzzle.getEntry(i), false));      // computer number stays hidden until solved
             e.setHorizontalAlignment(SwingConstants.CENTER);
             e.setHorizontalTextPosition(SwingConstants.CENTER);          // text sits on top of the tag picture
             e.setVerticalTextPosition(SwingConstants.CENTER);
             e.setForeground(INK_DARK);
-            e.setFont(new Font("Consolas", Font.PLAIN, 11));
+            e.setFont(new Font("Consolas", Font.BOLD, 11));              // Font.BOLD / Font.PLAIN, and the 11 is the size
             if (tagIcon == null) {                                        // no picture: plain dark card
                 e.setOpaque(true);
                 e.setBackground(PANEL);
@@ -222,7 +250,7 @@ public class Level7 extends javax.swing.JPanel {
                 System.err.println("Level7: no seated icon on lblAimeeSeated and aimeeF_computer.png NOT FOUND");
             }
         }
-        seatedIcon = (seatedRaw == null) ? null : fit(seatedRaw, SPRITE_H);
+        seatedIcon = (seatedRaw == null) ? null : fit(seatedRaw, SEATED_H);
 
         lblAimee.setIcon(standingIcon);                         // her dialogue sprite stays where the Design tab puts it
         lblAimee.setText(standingIcon == null && seatedIcon == null ? "Aimee" : "");
@@ -281,14 +309,17 @@ public class Level7 extends javax.swing.JPanel {
         return new ImageIcon(u);
     }
 
-    /** Two lines on the ruled tag: "Computer 4 | by the window" and "8:05 PM | 35 min". */
-    private static String tagHtml(String entry) {
+    /**
+     * Two lines on the ruled tag. While solving, line 1 is only the place ("by the window");
+     * once solved, the computer number is added ("Computer 4 | by the window").
+     */
+    private static String tagHtml(String entry, boolean showComputer) {
         String[] f = entry.split(" \\| ");
-        String line1 = (f.length >= 4) ? f[0] + " | " + f[1] : entry;
+        String line1 = (f.length >= 4) ? (showComputer ? f[0] + " | " + f[1] : f[1]) : entry;
         String line2 = (f.length >= 4) ? f[2] + " | " + f[3] : " ";
         return "<html><table cellspacing='0' cellpadding='0'>"
-             + "<tr><td width='22'></td><td height='17' valign='bottom'>" + line1 + "</td></tr>"
-             + "<tr><td></td><td height='17' valign='bottom'>" + line2 + "</td></tr></table></html>";
+             + "<tr><td width='22'></td><td height='17' valign='bottom' align='center'>" + line1 + "</td></tr>"
+             + "<tr><td></td><td height='17' valign='bottom' align='center'>" + line2 + "</td></tr></table></html>";
     }
 
     // ----- sheet geometry -----
@@ -355,12 +386,15 @@ public class Level7 extends javax.swing.JPanel {
         GameState gs = GameState.getInstance();
         hintsUsed = 0;
         lblFeedback.setText(" ");
+        endWaiting();
+        board.setVisible(false);
         lblAimee.setVisible(false);
         lblAimeeSeated.setVisible(false);
 
         if (gs.getChoice(KEY_SOLVED, "no").equals("yes")) {      // already solved: show the sorted log and Continue
             for (int i = 0; i < where.length; i++) {
                 where[i] = puzzle.getCorrectColumn(i);
+                entries[i].setText(tagHtml(puzzle.getEntry(i), true));
             }
             arrange();
             enterPhase(Phase.SOLVED);
@@ -370,10 +404,29 @@ public class Level7 extends javax.swing.JPanel {
         }
         for (int i = 0; i < where.length; i++) {
             where[i] = TRAY;
+            entries[i].setText(tagHtml(puzzle.getEntry(i), false));
         }
         arrange();
         enterPhase(Phase.INTRO);
-        playScene(Story.L7_INTRO, () -> enterPhase(Phase.PUZZLE));
+        // 1) the corkboard (once)  2) Aimee sits at Computer 4 until you click her  3) the talk  4) the puzzle
+        Runnable startScene = () -> {
+            // every line of L7_INTRO_OPEN except the last is played normally; the last one ("Click Aimee...")
+            // is shown and the dialogue box STAYS OPEN until the player clicks her
+            String[][] open = Story.L7_INTRO_OPEN;
+            openingLines = java.util.Arrays.copyOf(open, open.length - 1);
+            playScene(openingLines, () -> {
+                if (GameManager.getDialogue() != null) {
+                    GameManager.getDialogue().say("", open[open.length - 1][1]);
+                }
+                waitForClick(() -> playScene(Story.L7_INTRO, () -> enterPhase(Phase.PUZZLE)));
+            });
+        };
+        if (gs.getChoice(KEY_BOARD, "no").equals("no")) {
+            gs.putChoice(KEY_BOARD, "yes");
+            board.play(Story.BOARD_UPDATE[2], startScene);
+        } else {
+            startScene.run();
+        }
     }
 
     /** Plays lines in the shared DialogueBox (the same one Level 3 uses). */
@@ -387,24 +440,90 @@ public class Level7 extends javax.swing.JPanel {
 
     /** Plays a scene line by line; Aimee is on screen only while someone is speaking (not for narration). */
     private void playScene(String[][] lines, Runnable done) {
+        currentMood = "neutral";
         playFrom(lines, 0, done);
     }
 
     private void playFrom(String[][] lines, int i, Runnable done) {
+        boolean opening = (lines == openingLines);                 // she sits at Computer 4, waiting to be clicked
         if (i >= lines.length) {
-            lblAimee.setVisible(false);
-            lblAimeeSeated.setVisible(false);
+            if (!opening) {
+                lblAimee.setVisible(false);
+                lblAimeeSeated.setVisible(false);
+            }
             if (done != null) {
                 done.run();
             }
             return;
         }
-        boolean opening = (lines == Story.L7_INTRO && i == 0);   // the "Aimee is hunched over a laptop" narration line
-        boolean speaking = !lines[i][0].isEmpty();
-        boolean seated = seatedIcon != null && (opening || standingIcon == null);   // no portrait yet: she stays seated
-        lblAimeeSeated.setVisible(seated && (opening || speaking));
-        lblAimee.setVisible(!seated && speaking);                // narration lines hide her, except the opening one
-        playDialogue(new String[][] { lines[i] }, () -> playFrom(lines, i + 1, done));
+        String speaker = lines[i][0];
+        java.util.regex.Matcher m = MOOD.matcher(speaker);       // "Aimee [scared]" -> "Aimee" + "scared"
+        if (m.matches()) {
+            speaker = m.group(1);
+            currentMood = m.group(2).toLowerCase();
+        }
+        boolean speaking = !speaker.isEmpty();
+
+        if (opening) {
+            lblAimee.setVisible(false);
+            lblAimeeSeated.setVisible(seatedIcon != null);
+        } else {
+            ImageIcon sprite = moodIcon(currentMood);
+            boolean useSeated = (sprite == null && seatedIcon != null);   // no portrait at all: she stays seated
+            lblAimee.setIcon(sprite);
+            lblAimee.setText(sprite == null && !useSeated ? "Aimee" : "");
+            lblAimee.setVisible(speaking && !useSeated);
+            lblAimeeSeated.setVisible(speaking && useSeated);
+        }
+        playDialogue(new String[][] { { speaker, lines[i][1] } }, () -> playFrom(lines, i + 1, done));
+    }
+
+    // ----- clickable Aimee -----
+
+    /** Waits until the player clicks Aimee (she glows gold on hover), then runs "next". */
+    private void waitForClick(Runnable next) {
+        waitingForClick = true;
+        afterClick = next;
+        lblAimeeSeated.setVisible(seatedIcon != null);
+        btnTalk.setToolTipText(Story.L7_CLICK_TIP);
+        btnTalk.setVisible(true);
+    }
+
+    private void endWaiting() {
+        waitingForClick = false;
+        afterClick = null;
+        if (btnTalk != null) {
+            btnTalk.setVisible(false);
+            btnTalk.setBorderPainted(false);
+            btnTalk.setToolTipText(null);
+        }
+    }
+
+    private void talkClicked() {
+        if (!waitingForClick) {
+            return;
+        }
+        Runnable next = afterClick;
+        endWaiting();
+        if (next != null) {
+            next.run();
+        }
+    }
+
+    /** Her picture for a mood (aimee_<mood>.png), or the Design tab portrait if that file doesn't exist. */
+    private ImageIcon moodIcon(String mood) {
+        if (!moodIcons.containsKey(mood)) {
+            ImageIcon ic;
+            java.net.URL u = getClass().getResource("/kldcrimedecoder/images/aimee_" + mood + ".png");
+            if (u != null) {
+                ic = fit(new ImageIcon(u), SPRITE_H);
+            } else {
+                System.err.println("Level7: aimee_" + mood + ".png NOT FOUND, using the Design tab portrait instead");
+                ic = standingIcon;
+            }
+            moodIcons.put(mood, ic);
+        }
+        return moodIcons.get(mood);
     }
 
     private void enterPhase(Phase p) {
@@ -442,10 +561,11 @@ public class Level7 extends javax.swing.JPanel {
         gs.addItem(Story.ITEM_AIMEE_CLEARED);
         gs.addItem(Story.ITEM_COMP7_LOG);
         enterPhase(Phase.SOLVED);
-        for (JLabel e : entries) {
-            e.setBorder(new GlowBorder(GOOD, 6));
+        for (int i = 0; i < entries.length; i++) {
+            entries[i].setText(tagHtml(puzzle.getEntry(i), true));      // now show which computer each one was
+            entries[i].setBorder(new GlowBorder(GOOD, 6));
         }
-        Timer closeLog = new Timer(1200, ev -> {
+        Timer closeLog = new Timer(2500, ev -> {
             logPanel.setVisible(false);
             playScene(Story.L7_AFTER, () -> {
                 btnContinue.setVisible(true);
@@ -650,7 +770,7 @@ public class Level7 extends javax.swing.JPanel {
 
         lblAimee.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/portrait_aimee_ferrer.png"))); // NOI18N
         lblAimee.setText("Aimee");
-        add(lblAimee, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 130, 230, 330));
+        add(lblAimee, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 320, 380));
 
         lblBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/library_comp.png"))); // NOI18N
         add(lblBackground, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, -10, 1000, 600));

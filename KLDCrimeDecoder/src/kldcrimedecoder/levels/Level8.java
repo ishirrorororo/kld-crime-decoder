@@ -29,6 +29,8 @@ import kldcrimedecoder.engine.GameManager;
 import kldcrimedecoder.engine.GameState;
 import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
+import kldcrimedecoder.engine.TimerManager;
+import kldcrimedecoder.ui.DialogueBox;
 import kldcrimedecoder.puzzles.ClockclipsPuzzle;
 
 /**
@@ -57,7 +59,7 @@ public class Level8 extends javax.swing.JPanel {
     private Phase phase = Phase.INTRO;
 
     // Joel's height on screen (his picture is scaled to this, keeping its proportions)
-    private static final int SPRITE_H = 480;
+    private static final int SPRITE_H = 390;
 
     // The four monitor screens, measured for room_monitor.png (760 x 468) placed at x=20, y=24.
     // Each clip is 344 x 181 and sits on a screen, just under the monitor frame.
@@ -74,12 +76,37 @@ public class Level8 extends javax.swing.JPanel {
 
     private final Map<String, ImageIcon> joelIcons = new HashMap<>();
 
+    // ----- the wide front-office room, the front desk you click, and the sticky notes -----
+    private static final String KEY_BOARD = "level8.boardSeen";
+    // where the front desk is on the wide room picture (X, Y, Width, Height in panel pixels). Move/resize the glow here.
+    private static final int DESK_X = 515, DESK_Y = 210, DESK_W = 470, DESK_H = 285;
+    // the two sticky notes on the right of the monitor (prompt on top, feedback under it), and the buttons
+    private static final int NOTE_W = 225, NOTE_H = 150;
+    private static final int NOTE_X = 775, PROMPT_Y = 15, FEEDBACK_Y = 170;
+    private ImageIcon wideRoomIcon, deskRoomIcon;      // expanded_room.png (before the click) and room_desk.png (after)
+    private ImageIcon noteYellow, notePink;            // sticky_prompt.png and sticky_feedback.png
+    private javax.swing.JButton btnDesk;               // invisible button over the front desk (glows on hover)
+    private boolean waitingForClick = false;           // true while the player must click the front desk
+    private Runnable afterClick;
+    private kldcrimedecoder.ui.BoardOverlay board;     // the corkboard scene shown before the level
+
     /**
      * Creates new form Level8
      */
     public Level8() {
         initComponents();
         setupLevel8();
+
+        // invisible button over the front desk: gold glow on hover (HoverGlow), click goes to the desk scene
+        btnDesk = new javax.swing.JButton();
+        add(btnDesk, new org.netbeans.lib.awtextra.AbsoluteConstraints(DESK_X, DESK_Y, DESK_W, DESK_H), 0);
+        kldcrimedecoder.ui.HoverGlow.install(btnDesk);
+        btnDesk.addActionListener(e -> deskClicked());
+        btnDesk.setVisible(false);
+
+        board = new kldcrimedecoder.ui.BoardOverlay(3);          // 3 names cleared (Amy, Amariah, Aimee)
+        add(board, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580), 0);   // index 0 = drawn on top
+        board.setVisible(false);
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -107,6 +134,20 @@ public class Level8 extends javax.swing.JPanel {
         deskPanel.setOpaque(false);                // the room_desk picture behind is the background
         deskPanel.setBorder(null);
 
+        // ----- the two room pictures: the wide office first, the close-up desk after the click -----
+        deskRoomIcon = iconFor(lblBackground, "/kldcrimedecoder/images/room_desk.png");
+        wideRoomIcon = loadWideRoom();
+        noteYellow = loadNote("sticky_prompt.png");
+        notePink = loadNote("sticky_feedback.png");
+
+        // ----- where the sticky notes and the buttons sit (set here, so the numbers are all in one place) -----
+        lblPrompt.setBounds(NOTE_X, PROMPT_Y, NOTE_W, NOTE_H);
+        lblFeedback.setBounds(NOTE_X, FEEDBACK_Y, NOTE_W, NOTE_H);
+        btnCheck.setBounds(NOTE_X + 10, 328, 100, 30);
+        btnHint.setBounds(NOTE_X + 118, 328, 100, 30);
+        btnRewind.setBounds(NOTE_X + 10, 178, 205, 40);        // the choice buttons take the feedback note's place
+        btnSkip.setBounds(NOTE_X + 10, 228, 205, 40);
+
         // ----- the monitor picture (frame on top, the four screens are see-through) -----
         lblMonitor.setText("");
         lblMonitor.setIcon(iconFor(lblMonitor, "/kldcrimedecoder/images/room_monitor.png"));
@@ -121,7 +162,7 @@ public class Level8 extends javax.swing.JPanel {
             t.setOpaque(true);
             t.setBackground(DEEP);
             t.setBorder(BorderFactory.createLineBorder(AMBER, 1));
-            t.setBounds(SCREEN_X[i] + 8, SCREEN_Y[i] + 8, 70, 20);
+            t.setBounds(SCREEN_X[i] + CLIP_W - 70 - 8, SCREEN_Y[i] + CLIP_H - 20 - 8, 70, 20);   // bottom-right corner of its screen
         }
 
         // ----- the four clips -----
@@ -168,7 +209,7 @@ public class Level8 extends javax.swing.JPanel {
                     }
                     grab = null;
                     c.setBorder(null);
-                    deskPanel.setComponentZOrder(c, deskPanel.getComponentCount() - 1);   // back behind the monitor frame
+                    deskPanel.setComponentZOrder(c, Math.max(0, deskPanel.getComponentZOrder(lblGray) - 1));   // just in front of the gray backing
                     Point mid = new Point(c.getX() + CLIP_W / 2, c.getY() + CLIP_H / 2);
                     for (int s = 0; s < SCREEN_X.length; s++) {
                         if (screenRect(s).contains(mid)) {
@@ -237,18 +278,86 @@ public class Level8 extends javax.swing.JPanel {
         lblJoel.setText(icon == null ? "Joel" : "");
     }
 
-    /** A dark text box on the desk; empty text hides the box. */
+    /** The wide front-office picture, scaled to the panel width (1000) and cropped to the panel height (600). */
+    private ImageIcon loadWideRoom() {
+        java.net.URL u = getClass().getResource("/kldcrimedecoder/images/expanded_room.png");
+        if (u == null) {
+            System.err.println("Level8: expanded_room.png NOT FOUND, the desk picture is used instead");
+            return null;
+        }
+        ImageIcon src = new ImageIcon(u);
+        int iw = src.getIconWidth(), ih = src.getIconHeight();
+        if (iw <= 0 || ih <= 0) {
+            return null;
+        }
+        double sc = 1000.0 / iw;
+        int nh = (int) Math.round(ih * sc);
+        int top = (int) Math.round(Math.max(0, nh - 600) * 0.68);        // crop more of the ceiling than of the floor
+        java.awt.image.BufferedImage out = new java.awt.image.BufferedImage(1000, 600, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = out.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.drawImage(src.getImage(), 0, -top, 1000, nh, null);
+        g.dispose();
+        return new ImageIcon(out);
+    }
+
+    /** A sticky note picture, scaled to NOTE_W x NOTE_H. Null if the file is missing (then the old dark box is used). */
+    private ImageIcon loadNote(String file) {
+        java.net.URL u = getClass().getResource("/kldcrimedecoder/images/" + file);
+        if (u == null) {
+            System.err.println("Level8: " + file + " NOT FOUND, using the dark box instead");
+            return null;
+        }
+        java.awt.image.BufferedImage out = new java.awt.image.BufferedImage(NOTE_W, NOTE_H, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = out.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.drawImage(new ImageIcon(u).getImage(), 0, 0, NOTE_W, NOTE_H, null);
+        g.dispose();
+        return new ImageIcon(out);
+    }
+
+    /** Which room picture is behind everything: the wide office (true) or the close-up desk (false). */
+    private void setRoomView(boolean wide) {
+        lblBackground.setIcon(wide && wideRoomIcon != null ? wideRoomIcon : deskRoomIcon);
+    }
+
+    /** The darker version of a colour, for text that sits on the paper of a sticky note. */
+    private static Color onPaper(Color fg) {
+        if (fg == BAD)   return new Color(0xB02A2A);
+        if (fg == GOOD)  return new Color(0x1E7A44);
+        if (fg == AMBER) return new Color(0x8A5200);
+        return new Color(0x3A2F20);
+    }
+
+    /**
+     * Text on a sticky note: the prompt on the yellow one, everything else on the pink one.
+     * Empty text hides the note. If a note picture is missing, it falls back to the old dark box.
+     */
     private void setBox(JLabel l, String text, Color fg) {
         boolean has = text != null && !text.trim().isEmpty();
-        l.setFont(new Font("Consolas", Font.PLAIN, 12));
-        l.setForeground(fg);
-        l.setVerticalAlignment(SwingConstants.TOP);
-        l.setOpaque(has);
-        l.setBackground(DEEP);
-        l.setBorder(has ? BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(fg, 1, true),
-                BorderFactory.createEmptyBorder(5, 7, 5, 7)) : null);
-        l.setText(has ? "<html><body style='width:138px'>" + text + "</body></html>" : "");
+        ImageIcon note = (l == lblPrompt) ? noteYellow : notePink;
+        l.setFont(new Font("Consolas", Font.PLAIN, 11));
+        if (note != null) {
+            l.setIcon(has ? note : null);
+            l.setHorizontalAlignment(SwingConstants.CENTER);
+            l.setVerticalAlignment(SwingConstants.CENTER);
+            l.setHorizontalTextPosition(SwingConstants.CENTER);
+            l.setVerticalTextPosition(SwingConstants.CENTER);
+            l.setForeground(onPaper(fg));
+            l.setOpaque(false);
+            l.setBorder(null);
+            // the <br> pushes the text below the tape; the width keeps it inside the paper
+            l.setText(has ? "<html><body style='width:150px; text-align:center'><br>" + text + "</body></html>" : "");
+        } else {
+            l.setForeground(fg);
+            l.setVerticalAlignment(SwingConstants.TOP);
+            l.setOpaque(has);
+            l.setBackground(DEEP);
+            l.setBorder(has ? BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(fg, 1, true),
+                    BorderFactory.createEmptyBorder(5, 7, 5, 7)) : null);
+            l.setText(has ? "<html><body style='width:138px'>" + text + "</body></html>" : "");
+        }
         l.repaint();
     }
 
@@ -281,6 +390,27 @@ public class Level8 extends javax.swing.JPanel {
         screenOf[clip] = screen;
     }
 
+    /** Puts the clips on random screens. At most one starts in the right place, so every game is different. */
+    private void shuffleStart() {
+        java.util.Random rnd = new java.util.Random();
+        int n = screenOf.length;
+        int fixed;
+        do {
+            java.util.List<Integer> order = new java.util.ArrayList<>();
+            for (int s = 0; s < n; s++) {
+                order.add(s);
+            }
+            java.util.Collections.shuffle(order, rnd);
+            fixed = 0;
+            for (int i = 0; i < n; i++) {
+                screenOf[i] = order.get(i);
+                if (screenOf[i] == puzzle.getCorrectSlot(i) - 1) {
+                    fixed++;
+                }
+            }
+        } while (fixed > 1);
+    }
+
     /** Snaps every clip to its screen. */
     private void arrange() {
         for (int i = 0; i < clips.length; i++) {
@@ -296,6 +426,8 @@ public class Level8 extends javax.swing.JPanel {
         GameState gs = GameState.getInstance();
         hintsUsed = 0;
         setBox(lblFeedback, "", INK);
+        endWaiting();
+        board.setVisible(false);
 
         boolean solved = gs.getChoice(KEY_SOLVED, "no").equals("yes");
         boolean chosen = !gs.getChoice(KEY_CHOICE, "none").equals("none");
@@ -307,19 +439,69 @@ public class Level8 extends javax.swing.JPanel {
             if (chosen) {                                         // all done: Joel and Continue
                 enterPhase(Phase.SOLVED);
                 showJoel("neutral");
-                lblJoel.setVisible(true);
+                lblJoel.setVisible(false);
                 btnContinue.setVisible(true);
             } else {                                              // solved but never made the choice
                 enterPhase(Phase.CHOICE);
             }
             return;
         }
-        for (int s = 0; s < Story.L8_START.length; s++) {         // start mixed up
-            screenOf[Story.L8_START[s]] = s;
-        }
+        shuffleStart();                                           // start mixed up, differently every time
         arrange();
+        setRoomView(true);                                        // the wide office, until the front desk is clicked
         enterPhase(Phase.INTRO);
-        playScene(Story.L8_INTRO, () -> enterPhase(Phase.PUZZLE));
+        // 1) the corkboard (once)  2) the wide office until you click the front desk  3) Joel at the desk  4) the puzzle
+        Runnable startScene = () -> {
+            // every line of L8_INTRO_OPEN except the last is played normally; the last one ("Click the front desk...")
+            // is shown and the dialogue box STAYS OPEN until the player clicks the desk
+            String[][] open = Story.L8_INTRO_OPEN;
+            playScene(java.util.Arrays.copyOf(open, open.length - 1), () -> {
+                if (GameManager.getDialogue() != null) {
+                    GameManager.getDialogue().say("", open[open.length - 1][1]);
+                }
+                waitForClick(() -> {
+                    setRoomView(false);                           // now the close-up desk scene appears
+                    playScene(Story.L8_INTRO, () -> enterPhase(Phase.PUZZLE));
+                });
+            });
+        };
+        if (gs.getChoice(KEY_BOARD, "no").equals("no")) {
+            gs.putChoice(KEY_BOARD, "yes");
+            board.play(Story.BOARD_UPDATE[3], startScene);
+        } else {
+            startScene.run();
+        }
+    }
+
+    // ----- clickable front desk -----
+
+    /** Waits until the player clicks the front desk (it glows gold on hover), then runs "next". */
+    private void waitForClick(Runnable next) {
+        waitingForClick = true;
+        afterClick = next;
+        btnDesk.setToolTipText(Story.L8_CLICK_TIP);
+        btnDesk.setVisible(true);
+    }
+
+    private void endWaiting() {
+        waitingForClick = false;
+        afterClick = null;
+        if (btnDesk != null) {
+            btnDesk.setVisible(false);
+            btnDesk.setBorderPainted(false);
+            btnDesk.setToolTipText(null);
+        }
+    }
+
+    private void deskClicked() {
+        if (!waitingForClick) {
+            return;
+        }
+        Runnable next = afterClick;
+        endWaiting();
+        if (next != null) {
+            next.run();
+        }
     }
 
     /** Plays lines in the shared DialogueBox (the same one Level 3 uses). */
@@ -341,7 +523,7 @@ public class Level8 extends javax.swing.JPanel {
 
     private void playFrom(String[][] lines, int i, Runnable done) {
         if (i >= lines.length) {
-            lblJoel.setVisible(phase == Phase.SOLVED);           // after the scene Joel stays only at the desk
+            lblJoel.setVisible(false);                           // Joel is on screen only while someone speaks
             if (done != null) {
                 done.run();
             }
@@ -358,12 +540,16 @@ public class Level8 extends javax.swing.JPanel {
 
     private void enterPhase(Phase p) {
         phase = p;
+        if (p != Phase.INTRO) {
+            setRoomView(false);                        // the close-up desk scene
+        }
         boolean monitor = (p == Phase.PUZZLE || p == Phase.CHOICE);
         deskPanel.setVisible(monitor);
         btnCheck.setVisible(p == Phase.PUZZLE);
         btnHint.setVisible(p == Phase.PUZZLE);
-        btnRewind.setVisible(p == Phase.CHOICE);
-        btnSkip.setVisible(p == Phase.CHOICE);
+        boolean useBox = (GameManager.getDialogue() != null);     // the choice is asked in the dialogue box, like the earlier levels
+        btnRewind.setVisible(p == Phase.CHOICE && !useBox);       // the two buttons are only a stand-in when the level runs on its own
+        btnSkip.setVisible(p == Phase.CHOICE && !useBox);
         btnRewind.setEnabled(true);
         btnSkip.setEnabled(true);
         btnContinue.setVisible(false);
@@ -372,12 +558,31 @@ public class Level8 extends javax.swing.JPanel {
         }
         if (p == Phase.PUZZLE) {
             setBox(lblPrompt, puzzle.getPrompt(), INK);
-        } else if (p == Phase.CHOICE) {
+        } else if (p == Phase.CHOICE && !useBox) {
             setBox(lblPrompt, Story.L8_CHOICE_PROMPT, AMBER);
         } else {
             setBox(lblPrompt, "", INK);
         }
         repaint();
+        if (p == Phase.CHOICE && useBox) {
+            askChoice();
+        }
+    }
+
+    /** "Rewind clip D" or "Skip it", asked in the dialogue box (the options sit beside it, like Level 4). */
+    private void askChoice() {
+        DialogueBox box = GameManager.getDialogue();
+        TimerManager.pause();                          // the clock waits while the player chooses
+        box.ask("", Story.L8_CHOICE_PROMPT, new String[] { Story.L8_CHOICE_REWIND, Story.L8_CHOICE_SKIP }, pick -> {
+            if (!GameState.getInstance().isGameOver()) {
+                TimerManager.resume();
+            }
+            if (pick == 0) {
+                rewind();
+            } else {
+                skipIt();
+            }
+        });
     }
 
     private void check() {
@@ -457,7 +662,7 @@ public class Level8 extends javax.swing.JPanel {
             enterPhase(Phase.SOLVED);
             showJoel("neutral");
             playScene(Story.L8_AFTER, () -> {
-                lblJoel.setVisible(true);
+                lblJoel.setVisible(false);
                 btnContinue.setVisible(true);
                 repaint();
             });
@@ -638,10 +843,10 @@ public class Level8 extends javax.swing.JPanel {
         lblGray.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/gray.png"))); // NOI18N
         deskPanel.add(lblGray, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 70, 700, 370));
 
-        add(deskPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        add(deskPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, -1, -1));
 
         lblJoel.setText("joel");
-        add(lblJoel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 340, 430));
+        add(lblJoel, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, 300, 390));
 
         lblBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_desk.png"))); // NOI18N
         lblBackground.setText("bg");

@@ -244,21 +244,32 @@ public class Story {
     };
     public static final String L5_CLEARED = "Amy Mercado is cleared. No time was deducted.";
     // TODO Phase 6: LEVEL4 names, LEVEL5 riddles, LEVEL6 posts, LEVEL7 Morse
-    // ---------- LEVEL 6: Amariah Navarro ----------
+        // ---------- LEVEL 6: Amariah Navarro ----------
     public static final String L6_TITLE = "Amariah Navarro";
     public static final String ITEM_AMARIAH_CLEARED = "Amariah Navarro: cleared";
     public static final String ITEM_CLUE_CLOSET = "Clue: the janitor's closet";
 
-    public static final String[][] L6_INTRO = {
+    // CHANGED: the intro is now two parts. Part 1 plays while she leans on the lockers and the phone buzzes;
+    // then the game waits for the player to click her. A speaker like "Amariah [sad]" shows amariah_sad.png
+    // (suspicious, sad, neutral, confused). The mood stays until the next line that sets one.
+    public static final String[][] L6_INTRO_OPEN = {
         {"", "Amy's door closes behind you. In the hallway, Alli's phone buzzes with a new post. It's Amariah, tagged to Alli. She's leaning against the lockers, scrolling."},
-        {"Amariah", "You're here about the posts, aren't you?"},
+        {"", "Click Amariah to talk to her."}
+    };
+    public static final String L6_CLICK_TIP = "Talk to Amariah";     // NEW: tooltip on her while she waits to be clicked
+
+    // Part 2, after the click
+    public static final String[][] L6_INTRO = {
+        {"Amariah [suspicious]", "You're here about the posts, aren't you?"},
         {"Arnie", "Alli kicked you out of the group project."},
-        {"Amariah", "She did. I was mad. I posted some things I regret, and then I posted some kinder ones. I never sent a message. People tell me it spells something."},
+        {"Amariah [sad]", "She did. I was mad. I posted some things I regret, and then I posted some kinder ones. I never sent a message. People tell me it spells something."},
         {"", "Open the phone. Her last five posts glow on the Facebook feed."}
     };
 
     public static final String L6_PHONE_TITLE = "Alli's feed  |  Amariah Navarro";
-    public static final String L6_PROMPT = "Type the word the posts spell:";
+    // CHANGED: two lines, so it uses HTML
+    public static final String L6_PROMPT =
+        "<html><b>What word do the posts spell?</b><br>Read the first letter of each post, in order.</html>";
 
     /** Her last five posts. The first letter of each one spells the answer. */
     public static final String[] L6_POSTS = {
@@ -268,7 +279,7 @@ public class Story {
         "Really, I'm not angry anymore.",
         "You were right, Alli."
     };
-    
+
     public static final String[] L6_TIMES = {"2 hours ago", "1 hour ago", "45 min ago", "20 min ago", "Just now"};
     public static final String L6_SCROLL_ALL = "Scroll through all five posts first.";
     public static final String L6_ANSWER = "SORRY";
@@ -280,11 +291,32 @@ public class Story {
     public static final String L6_WRONG = "No. That's not what the page is saying.";
     public static final String L6_RIGHT = "Click. Something falls into place.";
 
+    // CHANGED: mood tags added
     public static final String[][] L6_AFTER = {
-        {"Amariah", "I tried to say it that night. I saw her walking toward the janitor's closet at the end of the hall."},
-        {"Amariah", "You seem tired, Arnie. Like you're somewhere else."},   // foreshadowing
+        {"Amariah [neutral]", "I tried to say it that night. I saw her walking toward the janitor's closet at the end of the hall."},
+        {"Amariah [confused]", "You seem tired, Arnie. Like you're somewhere else."},   // foreshadowing
         {"Arnie", "Exams. That's all."},
         {"", "Amariah is cleared. Clue added: the janitor's closet."}
+    };
+
+    // ===== NEW: the Suspect Board scene at the start of Levels 6, 7 and 8 (BoardOverlay.java) =====
+    public static final String BOARD_NEXT_LEAD   = "Next lead: ";
+    public static final String BOARD_ALL_CLEARED = "All three names cleared. Nobody on this board took her.";
+    // index = how many suspects are cleared (1 = before Level 6, 2 = before Level 7, 3 = before Level 8)
+    public static final String[][][] BOARD_UPDATE = {
+        {},
+        {   // before Level 6
+            {"Arnie (thinking)", "Amy is cleared. One name off the board."},
+            {"Arnie (thinking)", "Amariah posted about Alli all week. That makes her the next strongest lead."}
+        },
+        {   // before Level 7
+            {"Arnie (thinking)", "Amariah is cleared. Two names down."},
+            {"Arnie (thinking)", "Aimee's username is one letter away from AMIE. She's the last name on the board."}
+        },
+        {   // before Level 8
+            {"Arnie (thinking)", "Three names. Three dead ends."},
+            {"Arnie (thinking)", "The board is out of suspects. The only thing left is the camera feed."}
+        }
     };
     
     // ---------- LEVEL 7: Aimee Ferrer ----------
@@ -292,12 +324,20 @@ public class Story {
     public static final String ITEM_AIMEE_CLEARED = "Aimee Ferrer: cleared";
     public static final String ITEM_COMP7_LOG = "Evidence: Computer 7 log";
 
+    public static final String L7_CLICK_TIP = "Talk to Aimee";
+ 
+    // Aimee sits at Computer 4 until the player clicks her. The LAST line stays on screen until she is clicked.
+    public static final String[][] L7_INTRO_OPEN = {
+        {"", "Two names down. You go back to the library, to the terminal row. Aimee is at Computer 4, hunched over the desk."},
+        {"", "Click Aimee to talk to her."}
+    };
+ 
+    // [mood] after the name picks her picture: aimee_scared / suspicious / sad / confused / neutral .png
     public static final String[][] L7_INTRO = {
-        {"", "Two names down. You go back to the library, to the terminal row. Aimee is at Computer 4, hunched over a laptop."},
-        {"Aimee", "It was just her notes! I didn't touch anything else, I swear."},
+        {"Aimee [scared]", "It was just her notes! I didn't touch anything else, I swear."},
         {"Arnie", "I don't care about notes. I need the login log."},
-        {"Aimee", "My username is AimeeF. The system keeps mixing it up with Amie. That's why I got flagged."},
-        {"Aimee", "But you can tell us apart. Look at where we sit."}
+        {"Aimee [sad]", "My username is AimeeF. The system keeps mixing it up with Amie. That's why I got flagged."},
+        {"Aimee [suspicious]", "But you can tell us apart. Look at where we sit."}
     };
 
     public static final String L7_LOG_TITLE = "Library terminal log  |  who logged in?";
@@ -332,7 +372,7 @@ public class Story {
     };
 
     public static final String[][] L7_AFTER = {
-        {"Aimee", "So the real Amie was at Computer 7 the whole time. Even before last night."},
+        {"Aimee [confused]", "So the real Amie was at Computer 7 the whole time. Even before last night."},
         {"Arnie (thinking)", "{slow} Computer seven. That's the one by the back wall. That's where I always sit."},
         {"Arnie (thinking)", "{dim} Lots of people sit there."},
         {"", "Aimee is cleared. Evidence added: Computer 7 log."}
@@ -341,11 +381,18 @@ public class Story {
     // ---------- LEVEL 8: The Front Desk (Joel) ----------
     public static final String L8_TITLE = "The Front Desk";
     public static final String ITEM_CLOSET_CAMERA = "Clue: the closet (camera)";
-
+    
+    public static final String L8_CLICK_TIP = "Go to the front desk";
+ 
+    // Shown in the wide front office. The LAST line stays on screen until the player clicks the front desk.
+    public static final String[][] L8_INTRO_OPEN = {
+        {"", "Three names cleared, and still no Alli. Nine minutes left. The only thing left is the camera feed."},
+        {"", "Click the front desk."}
+    };
     // Rows are {speaker, line} or {speaker, line, joelMood}. joelMood = happy / sad / confused / neutral
     // and stays until the next row that sets one. Level8 shows the matching joel_<mood>.png.
     public static final String[][] L8_INTRO = {
-        {"", "Three names cleared, and still no Alli. Nine minutes left. The only thing left is the camera feed. You walk to the front desk.", "happy"},
+        {"", "You walk up to the front desk.", "happy"},
         {"Joel", "Hey detective! Want pandesal? It's the only thing keeping me awake."},
         {"Joel", "I saw Alli last night. Or a shadow. Or a mannequin... or.. jeez, I'm getting chills.", "confused"},
         {"Arnie", "Kuya Joel. Focus."},

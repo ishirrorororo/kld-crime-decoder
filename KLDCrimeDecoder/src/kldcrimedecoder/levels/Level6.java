@@ -4,9 +4,13 @@
  */
 package kldcrimedecoder.levels;
 
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.BorderFactory;
@@ -19,9 +23,6 @@ import kldcrimedecoder.engine.GameState;
 import kldcrimedecoder.engine.LevelManager;
 import kldcrimedecoder.engine.ScoreManager;
 import kldcrimedecoder.puzzles.AcrosticPuzzle;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 
 /**
  * Level 6: Amariah Navarro. The scene and the phone screen. The puzzle's data and answer
@@ -53,29 +54,23 @@ public class Level6 extends javax.swing.JPanel {
     private boolean glowFirst = false;
     private boolean updatingBar = false;     // true while the code (not the player) moves the scroll bar
 
-    private ImageIcon standingIcon, leaningIcon;      // Amariah sprites
-    private Timer buzzTimer;
-    private int buzzX, buzzY;
-    // same as lblAmariah's Width/Height in the Design tab (Properties → Layout)
+    // same as lblAmariah's Width/Height in the Design tab (Properties -> Layout). Change SPRITE_H to resize all her pictures.
     private static final int SPRITE_W = 300, SPRITE_H = 390;
+    private static final java.util.regex.Pattern MOOD = java.util.regex.Pattern.compile("^(.*?)\\s*\\[(\\w+)\\]$");
+    private static final String KEY_BOARD = "level6.boardSeen";
+    private String[][] openingLines;                   // the narration lines played while she leans on the lockers
 
-    /** Scales an icon to fit inside w x h, keeping its proportions. */
-    private static ImageIcon fit(ImageIcon src, int w, int h) {
-        if (src == null) return null;
-        int iw = src.getIconWidth(), ih = src.getIconHeight();
-        if (iw <= 0 || ih <= 0) return src;
-        double s = (double) h / ih;       
-        int nw = Math.max(1, (int) Math.round(iw * s)), nh = Math.max(1, (int) Math.round(ih * s));
-        java.awt.image.BufferedImage out =
-                new java.awt.image.BufferedImage(nw, nh, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-        java.awt.Graphics2D g = out.createGraphics();
-        g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
-                s < 1 ? java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC
-                      : java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g.drawImage(src.getImage(), 0, 0, nw, nh, null);
-        g.dispose();
-        return new ImageIcon(out);
-    }
+    private ImageIcon standingIcon, leaningIcon;     // Amariah sprites
+    private final java.util.Map<String, ImageIcon> moodIcons = new java.util.HashMap<>();
+    private String currentMood = "neutral";
+    private boolean waitingForClick = false;           // true while the player must click Amariah to start the talk
+    private Runnable afterClick;
+    private kldcrimedecoder.ui.BoardOverlay board;     // the corkboard scene shown before the level
+    private Timer buzzTimer;
+    private javax.swing.JButton btnTalk;               // invisible button over the leaning Amariah (glows on hover)
+    // same as lblAmariahLeaning's X and Y in the Design tab; the button takes the size of her picture
+    private static final int TALK_X = 70, TALK_Y = 80;
+    private int buzzX, buzzY;
 
     /**
      * Creates new form Level6
@@ -83,6 +78,17 @@ public class Level6 extends javax.swing.JPanel {
     public Level6() {
         initComponents();
         setupLevel6();
+
+        board = new kldcrimedecoder.ui.BoardOverlay(1);          // 1 name cleared (Amy)
+        add(board, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580), 0);   // index 0 = drawn on top
+        board.setVisible(false);
+        btnTalk = new javax.swing.JButton();
+        int tw = (leaningIcon == null) ? SPRITE_W : leaningIcon.getIconWidth();
+        int th = (leaningIcon == null) ? SPRITE_H : leaningIcon.getIconHeight();
+        add(btnTalk, new org.netbeans.lib.awtextra.AbsoluteConstraints(TALK_X, TALK_Y, tw, th), 0);   // index 0 = on top
+        kldcrimedecoder.ui.HoverGlow.install(btnTalk);
+        btnTalk.addActionListener(e -> talkClicked());
+        btnTalk.setVisible(false);
 
         // When the hallway appears, (re)start the level
         addComponentListener(new ComponentAdapter() {
@@ -103,36 +109,44 @@ public class Level6 extends javax.swing.JPanel {
     private void setupLevel6() {
         btnContinue.setText("Continue");
         lblBackground.setText("");
+        lblAvatar.setText("");
 
-        // Amariah: both sprites are scaled to fit her label
-    lblAmariah.setFont(new Font("Consolas", Font.BOLD, 18));
-    lblAmariah.setForeground(INK);
-    lblAmariah.setHorizontalAlignment(SwingConstants.CENTER);
-    lblAmariah.setVerticalAlignment(SwingConstants.BOTTOM);       // feet stay in the same place in both poses
-    standingIcon = fit((ImageIcon) lblAmariah.getIcon(), SPRITE_W, SPRITE_H);
-    java.net.URL u = getClass().getResource("/kldcrimedecoder/images/amariah_leaning_full.png");
-    if (u != null) {
-        leaningIcon = fit(new ImageIcon(u), SPRITE_W, SPRITE_H);
-    } else {
-        System.err.println("Level6: amariah_leaning_full.png NOT FOUND in /kldcrimedecoder/images/");
-    }
-    lblAmariah.setIcon(standingIcon);
-    lblAmariah.setText(standingIcon == null ? "Amariah" : "");
-    lblAvatar.setText("");
-
+        // Amariah: one picture per mood (amariah_suspicious / sad / neutral / confused.png) and the leaning pose
+        lblAmariah.setFont(new Font("Consolas", Font.BOLD, 18));
+        lblAmariah.setForeground(INK);
+        lblAmariah.setHorizontalAlignment(SwingConstants.CENTER);
+        lblAmariah.setVerticalAlignment(SwingConstants.BOTTOM);
+        standingIcon = (lblAmariah.getIcon() instanceof ImageIcon) ? fit((ImageIcon) lblAmariah.getIcon(), SPRITE_W, SPRITE_H) : null;   // stand-in if a mood picture is missing
+        lblAmariah.setText(standingIcon == null ? "Amariah" : "");
+        if (standingIcon == null) {
+            lblAmariah.setBorder(BorderFactory.createDashedBorder(new Color(255, 255, 255, 90)));
+        }
+        leaningIcon = spriteIcon("amariah_leaning_full.png");
+        if (leaningIcon == null) {
+            System.err.println("Level6: amariah_leaning_full.png NOT FOUND");
+            leaningIcon = standingIcon;
+        }
+        // the leaning pose has its own label (lblAmariahLeaning), so it can sit somewhere else in the Design tab
+        lblAmariahLeaning.setText("");
+        lblAmariahLeaning.setIcon(leaningIcon);
+        lblAmariahLeaning.setHorizontalAlignment(SwingConstants.CENTER);
+        lblAmariahLeaning.setVerticalAlignment(SwingConstants.BOTTOM);
+        
         // phone feed
         lblPost.setVerticalAlignment(SwingConstants.TOP);
         lblPost.setText("");
         lblFeed.setText("");
         lblReactions.setText("Like        Comment        Share");
-        lblReactions.setFont(new Font("Consolas", Font.BOLD, 12));
+        lblPost.setFont(new Font("Segoe UI", Font.PLAIN, 14));      // the posts use a social-media font
+        lblReactions.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblReactions.setForeground(new Color(0x777777));
         lblReactions.setHorizontalAlignment(SwingConstants.CENTER);
-        lblCounter.setFont(new Font("Consolas", Font.BOLD, 12));
+        lblCounter.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblCounter.setForeground(DARK);
         lblCounter.setHorizontalAlignment(SwingConstants.CENTER);
         lblPrompt.setText(puzzle.getPrompt());
-        lblPrompt.setFont(new Font("Consolas", Font.PLAIN, 13));
+        lblPrompt.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblPrompt.setVerticalAlignment(SwingConstants.TOP);
         lblPrompt.setForeground(DARK);
         txtAnswer.setFont(new Font("Consolas", Font.BOLD, 20));
         txtAnswer.setHorizontalAlignment(SwingConstants.CENTER);
@@ -155,11 +169,11 @@ public class Level6 extends javax.swing.JPanel {
                 showPost(e.getValue());
             }
         });
-        sbFeed.setUI(new FeedScrollUI());
+        sbFeed.setUI(new FeedScrollUI());                          // the styled scroll bar
         btnSubmit.setText("Submit");
         btnHint.setText("Hint");
         lblFeedback.setText(" ");
-        lblFeedback.setFont(new Font("Consolas", Font.ITALIC, 13));
+        lblFeedback.setFont(new Font("Segoe UI", Font.ITALIC, 13));
         lblFeedback.setHorizontalAlignment(SwingConstants.CENTER);
         phonePanel.setOpaque(false);
         phonePanel.addMouseWheelListener(e -> scrollFeed(e.getWheelRotation() > 0 ? 1 : -1));   // mouse wheel scrolls too
@@ -167,6 +181,7 @@ public class Level6 extends javax.swing.JPanel {
         phonePanel.setVisible(false);
         lblPhoneBuzz.setVisible(false);
         lblAmariah.setVisible(false);
+        lblAmariahLeaning.setVisible(false);
         btnContinue.setVisible(false);
     }
 
@@ -175,9 +190,12 @@ public class Level6 extends javax.swing.JPanel {
     /** Called every time the card is shown. */
     private void onShown() {
         GameState gs = GameState.getInstance();
+        endWaiting();
+        board.setVisible(false);
         stopBuzz();
         lblPhoneBuzz.setVisible(false);
         lblAmariah.setVisible(false);
+        lblAmariahLeaning.setVisible(false);
 
         if (gs.getChoice(KEY_SOLVED, "no").equals("yes")) {      // already solved: go straight to Continue
             enterPhase(Phase.SOLVED);
@@ -187,7 +205,25 @@ public class Level6 extends javax.swing.JPanel {
         }
         enterPhase(Phase.INTRO);
         gs.putChoice(KEY_INTRO, "yes");
-        playScene(Story.L6_INTRO, () -> enterPhase(Phase.PUZZLE));
+        // 1) the corkboard (once)  2) she leans on the lockers until you click her  3) the talk  4) the puzzle
+        Runnable startScene = () -> {
+            // every line of L6_INTRO_OPEN except the last is played normally; the last one ("Click Amariah...")
+            // is shown and the dialogue box STAYS OPEN until the player clicks her
+            String[][] open = Story.L6_INTRO_OPEN;
+            openingLines = java.util.Arrays.copyOf(open, open.length - 1);
+            playScene(openingLines, () -> {
+                if (GameManager.getDialogue() != null) {
+                    GameManager.getDialogue().say("", open[open.length - 1][1]);
+                }
+                waitForClick(() -> playScene(Story.L6_INTRO, () -> enterPhase(Phase.PUZZLE)));
+            });
+        };
+        if (gs.getChoice(KEY_BOARD, "no").equals("no")) {
+            gs.putChoice(KEY_BOARD, "yes");
+            board.play(Story.BOARD_UPDATE[1], startScene);
+        } else {
+            startScene.run();
+        }
     }
 
     private void enterPhase(Phase p) {
@@ -243,17 +279,25 @@ public class Level6 extends javax.swing.JPanel {
     }
 
     private void playFrom(String[][] lines, int i, Runnable done) {
+        boolean opening = (lines == openingLines);                 // she leans on the lockers, the phone buzzes
         if (i >= lines.length) {
-            lblAmariah.setVisible(false);
-            stopBuzz();
-            lblPhoneBuzz.setVisible(false);
+            if (!opening) {                                      // after the opening she stays, waiting to be clicked
+                lblAmariah.setVisible(false);
+                lblAmariahLeaning.setVisible(false);
+                stopBuzz();
+                lblPhoneBuzz.setVisible(false);
+            }
             if (done != null) {
                 done.run();
             }
             return;
         }
         String speaker = lines[i][0];
-        boolean opening = (lines == Story.L6_INTRO && i == 0);   // the "phone buzzes" narration line
+        java.util.regex.Matcher m = MOOD.matcher(speaker);       // "Amariah [sad]" -> "Amariah" + "sad"
+        if (m.matches()) {
+            speaker = m.group(1);
+            currentMood = m.group(2).toLowerCase();
+        }
 
         lblPhoneBuzz.setVisible(opening);
         if (opening) {
@@ -262,12 +306,85 @@ public class Level6 extends javax.swing.JPanel {
             stopBuzz();
         }
 
-        ImageIcon sprite = (opening && leaningIcon != null) ? leaningIcon : standingIcon;
-        lblAmariah.setIcon(sprite);
-        lblAmariah.setText(sprite == null ? "Amariah" : "");      // text placeholder only while there is no sprite
-        lblAmariah.setVisible(opening || speaker.equals("Amariah") || speaker.equals("Arnie"));
+        lblAmariahLeaning.setVisible(opening);                   // the leaning pose is its own label
+        if (opening) {
+            lblAmariahLeaning.setIcon(leaningIcon);
+            lblAmariah.setVisible(false);
+        } else {
+            ImageIcon sprite = moodIcon(currentMood);
+            lblAmariah.setIcon(sprite);
+            lblAmariah.setText("");
+            lblAmariah.setVisible(speaker.equals("Amariah") || speaker.equals("Arnie"));
+            lblAmariah.repaint();
+        }
 
-        playDialogue(new String[][] { lines[i] }, () -> playFrom(lines, i + 1, done));
+        playDialogue(new String[][] { { speaker, lines[i][1] } }, () -> playFrom(lines, i + 1, done));
+    }
+
+    // ----- clickable Amariah -----
+
+    /** Waits until the player clicks Amariah (she glows gold on hover), then runs "next". */
+    private void waitForClick(Runnable next) {
+        waitingForClick = true;
+        afterClick = next;
+        btnTalk.setToolTipText(Story.L6_CLICK_TIP);
+        btnTalk.setVisible(true);
+    }
+ 
+    private void endWaiting() {
+        waitingForClick = false;
+        afterClick = null;
+        if (btnTalk != null) {
+            btnTalk.setVisible(false);
+            btnTalk.setBorderPainted(false);
+            btnTalk.setToolTipText(null);
+        }
+    }
+ 
+    private void talkClicked() {
+        if (!waitingForClick) {
+            return;
+        }
+        Runnable next = afterClick;
+        endWaiting();
+        stopBuzz();
+        lblPhoneBuzz.setVisible(false);
+        if (next != null) {
+            next.run();
+        }
+    }
+
+    // ----- Amariah's pictures -----
+
+    /** /kldcrimedecoder/images/<file> scaled to SPRITE_H tall (same scaling as before). Null if the file is missing. */
+    private ImageIcon spriteIcon(String file) {
+        java.net.URL u = getClass().getResource("/kldcrimedecoder/images/" + file);
+        return (u == null) ? null : fit(new ImageIcon(u), SPRITE_W, SPRITE_H);
+    }
+
+    /** Her picture for a mood (amariah_<mood>.png), or the Design tab picture if that file doesn't exist. */
+    private ImageIcon moodIcon(String mood) {
+        if (!moodIcons.containsKey(mood)) {
+            ImageIcon ic = spriteIcon("amariah_" + mood + ".png");
+            if (ic == null) {
+                System.err.println("Level6: /kldcrimedecoder/images/amariah_" + mood + ".png NOT FOUND, using the Design tab picture instead");
+                ic = standingIcon;
+            }
+            moodIcons.put(mood, ic);
+        }
+        return moodIcons.get(mood);
+    }
+
+    /** A slightly brighter copy of a picture: the hover effect. */
+    private static ImageIcon brighter(ImageIcon src) {
+        java.awt.image.BufferedImage in = new java.awt.image.BufferedImage(
+                src.getIconWidth(), src.getIconHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        java.awt.Graphics2D g = in.createGraphics();
+        g.drawImage(src.getImage(), 0, 0, null);
+        g.dispose();
+        java.awt.image.RescaleOp op = new java.awt.image.RescaleOp(
+                new float[] { 1.18f, 1.18f, 1.18f, 1f }, new float[] { 24f, 24f, 24f, 0f }, null);   // brighter, keeps see-through edges
+        return new ImageIcon(op.filter(in, null));
     }
 
     private void startBuzz() {
@@ -325,14 +442,13 @@ public class Level6 extends javax.swing.JPanel {
         String first = glowFirst
                 ? "<font color='#E08A00'><b>" + t.charAt(0) + "</b></font>"
                 : "<b>" + t.charAt(0) + "</b>";
-        return "<html><body style='width:240px; font-family:Consolas; color:#111111'>"
+        // looks like a Facebook post: name, "with Alli", time, then the text. The font comes from lblPost (Segoe UI).
+        return "<html><body style='width:214px; color:#050505'>"
              + "<table cellpadding='0' cellspacing='0'><tr><td width='56'>&nbsp;</td><td>"      // room for the avatar
-             + "<div style='font-size:12px; color:#1C3F8C'><b>Amariah</b></div>"
-             + "<div style='font-size:11px; color:#777777'>Tagged: Alli</div>"
+             + "<div style='font-size:13px'><b>Amariah Navarro</b></div>"
+             + "<div style='font-size:11px; color:#65676B'>with <b>Alli</b> &middot; " + puzzle.getPostTime(n) + "</div>"
              + "</td></tr></table><br>"
-             + "<div style='font-size:21px'>" + first + t.substring(1) + "</div><br>"
-             + "<div style='font-size:11px; color:#777777'>Posted by <font color='#1C3F8C'>Amariah</font><br>"
-             + puzzle.getPostTime(n) + "</div></body></html>";
+             + "<div style='font-size:19px'>" + first + t.substring(1) + "</div></body></html>";
     }
 
     private void submit() {
@@ -389,7 +505,25 @@ public class Level6 extends javax.swing.JPanel {
         });
         t.start();
     }
-    
+
+    /** Scales an icon to the height h, keeping its proportions. */
+    private static ImageIcon fit(ImageIcon src, int w, int h) {
+        if (src == null) return null;
+        int iw = src.getIconWidth(), ih = src.getIconHeight();
+        if (iw <= 0 || ih <= 0) return src;
+        double s = (double) h / ih;
+        int nw = Math.max(1, (int) Math.round(iw * s)), nh = Math.max(1, (int) Math.round(ih * s));
+        java.awt.image.BufferedImage out =
+                new java.awt.image.BufferedImage(nw, nh, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        java.awt.Graphics2D g = out.createGraphics();
+        g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                s < 1 ? java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC
+                      : java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.drawImage(src.getImage(), 0, 0, nw, nh, null);
+        g.dispose();
+        return new ImageIcon(out);
+    }
+
     /** Slim rounded scroll bar in the Facebook blue: no arrow buttons, light track, grey outline all around. */
     private static class FeedScrollUI extends javax.swing.plaf.basic.BasicScrollBarUI {
         private static final Color THUMB   = new Color(0x3B5998);
@@ -472,6 +606,7 @@ public class Level6 extends javax.swing.JPanel {
         btnContinue = new javax.swing.JButton();
         lblAmariah = new javax.swing.JLabel();
         lblPhoneBuzz = new javax.swing.JLabel();
+        lblAmariahLeaning = new javax.swing.JLabel();
         lblBackground = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(1000, 580));
@@ -481,7 +616,7 @@ public class Level6 extends javax.swing.JPanel {
         phonePanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblPost.setText("post");
-        phonePanel.add(lblPost, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 140, 260, 345));
+        phonePanel.add(lblPost, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 140, 280, 345));
 
         lblAvatar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/avatar_amariah.png"))); // NOI18N
         phonePanel.add(lblAvatar, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 130, 50, 60));
@@ -490,7 +625,7 @@ public class Level6 extends javax.swing.JPanel {
         phonePanel.add(lblReactions, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 310, 280, 30));
 
         lblPrompt.setText("prompt");
-        phonePanel.add(lblPrompt, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 390, 374, 20));
+        phonePanel.add(lblPrompt, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 380, 374, 36));
 
         txtAnswer.setText("jTextField1");
         txtAnswer.addActionListener(this::txtAnswerActionPerformed);
@@ -512,7 +647,7 @@ public class Level6 extends javax.swing.JPanel {
         phonePanel.add(lblCounter, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 346, -1, 20));
 
         sbFeed.setForeground(new java.awt.Color(204, 204, 204));
-        phonePanel.add(sbFeed, new org.netbeans.lib.awtextra.AbsoluteConstraints(385, 140, 15, 180));
+        phonePanel.add(sbFeed, new org.netbeans.lib.awtextra.AbsoluteConstraints(393, 140, 13, 180));
 
         lblFeed.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/phone_feed.png"))); // NOI18N
         lblFeed.setText("feed");
@@ -529,6 +664,7 @@ public class Level6 extends javax.swing.JPanel {
 
         lblPhoneBuzz.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/phone_buzz_small.png"))); // NOI18N
         add(lblPhoneBuzz, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 160, 314, 314));
+        add(lblAmariahLeaning, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, -1, -1));
 
         lblBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_hallway.png"))); // NOI18N
         lblBackground.setText("bg");
@@ -557,6 +693,7 @@ public class Level6 extends javax.swing.JPanel {
     private javax.swing.JButton btnHint;
     private javax.swing.JButton btnSubmit;
     private javax.swing.JLabel lblAmariah;
+    private javax.swing.JLabel lblAmariahLeaning;
     private javax.swing.JLabel lblAvatar;
     private javax.swing.JLabel lblBackground;
     private javax.swing.JLabel lblCounter;
