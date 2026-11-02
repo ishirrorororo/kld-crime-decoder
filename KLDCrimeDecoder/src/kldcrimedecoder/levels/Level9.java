@@ -35,6 +35,7 @@ import kldcrimedecoder.ui.Shake;
 import java.util.HashMap;
 import java.util.Map;
 import kldcrimedecoder.ui.Fade;
+import kldcrimedecoder.ui.GlowBorder;
 
 public class Level9 extends JPanel {
     
@@ -137,6 +138,7 @@ private Shake padlockShake;
         noteFade = new Fade(lblNote);
         notePop = new PopIn(lblNote, 0, 40, 400);      // the note rises 40 pixels into place
         makeHotspot(btnNote);
+        GlowBorder.onHover(btnPadlock, btnNote);
         
         fades.put(lblSceneDoor, new Fade(lblSceneDoor));
         fades.put(lblSceneCloset, new Fade(lblSceneCloset));
@@ -149,8 +151,7 @@ private Shake padlockShake;
         sceneShake = new Shake(
             SCENE_SHAKE_PX, SCENE_SHAKE_MS, SCENE_SHAKE_COUNT,
             jLabel1, lblSceneDoor, lblSceneCloset,
-            lblJennaScared, lblJennaSuspicious, lblJennaNeutral, lblJennaConfused,
-            lblArnieNeutral, lblArnieSad);
+            lblJennaScared, lblJennaSuspicious, lblJennaNeutral, lblJennaConfused);
         
         unlockHop = new PopIn(lblUnLockArt, 0, UNLOCK_HOP_PX, UNLOCK_HOP_MS);
         phonePopIn = new PopIn(pnlPhone, 0, PHONE_FROM_DY, PHONE_POP_MS);
@@ -172,9 +173,6 @@ private Shake padlockShake;
             .add("jenna", "suspicious", lblJennaSuspicious)
             .add("jenna", "neutral", lblJennaNeutral)
             .add("jenna", "confused", lblJennaConfused)
-
-            .add("arnie", "neutral", lblArnieNeutral)
-            .add("arnie", "sad", lblArnieSad)
 
             .effect("flicker", this::flicker)
             .effect("shake", () -> sceneShake.start())
@@ -318,7 +316,7 @@ private Shake padlockShake;
         btnHint.setEnabled(false);
         btnPhone.setEnabled(false);
 
-        btnPadlock.setEnabled(true);
+        btnPadlock.setEnabled(false);
         padlockClickable = false;
 
         // =====================================================
@@ -391,11 +389,13 @@ private Shake padlockShake;
 
         btnPadlock.setVisible(true);
 
-        btnPadlock.setEnabled(true);
+        btnPadlock.setEnabled(false);
 
         pnlPhone.setVisible(false);
 
         sprites.hideAll();
+        
+        GlowBorder.clear(btnPadlock, btnNote);
 
         lblTitle.setText(
                 Story.LEVEL_TITLES[9]);
@@ -417,6 +417,7 @@ private Shake padlockShake;
                 () -> {
 
                     padlockClickable = true;
+                    btnPadlock.setEnabled(true);
 
                     setFeedback(
                             Story.L9_CLICK_PROMPT,
@@ -433,6 +434,7 @@ private Shake padlockShake;
         puzzleActive = true;
 
         lblBgPuzzle.setVisible(true);
+        GlowBorder.clear(btnPadlock);
         btnPadlock.setVisible(false);
 
         setComponentZOrder(pnlLockArtDesign, 0);
@@ -780,8 +782,6 @@ private Shake padlockShake;
         lblJennaSuspicious = new javax.swing.JLabel();
         lblJennaNeutral = new javax.swing.JLabel();
         lblJennaConfused = new javax.swing.JLabel();
-        lblArnieNeutral = new javax.swing.JLabel();
-        lblArnieSad = new javax.swing.JLabel();
         pnlPhone = new javax.swing.JPanel();
         btnPhoneClose = new javax.swing.JButton();
         btnAppWifi = new javax.swing.JButton();
@@ -834,7 +834,7 @@ private Shake padlockShake;
         add(pnlLockArtDesign, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 40, -1, -1));
 
         lblJennaScared.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_scared.png"))); // NOI18N
-        add(lblJennaScared, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 468, 455));
+        add(lblJennaScared, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
 
         lblJennaSuspicious.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_suspicious.png"))); // NOI18N
         add(lblJennaSuspicious, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
@@ -844,12 +844,6 @@ private Shake padlockShake;
 
         lblJennaConfused.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/jenna_confused.png"))); // NOI18N
         add(lblJennaConfused, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 468, 455));
-
-        lblArnieNeutral.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/arnie_neutral.png"))); // NOI18N
-        add(lblArnieNeutral, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 40, 468, 455));
-
-        lblArnieSad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/arnie_sad.png"))); // NOI18N
-        add(lblArnieSad, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 40, 468, 455));
 
         pnlPhone.setOpaque(false);
         pnlPhone.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -911,7 +905,7 @@ private Shake padlockShake;
         add(lblSceneCloset, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 600));
 
         lblNote.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/the_note.png"))); // NOI18N
-        add(lblNote, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, 380, 336));
+        add(lblNote, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 60, 380, 336));
 
         btnNote.setText("jButton1");
         btnNote.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -953,6 +947,7 @@ private Shake padlockShake;
     }//GEN-LAST:event_btnPhoneNavActionPerformed
 
     private void btnNoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNoteActionPerformed
+        GlowBorder.clear(btnNote);
         btnNote.setVisible(false);
         setFeedback("", true);
 
@@ -969,8 +964,6 @@ private Shake padlockShake;
     private javax.swing.JButton btnPhoneClose;
     private javax.swing.JButton btnPhoneNav;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel lblArnieNeutral;
-    private javax.swing.JLabel lblArnieSad;
     private javax.swing.JLabel lblBgPuzzle;
     private javax.swing.JLabel lblFlicker;
     private javax.swing.JLabel lblJennaConfused;

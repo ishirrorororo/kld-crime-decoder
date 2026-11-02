@@ -279,9 +279,10 @@ public class Story {
      // ============ THE HALLWAY CLOSET (Level 9) ============
 
     public static final String[][] L9_INTRO = {
-        {"@Jenna [scared]", "Six minutes. You reach the end of the hallway. A padlock hangs on the closet door. Behind you, quick footsteps."},
+        {"@Jenna [scared]", "..."},
+        {"", "Six minutes. You reach the end of the hallway. A padlock hangs on the closet door. Behind you, quick footsteps."},
         {"Jenna [suspicious]", "I followed you. I know I shouldn't have. Arnie, you haven't slept, have you?"},
-        {"Arnie [neutral]", "Jenna. Help me with the lock."},
+        {"Arnie", "Jenna. Help me with the lock."},
         {"Jenna [neutral]", "It's a four-digit padlock. Alli and I put it on during foundation week. She picked the code herself. She said it's the one date she never forgets."},
         {"Jenna [confused]", "She even put it on her phone. Check her wallpaper."}
     };
@@ -314,10 +315,10 @@ public class Story {
         
     public static final String[][] L9_NOTE = {   
         {"The note:", "You're close. Now look at yourself."},
-        {"Arnie (thinking)", "That's my handwriting."},
-        {"", "{hidenote} {flicker} A voice that isn't quite yours: \"Don't read it.\""},
+        {"Arnie (thinking)", "{hidenote} That's my handwriting."},
+        {"", "{flicker} A voice that isn't quite yours: \"Don't read it.\""},
         {"", "{seconddoor} Behind the shelves, a small second door. A keyhole, with a number scratched beside it."},
-        {"Arnie [sad]", "{shake} I... I need some air."},
+        {"Arnie", "{shake} I... I need some air."},
         {"", "You push past Jenna and run."}
     };
 
