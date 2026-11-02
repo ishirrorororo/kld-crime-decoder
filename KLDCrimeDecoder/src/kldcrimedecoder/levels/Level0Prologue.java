@@ -473,7 +473,7 @@ public class Level0Prologue extends ScenePanel {
             cx = b.x + b.width / 2;
             cy = b.y + b.height / 2;
 
-            BufferedImage src = Theme.trimmedImage("brass_key.png");
+            BufferedImage src = Theme.trimmedImage("brass_key_small.png");
             if (src == null) {
                 src = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
             }
@@ -691,7 +691,7 @@ public class Level0Prologue extends ScenePanel {
         btnContinueB.addActionListener(this::btnContinueBActionPerformed);
         pnlClassroom.add(btnContinueB, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 530, 120, 36));
 
-        lblKey.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/brass_key.png"))); // NOI18N
+        lblKey.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/brass_key_small.png"))); // NOI18N
         pnlClassroom.add(lblKey, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 190, 200, 90));
 
         lblProfConfused.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/danel_confused.png"))); // NOI18N

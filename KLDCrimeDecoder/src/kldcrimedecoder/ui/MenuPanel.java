@@ -89,13 +89,11 @@ public class MenuPanel extends javax.swing.JPanel {
         setPreferredSize(new java.awt.Dimension(985, 615));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblTitle.setText("jLabel1");
         lblTitle.setToolTipText("");
         lblTitle.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         lblTitle.setPreferredSize(new java.awt.Dimension(420, 110));
         add(lblTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 110, 420, 110));
 
-        lblSubtitle.setText("jLabel2");
         lblSubtitle.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         lblSubtitle.setPreferredSize(new java.awt.Dimension(300, 50));
         add(lblSubtitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 235, 300, 50));
