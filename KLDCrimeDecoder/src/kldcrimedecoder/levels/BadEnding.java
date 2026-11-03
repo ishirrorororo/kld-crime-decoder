@@ -3,18 +3,61 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package kldcrimedecoder.levels;
-
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import javax.swing.border.LineBorder;
+import kldcrimedecoder.engine.GameManager;
+import kldcrimedecoder.engine.GameState;
+import kldcrimedecoder.ui.DialogueBox;
+import kldcrimedecoder.ui.ScenePlayer;
+import kldcrimedecoder.ui.Theme;
+ 
 /**
  *
- * @author Joel
+ * @author Rosaldo
  */
 public class BadEnding extends javax.swing.JPanel {
-
-    /**
-     * Creates new form BadEnding
-     */
+    // background pictures (the files are in the images folder)
+    private static final String BG_BATHROOM = "bathroomAmie.png";
+    private static final String BG_HALLWAY  = "badending.png";
+    private static final String BG_END  = "badending2.png";
+ 
+    // {bg:file.png} at the start of a line changes the background
+    private static final String[][] STORY = {
+        {"Arnie [furious]", "{bg:" + BG_BATHROOM + "}{dim:35}You're not me. I did nothing."},
+        {"Amie [glitch]", "{glitch}Good. Now stay quiet and let me finish."},
+        {"", "The bell rings. The clock hits zero."},
+        {"", "{bg:" + BG_HALLWAY + "}You are walking back to the hallway when Prof. Danel and two staff members open the closet. They find Alli, and the note in your handwriting."},
+        {"Prof. Danel [sad]","{bg:" + BG_END+"} Arnie, sit down. Please. We have a lot to talk about."}
+    };
+ 
+    private ScenePlayer player;     // plays the story on this screen
+ 
+ 
     public BadEnding() {
         initComponents();
+            // use the same dark theme as the other screens
+        Theme.background(this);
+        Theme.button(btnMenu);
+        Theme.heading(lblEndTitle);                       
+        lblEndTitle.setFont(new java.awt.Font("Consolas", java.awt.Font.BOLD, 30));  
+        lblEndTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);        
+ 
+        // the final box, hidden until the story is over
+        pnlFinal.setOpaque(true);
+        pnlFinal.setBackground(Theme.PANEL);
+        pnlFinal.setBorder(new LineBorder(Theme.AMBER, 2));
+        pnlFinal.setVisible(false);
+ 
+        player = new ScenePlayer(lblBg, lblLeft, lblRight);
+ 
+        // start the ending every time this screen is shown
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                startEnding();
+            }
+        });
     }
 
     /**
@@ -26,19 +69,61 @@ public class BadEnding extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        lblLeft = new javax.swing.JLabel();
+        lblRight = new javax.swing.JLabel();
+        pnlFinal = new javax.swing.JPanel();
+        lblEndTitle = new javax.swing.JLabel();
+        btnMenu = new javax.swing.JButton();
+        lblBg = new javax.swing.JLabel();
+
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        add(lblLeft, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 165, 220, 300));
+        add(lblRight, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 165, 220, 300));
+
+        pnlFinal.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        pnlFinal.add(lblEndTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 500, 50));
+
+        btnMenu.setText("Back to Menu");
+        btnMenu.addActionListener(this::btnMenuActionPerformed);
+        pnlFinal.add(btnMenu, new org.netbeans.lib.awtextra.AbsoluteConstraints(175, 100, 150, 32));
+
+        add(pnlFinal, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 100, 500, 160));
+        add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenuActionPerformed
+        GameManager.backToMenu();
+    }//GEN-LAST:event_btnMenuActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnMenu;
+    private javax.swing.JLabel lblBg;
+    private javax.swing.JLabel lblEndTitle;
+    private javax.swing.JLabel lblLeft;
+    private javax.swing.JLabel lblRight;
+    private javax.swing.JPanel pnlFinal;
     // End of variables declaration//GEN-END:variables
+
+    // plays the story first, then shows the final message
+    private void startEnding() {
+        player.resetEffects();
+        pnlFinal.setVisible(false);
+        player.hideSprites();
+        player.showBackground(BG_BATHROOM);
+        player.play(STORY, this::showFinalScreen);
+    }
+ 
+    private void showFinalScreen() {
+        DialogueBox box = GameManager.getDialogue();
+        if (box != null) {
+            box.hideBox();                           // close the dialogue box
+            player.hideSprites();                   // removes Prof. Danel from the final screen
+        }
+        lblEndTitle.setText("You lost to yourself.");   
+        pnlFinal.setVisible(true);
+    }
+ 
+ 
+ 
 }

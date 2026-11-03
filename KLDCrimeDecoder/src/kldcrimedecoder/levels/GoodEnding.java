@@ -19,7 +19,9 @@ import kldcrimedecoder.ui.Theme;
 public class GoodEnding extends javax.swing.JPanel {
     // background pictures (the files are in the images folder)
     private static final String BG_BATHROOM    = "bathroom_last.png";    
-    private static final String BG_HALLWAY  = "room_hallway.png";
+    private static final String BG_HALLWAY  = "room_closet_open.png";
+    private static final String BG_DOOR  = "second_door.png";
+    private static final String BG_OPEN  = "open_door.png";
     private static final String BG_ALLI_OUT = "alliOut.png";      // Alli in the dark room
     private static final String ITEM_KEY    = "brass_key.png";    // pops up on the first line
  
@@ -31,7 +33,9 @@ public class GoodEnding extends javax.swing.JPanel {
     // {bg:file.png} at the start of a line changes the background
     private static final String[][] STORY = {
         {"Arnie [scared]", "{bg:" + BG_BATHROOM + "}{item:" + ITEM_KEY + "}The key. It was in my bag the whole time. The reflection thins, then goes."},
-        {"", "{bg:" + BG_HALLWAY + "}You walk back to the closet and open the small door behind the shelves with the brass key."},
+        {"", "{bg:" + BG_HALLWAY + "}You walk back to the closet..."},
+        {"", "{bg:" + BG_DOOR +"} and open the small door behind the shelves with the brass key."},
+        {"","{bg:" + BG_OPEN +"} "},
         {"", "{bg:" + BG_ALLI_OUT + "} Alli steps out, blinking in the light."},
         {"Alli [furious]", "{bg:" + BG_HALLWAY + "}You locked me in a closet, Arnie."},
         {"Arnie [sad]", "I know. I'm so sorry. I didn't know why until now."},
@@ -97,18 +101,12 @@ public class GoodEnding extends javax.swing.JPanel {
 
         pnlFinal.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblEndTitle.setText("jLabel1");
         lblEndTitle.setPreferredSize(new java.awt.Dimension(500, 40));
         pnlFinal.add(lblEndTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 15, 500, 40));
 
-        lblScore.setText("jLabel1");
         lblScore.setPreferredSize(new java.awt.Dimension(500, 30));
         pnlFinal.add(lblScore, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 500, 30));
-
-        lblRank.setText("jLabel1");
         pnlFinal.add(lblRank, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 120, 500, 30));
-
-        lblAwareness.setText("jLabel1");
         pnlFinal.add(lblAwareness, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 160, 500, 30));
 
         btnMenu.setText("Back to Menu");
