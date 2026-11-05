@@ -87,16 +87,16 @@ public class Level10 extends javax.swing.JPanel {
         {"", "The brass key in your pocket is suddenly heavy. The tag now shows a number: 2."}
     };
 
-    private static final String[] CHOICES = {
-        "Accept it: You're right. I did this. I'm sorry.",
-        "Deny it: No. You're not me."
+        private static final String[] CHOICES = {
+        "Accept it. I did this.",
+        "Deny it. You're not me."
     };
 
-    private static final String[] HINTS = {
-        "Every letter in the steam was pushed forward by the letter written under it.",
-        "Use the table: A=0, B=1, C=2... "
-        + "To undo it, go backwards that many letters. If N sits over E (4), N goes back 4 to J.",
-        "It is three words and six letters in total. The first word is just one letter."
+        private static final String[] HINTS = {
+        "Each letter in the steam was pushed forward by the letter written under it.",
+        "Three words, six letters. The first word is only one letter.",
+        "Go back that many letters (A=0, B=1...). Example: N(13) - E(4)= J(9)."
+        
     };
 
     private String keyWord;         // the nickname from the Prologue, letters only (ARNIE if none was saved)
@@ -207,16 +207,20 @@ public class Level10 extends javax.swing.JPanel {
         pnlCipher.add(lblFog, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 500, 130));
 
         lblCoded.setText("jLabel1");
-        pnlCipher.add(lblCoded, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 8, 500, 42));
+        pnlCipher.add(lblCoded, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 8, 500, 45));
 
         lblKey.setText("jLabel2");
-        pnlCipher.add(lblKey, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 500, 36));
+        pnlCipher.add(lblKey, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 500, 40));
+        lblKey.getAccessibleContext().setAccessibleDescription("");
 
-        lblRef.setText("jLabel3");
-        pnlCipher.add(lblRef, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 480, 36));
-        pnlCipher.add(txtAnswer, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 135, 200, 30));
+        lblRef.setText("jLabel1");
+        pnlCipher.add(lblRef, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, -1, -1));
+
+        txtAnswer.addActionListener(this::txtAnswerActionPerformed);
+        pnlCipher.add(txtAnswer, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 135, 240, -1));
 
         add(pnlCipher, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 50, 500, 175));
+        pnlCipher.getAccessibleContext().setAccessibleName("");
 
         btnSubmit.setText("Unlock");
         btnSubmit.addActionListener(this::btnSubmitActionPerformed);
@@ -225,8 +229,6 @@ public class Level10 extends javax.swing.JPanel {
         btnHint.setText("Hint");
         btnHint.addActionListener(this::btnHintActionPerformed);
         add(btnHint, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 235, 110, 30));
-
-        lblFeedback.setText("jLabel1");
         add(lblFeedback, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 300, 800, 28));
 
         lblBg.setMaximumSize(new java.awt.Dimension(985, 575));
@@ -265,6 +267,10 @@ public class Level10 extends javax.swing.JPanel {
         setFeedback("Hint " + (i + 1) + ": " + HINTS[i], true);
         hintsUsed++;
     }//GEN-LAST:event_btnHintActionPerformed
+
+    private void txtAnswerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAnswerActionPerformed
+
+    }//GEN-LAST:event_txtAnswerActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -417,7 +423,7 @@ public class Level10 extends javax.swing.JPanel {
                 btnSubmit.setEnabled(true);
                 txtAnswer.setEnabled(true);
                 txtAnswer.requestFocusInWindow();
-                setFeedback("Each letter was pushed forward by the letter under it. Type the real message, then press Unlock.", true);
+                setFeedback("Undo the shift using the letters below. Type the message, then press Unlock.", true);
             }
         });
         t.start();
@@ -627,7 +633,7 @@ public class Level10 extends javax.swing.JPanel {
         return out;
     }
 
-    private void setFeedback(String text, boolean good) {
+        private void setFeedback(String text, boolean good) {
         lblFeedback.setForeground(good ? Theme.AMBER : new Color(0xFF8A8A));
         lblFeedback.setText(text);
         lblFeedback.setVisible(!text.isEmpty());  // no empty dark bar when there is nothing to say

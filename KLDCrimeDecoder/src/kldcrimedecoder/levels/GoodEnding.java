@@ -115,7 +115,6 @@ public class GoodEnding extends javax.swing.JPanel {
 
         add(pnlFinal, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 60, 500, 260));
 
-        lblBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/kldcrimedecoder/images/room_hallway.png"))); // NOI18N
         lblBg.setToolTipText("");
         add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 580));
     }// </editor-fold>//GEN-END:initComponents
